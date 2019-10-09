@@ -1,5 +1,5 @@
 """
-Handle parsing a notes file into separate pages of notes
+Handle parsing a notes file into separate pages of notes.
 """
 
 
@@ -32,6 +32,20 @@ class Notes:
             split_notes.append("\n".join(split))
 
         self.notes = split_notes
+
+    @classmethod
+    def from_file(cls, path, separator='', formatter=None):
+        """
+        Helper method to parse a set of notes read from a given file path.
+
+        :param path: path to notes text file
+        :param separator: The separator between split segments (default blank line)
+        :param formatter: The formatter to tidy up the notes
+        :return: Instance of Notes parsed from the provided file
+        """
+        with open(path, 'r') as f:
+            notes = Notes(f, separator, formatter)
+        return notes
 
     def render_split(self, idx):
         """
