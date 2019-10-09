@@ -6,7 +6,7 @@ import socket
 BUFFER_SIZE = 4096
 
 
-class LSConnection:
+class LivesplitConnection:
     def __init__(self, server="localhost", port=16834, timeout=1):
         self.server = server
         self.port = port

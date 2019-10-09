@@ -1,10 +1,11 @@
 """
 Handle livesplit
 """
-from ..util import parse_time
+import re
+from datetime import timedelta
 
 
-class LivesplitHandler:
+class LivesplitMessaging:
     def __init__(self, connection):
         self.connection = connection
 
@@ -106,6 +107,8 @@ class LivesplitHandler:
     def set_comparison(self, comparison):
         """
         Change the comparison method
+
+        :param comparison: Time to compare against eg 'Personal Best' or 'Best Segments'
         """
         self.send(f"setcomparison {comparison}")
 
@@ -159,3 +162,28 @@ class LivesplitHandler:
     def get_current_timer_phase(self):
         self.send("getcurrenttimerphase")
         return self.recieve()
+
+
+pattern = re.compile(
+    r"^(?P<hours>\d*):?(?P<minutes>\d{1,2}):(?P<seconds>\d{2}).(?P<centiseconds>\d*)"
+)
+
+
+def parse_time(time_str):
+    """
+    Takes the time string from livesplit and converts to a timedelta
+
+    :param time_str:
+    :return:
+    """
+    match = pattern.match(time_str)
+    hours = int(match['hours']) if match['hours'] else 0
+    minutes = int(match['minutes'])
+    seconds = int(match['seconds'])
+    milliseconds = int(match['centiseconds']) * 10
+
+    result = timedelta(
+        hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds
+    )
+
+    return result
