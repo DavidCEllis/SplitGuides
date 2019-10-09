@@ -44,6 +44,6 @@ class Notes:
         if self.formatter:
             result = self.formatter(raw_split)
         else:
-            result = r'<br/>\n'.join(raw_split.split('\n'))
+            result = '<br/>\n'.join(raw_split.split('\n'))
 
         return result
