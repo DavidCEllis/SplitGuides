@@ -1,0 +1,3 @@
+{
+    "files": ["settings.py","layouts/main_window.ui","main_window.py","layouts/settings.ui","layouts/build_ui.py"]
+}
