@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Splitnotes</title>
+  <style>
+    {{ css }}
+  </style>
+</head>
+<body>
+  {% for split in notes %}
+    {{ split }}
+    {% if not loop.last %}
+      <hr>
+    {% endif %}
+  {%  endfor %}
+</body>
+</html>
