@@ -22,6 +22,7 @@ setup(
     package_dir={"": "src"},
     install_requires=[
         'pyside2',
+        'jinja2',
     ],
     tests_require=[
         'pytest',
