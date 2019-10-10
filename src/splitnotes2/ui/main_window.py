@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader
 from PySide2 import QtCore
 from PySide2.QtGui import QCursor
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu
