@@ -179,3 +179,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Qt Project User File
+*.pyproject.user
