@@ -13,6 +13,7 @@ user_path = os.path.expanduser("~")
 template_path = Path(__file__).parent / 'html'
 default_template = 'default.html'
 default_css = 'default.css'
+default_font_size = 20
 
 
 class MainWindow(QMainWindow):
@@ -31,6 +32,7 @@ class MainWindow(QMainWindow):
         )
         self.template = None
         self.css = ''
+        self.font_size = default_font_size
 
         self.load_template()
         self.load_css()
@@ -71,6 +73,7 @@ class MainWindow(QMainWindow):
             self.notes = Notes.from_file(notefile)
 
             html = self.template.render(
+                font_size=self.font_size,
                 css=self.css,
                 notes=self.notes.render_splits(0, 3)
             )

@@ -4,15 +4,22 @@
   <meta charset="UTF-8">
   <title>Splitnotes</title>
   <style>
+    :root {
+      font-size: {{ font_size }}px;
+      color: #000000;
+      background-color: #f1f8ff;
+    }
     {{ css }}
   </style>
 </head>
 <body>
+<div class="main-content">
   {% for split in notes %}
     {{ split }}
     {% if not loop.last %}
       <hr>
     {% endif %}
   {%  endfor %}
+</div>
 </body>
 </html>
