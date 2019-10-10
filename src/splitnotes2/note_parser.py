@@ -7,22 +7,28 @@ class Notes:
     """
     Class to handle splitnotes and formatting
     """
-    def __init__(self, note_stream, separator='', formatter=None):
+    def __init__(self, note_stream, separator='', preprocessor=None):
         """
         Note_stream should be an iterable object providing notes line by line
 
         :param note_stream: iterable object providing notes
         :param separator: The separator between split segments (default blank line)
-        :param formatter: The formatter to tidy up the notes
+        :param preprocessor: Tool if there is preprocessing to do on the notes
         """
-        self.formatter = formatter
+        self.preprocessor = preprocessor
+        self.separator = separator
+
+        self.notes = []
+        self.get_notes(note_stream)
+
+    def get_notes(self, note_stream):
         split_notes = []
         split = []
         for line in note_stream:
             line = line.rstrip()  # remove newlines
             if line.startswith('[') and line.endswith(']'):
                 pass  # Ignore comment lines
-            elif line == separator:
+            elif line == self.separator:
                 # Split segment on separator
                 split_notes.append("\n".join(split))
                 split = []
@@ -55,8 +61,8 @@ class Notes:
         :return: notes
         """
         raw_split = self.notes[idx]
-        if self.formatter:
-            result = self.formatter(raw_split)
+        if self.preprocessor:
+            result = self.preprocessor(raw_split)
         else:
             result = '<br/>\n'.join(raw_split.split('\n'))
 
