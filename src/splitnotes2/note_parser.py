@@ -53,17 +53,25 @@ class Notes:
             notes = Notes(f, separator, formatter)
         return notes
 
-    def render_split(self, idx):
+    def render_splits(self, start, end):
         """
-        Render the notes as text for HTML
+        Render the notes as a list of text items for HTML
 
-        :param idx:
+        :param start: Split index to start rendering
+        :param end: Split index to end rendering
         :return: notes
         """
-        raw_split = self.notes[idx]
-        if self.preprocessor:
-            result = self.preprocessor(raw_split)
-        else:
-            result = '<br/>\n'.join(raw_split.split('\n'))
+        start = max(start, 0)
+        end = min(end, len(self.notes))
+
+        result = []
+
+        for idx in range(start, end):
+            raw_split = self.notes[idx]
+            if self.preprocessor:
+                split = self.preprocessor(raw_split)
+            else:
+                split = '<br/>\n'.join(raw_split.split('\n'))
+            result.append(split)
 
         return result
