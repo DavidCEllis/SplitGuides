@@ -17,7 +17,7 @@ class Options:
 
 def build_ui():
 
-    root = Path('.')
+    root = Path(__file__).parent
     ui_files = root.glob('*.ui')
 
     for infile in ui_files:
