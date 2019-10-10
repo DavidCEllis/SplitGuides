@@ -9,7 +9,7 @@ from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu
 from .layouts import Ui_MainWindow
 from ..note_parser import Notes
 
-user_path = os.path.expanduser("~")
+user_path = os.path.expanduser("~/Documents")
 template_path = Path(__file__).parent / 'html'
 default_template = 'default.html'
 default_css = 'default.css'

@@ -71,7 +71,10 @@ class Notes:
             if self.preprocessor:
                 split = self.preprocessor(raw_split)
             else:
-                split = '<br/>\n'.join(raw_split.split('\n'))
+                split_parts = (item[:-1] if item.endswith('/') else f"{item}<br/>"
+                               for item in raw_split.split('\n'))
+
+                split = '\n'.join(split_parts)
             result.append(split)
 
         return result
