@@ -12,11 +12,7 @@ class Options:
         self._options = options
 
     def __getattr__(self, key):
-        # For values that aren't set, provide None like optparse
-        try:
-            return self._options[key]
-        except KeyError:
-            return None
+        return self._options[key]
 
 
 def build_ui():
@@ -25,10 +21,15 @@ def build_ui():
     ui_files = root.glob('*.ui')
 
     for infile in ui_files:
-        outfile = infile.parents[1] / 'build' / infile.with_suffix('.py').name
+
+        outfile = root / 'build' / infile.with_suffix('.py').name
         options_dict = {
             'output': str(outfile),
             'execute': False,
+            'preview': False,
+            'debug': False,
+            'indent': 4,
+            'from_imports': False
         }
 
         # Usually the options are parsed by optparse which makes an object
@@ -39,3 +40,7 @@ def build_ui():
         invoke(Driver(options, arguments))
 
         print(f'Read: {infile}\nBuilt: {outfile}\n')
+
+
+if __name__ == '__main__':
+    build_ui()
