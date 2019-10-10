@@ -1,5 +1,7 @@
 import os
+from pathlib import Path
 
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from PySide2 import QtCore
 from PySide2.QtGui import QCursor
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu
@@ -8,6 +10,9 @@ from .layouts import Ui_MainWindow
 from ..note_parser import Notes
 
 user_path = os.path.expanduser("~")
+template_path = Path(__file__).parent / 'html'
+default_template = 'default.html'
+default_css = 'default.css'
 
 
 class MainWindow(QMainWindow):
@@ -19,6 +24,16 @@ class MainWindow(QMainWindow):
 
         self.notes = None
         self.rc_menu = None
+
+        self.j2_environment = Environment(
+            loader=FileSystemLoader(str(template_path)),
+            autoescape=False  # select_autoescape(['html'])
+        )
+        self.template = None
+        self.css = ''
+
+        self.load_template()
+        self.load_css()
 
         self.build_menu()
         self.setup_actions()
@@ -35,6 +50,12 @@ class MainWindow(QMainWindow):
         open_settings = self.rc_menu.addAction("Settings")
         open_settings.triggered.connect(self.open_settings)
 
+    def load_template(self, template=default_template):
+        self.template = self.j2_environment.get_template(template)
+
+    def load_css(self, css_file=default_css):
+        self.css = (Path(template_path) / css_file).read_text()
+
     def show_menu(self):
         if not self.rc_menu:
             self.build_menu()
@@ -48,7 +69,13 @@ class MainWindow(QMainWindow):
 
         if notefile:
             self.notes = Notes.from_file(notefile)
-            self.ui.notes.setHtml(self.notes.render_split(0))
+
+            html = self.template.render(
+                css=self.css,
+                notes=self.notes.render_splits(0, 3)
+            )
+
+            self.ui.notes.setHtml(html)
 
     def open_settings(self):
         print("This will open settings")
