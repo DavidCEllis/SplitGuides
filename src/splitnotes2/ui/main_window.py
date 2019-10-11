@@ -124,6 +124,7 @@ class LivesplitLink(QtCore.QObject):
         self.connected = False
         self.break_loop = False
         self.pool = None
+        # noinspection PyUnresolvedReferences
         self.note_signal.connect(self.main_window.update_notes)
 
     def start_loops(self):
@@ -174,5 +175,6 @@ class LivesplitLink(QtCore.QObject):
                 self.client.close()
                 self.connect_and_update()
             else:
+                # noinspection PyUnresolvedReferences
                 self.note_signal.emit(split_index)
             time.sleep(1)
