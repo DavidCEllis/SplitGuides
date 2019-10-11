@@ -51,7 +51,6 @@ class MainWindow(QMainWindow):
 
     def start_loops(self):
         self.ls.start_loops()
-        print("Loops Started")
 
     def closeEvent(self, event):
         self.ls.close()
@@ -130,10 +129,7 @@ class LivesplitLink(QtCore.QObject):
     def start_loops(self):
         self.break_loop = False
         self.pool = ThreadPoolExecutor(max_workers=1)
-        if self.connected:
-            self.pool.submit(self.loop_update_split)
-        else:
-            self.pool.submit(self.connect_and_update)
+        self.pool.submit(self.loop_update_split)
 
     def stop_loops(self):
         self.break_loop = True
@@ -146,35 +142,24 @@ class LivesplitLink(QtCore.QObject):
     def update_status(self, message):
         self.main_window.ui.statusbar.showMessage(message)
 
-    def connect_and_update(self):
-        self.loop_connect()
-        self.loop_update_split()
-
-    def loop_connect(self):
+    def ls_connect(self):
         self.update_status("Trying to connect to Livesplit.")
-
-        while not self.connected:
-            if self.break_loop:
-                break
-            self.connected = self.client.connect()
-        else:
+        self.connected = self.client.connect()
+        if self.connected:
             self.update_status("Connected to Livesplit.")
 
-        if not self.connected:
-            self.update_status("Not Connected to Livesplit.")
-
     def loop_update_split(self):
-        if not self.connected:
-            self.loop_connect()
-
-        while (not self.break_loop) and self.connected:
-            try:
-                split_index = self.client.get_split_index()
-            except (ConnectionAbortedError, TimeoutError):
-                self.connected = False
-                self.client.close()
-                self.connect_and_update()
+        while not self.break_loop:
+            # If not connected attempt to connect
+            if self.connected:
+                try:
+                    split_index = self.client.get_split_index()
+                except (ConnectionError, ConnectionAbortedError, TimeoutError):
+                    self.connected = False
+                    self.client.close()
+                else:
+                    # noinspection PyUnresolvedReferences
+                    self.note_signal.emit(split_index)
             else:
-                # noinspection PyUnresolvedReferences
-                self.note_signal.emit(split_index)
-            time.sleep(1)
+                self.ls_connect()
+            time.sleep(0.5)
