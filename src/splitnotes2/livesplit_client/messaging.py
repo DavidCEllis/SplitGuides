@@ -9,6 +9,12 @@ class LivesplitMessaging:
     def __init__(self, connection):
         self.connection = connection
 
+    def connect(self):
+        return self.connection.connect()
+
+    def close(self):
+        self.connection.close()
+
     def send(self, message):
         m = message.encode('UTF8')
         self.connection.send(m + b'\r\n')

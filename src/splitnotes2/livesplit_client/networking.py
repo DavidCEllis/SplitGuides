@@ -12,12 +12,11 @@ class LivesplitConnection:
         self.port = port
         self.sock = None
         self.timeout = timeout
-        self.connect()
 
     def connect(self):
         """
         Attempt to connect to the livesplit server
-        :return:
+        :return: True if connected, otherwise False
         """
         self.sock = socket.socket()
         try:
@@ -25,9 +24,14 @@ class LivesplitConnection:
         except ConnectionRefusedError:
             self.sock.close()
             self.sock = None
-            raise ConnectionRefusedError("Could not connect to livesplit server")
-        finally:
+            return False
+        else:
             self.sock.settimeout(self.timeout)
+            return True
+
+    def close(self):
+        if self.sock:
+            self.sock.close()
 
     def send(self, msg):
         """
