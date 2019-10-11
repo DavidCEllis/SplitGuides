@@ -1,3 +1,4 @@
+import sys
 import os
 import time
 from pathlib import Path
@@ -14,9 +15,17 @@ from ..livesplit_client import get_client
 
 
 user_path = os.path.expanduser("~/Documents")
-template_path = Path(__file__).parent / 'html'
+
+if getattr(sys, 'frozen', False):
+    # Application is .exe, use visible files
+    template_path = Path(sys.executable).parent / 'html'
+else:
+    # Running as .py - use standard folder structure
+    template_path = Path(__file__).parent / 'html'
+
 default_template = 'default.html'
 default_css = 'default.css'
+
 default_font_size = 20
 
 
