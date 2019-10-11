@@ -36,6 +36,11 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.ui.statusbar.showMessage("Not connected to server")
 
+        # Always on Top
+        self.menu_on_top = None
+        self.on_top = False
+        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.on_top)
+
         self.notes = None
 
         self.rc_menu = None
@@ -58,6 +63,12 @@ class MainWindow(QMainWindow):
 
         self.start_loops()
 
+    def toggle_on_top(self):
+        self.on_top = not self.on_top
+        self.menu_on_top.setChecked(self.on_top)
+        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.on_top)
+        self.show()
+
     def start_loops(self):
         self.ls.start_loops()
 
@@ -76,6 +87,10 @@ class MainWindow(QMainWindow):
 
         open_settings = self.rc_menu.addAction("Settings")
         open_settings.triggered.connect(self.open_settings)
+
+        self.menu_on_top = self.rc_menu.addAction("Always on top")
+        self.menu_on_top.setCheckable(True)
+        self.menu_on_top.triggered.connect(self.toggle_on_top)
 
     def load_template(self, template=default_template):
         self.template = self.j2_environment.get_template(template)
