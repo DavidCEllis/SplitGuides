@@ -182,3 +182,6 @@ $RECYCLE.BIN/
 
 # Qt Project User File
 *.pyproject.user
+
+# Project settings file
+settings.json
