@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         self.menu_on_top = None
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
 
+        self.notefile = None
         self.notes = None
 
         self.rc_menu = None
@@ -111,8 +112,9 @@ class MainWindow(QMainWindow):
                                                   "Note Files (*.txt *.md);;All Files (*.*)")
 
         if notefile:
+            self.notefile = notefile
             # Reset split index and load notes
-            self.notes = Notes.from_file(notefile)
+            self.notes = Notes.from_file(notefile, separator=self.settings.split_separator)
             self.settings.notes_folder = str(Path(notefile).parent)
             self.update_notes(idx=0, refresh=True)
 
@@ -149,7 +151,10 @@ class MainWindow(QMainWindow):
         settings_dialog.exec_()
         if settings_dialog.result() == 1:
             settings_dialog.store_settings()
-            self.update_notes(self.split_index, refresh=True)
+            # Reread notes with separator
+            if self.notefile:
+                self.notes = Notes.from_file(self.notefile, separator=self.settings.split_separator)
+                self.update_notes(self.split_index, refresh=True)
 
 
 class LivesplitLink(QtCore.QObject):
