@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from PySide2.QtWidgets import QDialog
-from PySide2.QtCore import QRegExp
+from PySide2.QtCore import QRegExp, Qt
 from PySide2.QtGui import QIntValidator, QRegExpValidator
 
 from .layouts import Ui_Settings
@@ -19,7 +19,7 @@ else:
 
 settings_file = Path(base_path / "settings.json")
 default_template_folder = Path(base_path / "html")
-user_path = os.path.expanduser("~/Documents")
+user_path = str(Path(os.path.expanduser("~")) / "Documents")
 
 
 class Settings:
@@ -58,6 +58,11 @@ class Settings:
         self.settings = {**self.defaults}
         if settings_file.exists():
             new_settings = json.loads(settings_file.read_text())
+
+            # Convert strings to Paths
+            new_settings["html_template_folder"] = Path(new_settings["html_template_folder"])
+            new_settings["css_folder"] = Path(new_settings["css_folder"])
+
             self.settings.update(**new_settings)
 
     def __getattr__(self, item):
@@ -68,13 +73,14 @@ class Settings:
 
     def __setattr__(self, key, value):
         # If the key is a settings value update it, otherwise update the instance dict.
-        if key in self.settings:
+        if key in self.defaults:
             self.settings[key] = value
         else:
             super().__setattr__(key, value)
 
+    # noinspection PyAttributeOutsideInit
     def save(self):
-        output = json.dumps(self.settings, indent=2)
+        output = json.dumps(self.settings, indent=2, default=str)
         settings_file.write_text(output)
 
     @property
@@ -96,6 +102,17 @@ class SettingsDialog(QDialog):
         self.temp_html_path = self.settings.full_template_path
         self.temp_css_path = self.settings.full_css_path
 
+        self.setup_validators()
+        self.setup_unfinished()
+        self.fill_settings()
+        self.setWindowFlag(Qt.WindowStaysOnTopHint, self.settings.on_top)
+
+    def setup_unfinished(self):
+        self.ui.textcolor_button.setEnabled(False)
+        self.ui.bgcolor_button.setEnabled(False)
+        self.ui.htmltemplate_button.setEnabled(False)
+        self.ui.css_button.setEnabled(False)
+
     def setup_validators(self):
         color_re = QRegExp(r'#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})')
         color_validator = QRegExpValidator(color_re, None)
@@ -116,7 +133,7 @@ class SettingsDialog(QDialog):
         self.ui.fontsize_edit.setText(str(self.settings.font_size))
         self.ui.textcolor_edit.setText(self.settings.font_color)
         self.ui.bgcolor_edit.setText(self.settings.background_color)
-        self.ui.htmltemplate_edit.setText(str(self.settings.html_template))
+        self.ui.htmltemplate_edit.setText(str(self.settings.html_template_file))
         self.ui.css_edit.setText(str(self.settings.css_file))
 
     def store_settings(self):
@@ -130,7 +147,7 @@ class SettingsDialog(QDialog):
 
         # Paths get stored in temporary variables
         self.settings.html_template_folder = Path(self.temp_html_path).parent
-        self.settings.html_template_file = Path(self.temp_html_path).stem
+        self.settings.html_template_file = Path(self.temp_html_path).name
 
         self.settings.css_folder = Path(self.temp_css_path).parent
-        self.settings.css_file = Path(self.temp_css_path).stem
+        self.settings.css_file = Path(self.temp_css_path).name

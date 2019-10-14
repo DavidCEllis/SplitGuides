@@ -233,7 +233,7 @@
      <item row="11" column="0">
       <widget class="QLabel" name="htmltemplate_label">
        <property name="text">
-        <string>Default HTML Template:</string>
+        <string>HTML Template:</string>
        </property>
       </widget>
      </item>
@@ -258,7 +258,7 @@
      <item row="12" column="0">
       <widget class="QLabel" name="css_label">
        <property name="text">
-        <string>Default CSS:</string>
+        <string>CSS:</string>
        </property>
       </widget>
      </item>

@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 from jinja2 import Environment, FileSystemLoader
@@ -21,7 +22,9 @@ class MainWindow(QMainWindow):
 
         # Get settings
         self.settings = Settings()
-        self.settings_dialog = SettingsDialog(self.settings)
+
+        # Window size
+        self.resize(self.settings.width, self.settings.height)
 
         # Always on Top
         self.menu_on_top = None
@@ -32,7 +35,7 @@ class MainWindow(QMainWindow):
         self.rc_menu = None
 
         self.j2_environment = Environment(
-            loader=FileSystemLoader(str(self.settings.template_path)),
+            loader=FileSystemLoader(str(self.settings.html_template_folder)),
             autoescape=False
         )
         self.template = None
@@ -42,6 +45,8 @@ class MainWindow(QMainWindow):
 
         self.build_menu()
         self.setup_actions()
+
+        self.render_blank()
 
         self.ls = LivesplitLink(get_client(), self)
         self.split_index = 0
@@ -88,7 +93,7 @@ class MainWindow(QMainWindow):
 
     def load_template(self):
         self.template = self.j2_environment.get_template(
-            str(self.settings.full_template_path)
+            str(self.settings.html_template_file)
         )
 
     def load_css(self):
@@ -106,10 +111,20 @@ class MainWindow(QMainWindow):
                                                   "Note Files (*.txt *.md);;All Files (*.*)")
 
         if notefile:
+            # Reset split index and load notes
             self.notes = Notes.from_file(notefile)
+            self.settings.notes_folder = str(Path(notefile).parent)
+            self.update_notes(idx=0, refresh=True)
 
-        # Reset split index and load notes
-        self.update_notes(idx=0, refresh=True)
+    def render_blank(self):
+        html = self.template.render(
+            font_size=self.settings.font_size,
+            font_color=self.settings.font_color,
+            bg_color=self.settings.background_color,
+            css=self.css,
+            notes=["<h1>Right Click to Load Notes</h1>"]
+        )
+        self.ui.notes.setHtml(html)
 
     def update_notes(self, idx, refresh=False):
         idx = max(idx, 0)
@@ -120,6 +135,8 @@ class MainWindow(QMainWindow):
 
             html = self.template.render(
                 font_size=self.settings.font_size,
+                font_color=self.settings.font_color,
+                bg_color=self.settings.background_color,
                 css=self.css,
                 notes=self.notes.render_splits(start, end)
             )
@@ -128,7 +145,11 @@ class MainWindow(QMainWindow):
             self.split_index = idx
 
     def open_settings(self):
-        self.settings_dialog.exec_()
+        settings_dialog = SettingsDialog(self.settings)
+        settings_dialog.exec_()
+        if settings_dialog.result() == 1:
+            settings_dialog.store_settings()
+            self.update_notes(self.split_index, refresh=True)
 
 
 class LivesplitLink(QtCore.QObject):
