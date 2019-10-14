@@ -38,6 +38,6 @@ def test_render():
     note_file = StringIO(notes_blank_delimiter)
     notes = Notes(note_file)
 
-    expected = "This is the first split<br/>\nThere is some text here"
+    expected = "This is the first split<br/>\nThere is some text here<br/>"
 
-    assert notes.render_split(0) == expected
+    assert notes.render_splits(0, 1)[0] == expected
