@@ -1,32 +1,15 @@
-import sys
-import os
 import time
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 from jinja2 import Environment, FileSystemLoader
 from PySide2 import QtCore
 from PySide2.QtGui import QCursor
-from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu, QMessageBox
+from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu
 
+from .settings import Settings, SettingsDialog
 from .layouts import Ui_MainWindow
 from ..note_parser import Notes
 from ..livesplit_client import get_client
-
-
-user_path = os.path.expanduser("~/Documents")
-
-if getattr(sys, 'frozen', False):
-    # Application is .exe, use visible files
-    template_path = Path(sys.executable).parent / 'html'
-else:
-    # Running as .py - use standard folder structure
-    template_path = Path(__file__).parent / 'html'
-
-default_template = 'default.html'
-default_css = 'default.css'
-
-default_font_size = 20
 
 
 class MainWindow(QMainWindow):
@@ -36,22 +19,24 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.ui.statusbar.showMessage("Not connected to server")
 
+        # Get settings
+        self.settings = Settings()
+        self.settings_dialog = SettingsDialog(self.settings)
+
         # Always on Top
         self.menu_on_top = None
-        self.on_top = False
-        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.on_top)
+        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
 
         self.notes = None
 
         self.rc_menu = None
 
         self.j2_environment = Environment(
-            loader=FileSystemLoader(str(template_path)),
+            loader=FileSystemLoader(str(self.settings.template_path)),
             autoescape=False
         )
         self.template = None
         self.css = ''
-        self.font_size = default_font_size
         self.load_template()
         self.load_css()
 
@@ -64,16 +49,24 @@ class MainWindow(QMainWindow):
         self.start_loops()
 
     def toggle_on_top(self):
-        self.on_top = not self.on_top
-        self.menu_on_top.setChecked(self.on_top)
-        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.on_top)
+        self.settings.on_top = not self.settings.on_top
+        self.menu_on_top.setChecked(self.settings.on_top)
+        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
         self.show()
 
     def start_loops(self):
         self.ls.start_loops()
 
     def closeEvent(self, event):
+        self.settings.save()
         self.ls.close()
+        event.accept()
+
+    def resizeEvent(self, event):
+        # Store the new width and height to keep it
+        # between launches
+        self.settings.width = self.width()
+        self.settings.height = self.height()
         event.accept()
 
     def setup_actions(self):
@@ -90,13 +83,16 @@ class MainWindow(QMainWindow):
 
         self.menu_on_top = self.rc_menu.addAction("Always on top")
         self.menu_on_top.setCheckable(True)
+        self.menu_on_top.setChecked(self.settings.on_top)
         self.menu_on_top.triggered.connect(self.toggle_on_top)
 
-    def load_template(self, template=default_template):
-        self.template = self.j2_environment.get_template(template)
+    def load_template(self):
+        self.template = self.j2_environment.get_template(
+            str(self.settings.full_template_path)
+        )
 
-    def load_css(self, css_file=default_css):
-        self.css = (Path(template_path) / css_file).read_text()
+    def load_css(self):
+        self.css = self.settings.full_css_path.read_text()
 
     def show_menu(self):
         if not self.rc_menu:
@@ -106,7 +102,7 @@ class MainWindow(QMainWindow):
     def open_notes(self):
         notefile, _ = QFileDialog.getOpenFileName(self,
                                                   "Open Notes",
-                                                  user_path,  # Starting Directory
+                                                  self.settings.notes_folder,
                                                   "Note Files (*.txt *.md);;All Files (*.*)")
 
         if notefile:
@@ -117,20 +113,22 @@ class MainWindow(QMainWindow):
 
     def update_notes(self, idx, refresh=False):
         idx = max(idx, 0)
+
         if self.notes and idx != self.split_index or refresh:
+            start = idx - self.settings.previous_splits
+            end = idx + self.settings.next_splits + 1
+
             html = self.template.render(
-                font_size=self.font_size,
+                font_size=self.settings.font_size,
                 css=self.css,
-                notes=self.notes.render_splits(idx, idx + 3)
+                notes=self.notes.render_splits(start, end)
             )
 
             self.ui.notes.setHtml(html)
             self.split_index = idx
 
     def open_settings(self):
-        msgbox = QMessageBox()
-        msgbox.setText("Soon (TM)")
-        msgbox.exec_()
+        self.settings_dialog.exec_()
 
 
 class LivesplitLink(QtCore.QObject):
