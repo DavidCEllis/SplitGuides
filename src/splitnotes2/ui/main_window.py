@@ -49,7 +49,9 @@ class MainWindow(QMainWindow):
 
         self.render_blank()
 
-        self.ls = LivesplitLink(get_client(), self)
+        self.client = get_client(self.settings.hostname, self.settings.port)
+
+        self.ls = LivesplitLink(self.client, self)
         self.split_index = 0
 
         self.start_loops()
@@ -151,6 +153,14 @@ class MainWindow(QMainWindow):
         settings_dialog.exec_()
         if settings_dialog.result() == 1:
             settings_dialog.store_settings()
+            # Kill and restart connection if server ip or port change
+            if (self.client.connection.server != self.settings.hostname
+                    or self.client.connection.port != self.settings.port):
+                self.ls.close()
+                self.client = get_client(self.settings.hostname, self.settings.port)
+                self.ls = LivesplitLink(self.client, self)
+                self.ls.start_loops()
+
             # Reread notes with separator
             if self.notefile:
                 self.notes = Notes.from_file(self.notefile, separator=self.settings.split_separator)
