@@ -21,6 +21,9 @@ def build_ui():
     ui_files = root.glob('*.ui')
 
     Path(root / 'build').mkdir(exist_ok=True)
+    Path(root / 'build' / '__init__.py').touch(exist_ok=True)
+
+    print("Building user interface files.")
 
     for infile in ui_files:
 
