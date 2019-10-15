@@ -27,5 +27,8 @@ setup(
     tests_require=[
         'pytest',
         'pytest-cov',
-    ]
+    ],
+    extras_require={
+        'build_exe': 'cx-freeze',
+    }
 )
