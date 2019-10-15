@@ -1,14 +1,14 @@
-# Splitnotes 2 #
+# SplitNotes 2 #
 
-**Splitnotes but bigger***
+**SplitNotes but bigger***
 
-Splitnotes2 is an application for displaying speedrun notes in sync with livesplit.
+SplitNotes2 is an application for displaying speedrun notes in sync with livesplit.
 Requires *livesplit server* to be running.
 
 ## Install/Setup ##
 
 1. Under the Livesplit layout editor add 'LiveSplit Server' (listed under 'control')
-2. Download splitnotes2 from the [**releases page**](https://github.com/DavidCEllis/splitnotes2/releases)
+2. Download SplitNotes2 from the [**releases page**](https://github.com/DavidCEllis/SplitNotes-2/releases)
 3. Extract anywhere and run *splitnotes2.exe*
 
 ## Usage ##
