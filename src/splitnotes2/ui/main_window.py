@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
             self.split_index = idx
 
     def open_settings(self):
-        settings_dialog = SettingsDialog(self.settings)
+        settings_dialog = SettingsDialog(parent=self, settings=self.settings)
         settings_dialog.exec_()
         if settings_dialog.result() == 1:
             settings_dialog.store_settings()
