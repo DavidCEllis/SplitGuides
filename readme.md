@@ -29,7 +29,7 @@ with some additional enhancements and exceptions.
    `<strong>`, `<em>`, and `<mark>`.
    
    The formatter will automatically insert HTML breaks `<br>` between lines, 
-   a backslash `\ ` at the end of a line will indicate that the line should
+   a backslash `\ ` at the end of a line will indicate that the line should **not**
    have a break inserted (useful for headers and lists).
    
 ### Example Notes ###
@@ -75,8 +75,19 @@ Darksign
 
 ![Image of splitnotes rendering](resources/notes_demo.png)
 
-   
+## Configuration ##
+
+The settings page offers some customisation and connection settings including:
+
+  * Server hostname and port
+  * Show previous/next N splits
+  * Custom split separator
+  * Base font size
+  * Default text and background colour
+  * HTML (Jinja2) template and CSS files to use for rendering
+
+--- 
 
 Inspired by the original splitnotes: https://github.com/joeloskarsson/SplitNotes
 
-[*] approximately 19x larger in file size (PySide2 is large)
+[*] approximately 19x larger in file size! (Mostly Qt and PySide2)
