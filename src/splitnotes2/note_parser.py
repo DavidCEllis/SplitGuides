@@ -29,6 +29,10 @@ class Notes:
             if line.startswith('[') and line.endswith(']'):
                 pass  # Ignore comment lines
             elif line == self.separator:
+                # If the split is empty and the separator is blank
+                # Ignore the break
+                if not (split or self.separator):
+                    continue
                 # Split segment on separator
                 split_notes.append("\n".join(split))
                 split = []
@@ -71,7 +75,7 @@ class Notes:
             if self.preprocessor:
                 split = self.preprocessor(raw_split)
             else:
-                split_parts = (item[:-1] if item.endswith('/') else f"{item}<br/>"
+                split_parts = (item[:-1] if item.endswith('\\') else f"{item}<br>"
                                for item in raw_split.split('\n'))
 
                 split = '\n'.join(split_parts)
