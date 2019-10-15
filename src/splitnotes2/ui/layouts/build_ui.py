@@ -20,6 +20,8 @@ def build_ui():
     root = Path(__file__).parent
     ui_files = root.glob('*.ui')
 
+    Path(root / 'build').mkdir(exist_ok=True)
+
     for infile in ui_files:
 
         outfile = root / 'build' / infile.with_suffix('.py').name
