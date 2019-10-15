@@ -10,7 +10,7 @@ setup(
 
     packages=find_packages('src'),
     url='',
-    license='GPLv2+',
+    license='GPLv3',
     description='Quick tool for handling SEG-Y metadata and geometry.',
     python_requires='>=3.6',
     classifiers=[
