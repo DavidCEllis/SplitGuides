@@ -1,5 +1,4 @@
 from datetime import timedelta
-from functools import partial
 from unittest.mock import MagicMock, call
 
 import pytest

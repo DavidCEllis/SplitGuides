@@ -32,6 +32,7 @@ class LivesplitConnection:
     def close(self):
         if self.sock:
             self.sock.close()
+            self.sock = None
 
     def send(self, msg):
         """
@@ -62,15 +63,15 @@ class LivesplitConnection:
             self.connect()
         try:
             data_received = self.sock.recv(BUFFER_SIZE)
-        except OSError:
-            self.sock.close()
-            self.sock = None
-            raise ConnectionError("The connection has been closed by the host")
         except socket.timeout:
             raise TimeoutError(
                 "No response received from the server within "
                 f"the timeout period ({self.timeout}s)"
             )
+        except OSError:
+            self.sock.close()
+            self.sock = None
+            raise ConnectionError("The connection has been closed by the host")
 
         if data_received == b"":
             self.sock.close()
