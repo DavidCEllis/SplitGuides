@@ -19,7 +19,7 @@ class LivesplitMessaging:
         m = message.encode('UTF8')
         self.connection.send(m + b'\r\n')
 
-    def recieve(self, datatype="text"):
+    def receive(self, datatype="text"):
         result = self.connection.receive()
         result = result.strip().decode('UTF8')
         if datatype == "time":
@@ -124,50 +124,50 @@ class LivesplitMessaging:
         else:
             self.send(f"getdelta")
 
-        return self.recieve()
+        return self.receive()
 
     def get_last_split_time(self):
         self.send("getlastsplittime")
-        return self.recieve("time")
+        return self.receive("time")
 
     def get_comparison_split_time(self):
         self.send("getcomparisonsplittime")
-        return self.recieve("time")
+        return self.receive("time")
 
     def get_current_time(self):
         self.send("getcurrenttime")
-        return self.recieve("time")
+        return self.receive("time")
 
     def get_final_time(self, comparison=None):
         if comparison:
             self.send(f"getfinaltime {comparison}")
         else:
             self.send("getfinaltime")
-        return self.recieve("time")
+        return self.receive("time")
 
     def get_predicted_time(self, comparison):
         self.send(f"getpredictedtime {comparison}")
-        return self.recieve("time")
+        return self.receive("time")
 
     def get_best_possible_time(self):
         self.send("getbestpossibletime")
-        return self.recieve("time")
+        return self.receive("time")
 
     def get_split_index(self):
         self.send("getsplitindex")
-        return self.recieve("int")
+        return self.receive("int")
 
     def get_current_split_name(self):
         self.send("getcurrentsplitname")
-        return self.recieve()
+        return self.receive()
 
     def get_previous_split_name(self):
         self.send("getprevioussplitname")
-        return self.recieve()
+        return self.receive()
 
     def get_current_timer_phase(self):
         self.send("getcurrenttimerphase")
-        return self.recieve()
+        return self.receive()
 
 
 pattern = re.compile(
