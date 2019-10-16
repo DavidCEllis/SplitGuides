@@ -171,7 +171,7 @@ class LivesplitMessaging:
 
 
 pattern = re.compile(
-    r"^(?P<hours>\d*):?(?P<minutes>\d{1,2}):(?P<seconds>\d{2}).(?P<centiseconds>\d*)"
+    r"^(?:(?P<hours>\d*):)?(?P<minutes>\d{1,2}):(?P<seconds>\d{2}).(?P<centiseconds>\d*)"
 )
 
 
