@@ -1,10 +1,11 @@
+import sys
 import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 from jinja2 import Environment, FileSystemLoader
 from PySide2 import QtCore
-from PySide2.QtGui import QCursor
+from PySide2.QtGui import QCursor, QIcon
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu
 
 from .settings import Settings, SettingsDialog
@@ -13,11 +14,23 @@ from ..note_parser import Notes
 from ..livesplit_client import get_client
 
 
+if getattr(sys, 'frozen', False):
+    base_path = Path(sys.executable).parent
+    icon_file = str(base_path / 'logo_alpha.png')
+else:
+    base_path = Path(__file__).parent
+    icon_file = str(base_path.parents[2] / 'resources' / 'logo_alpha.png')
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.icon = QIcon(icon_file)
+        self.setWindowIcon(self.icon)
+
         self.ui.statusbar.showMessage("Not connected to server")
 
         # Get settings
@@ -150,6 +163,7 @@ class MainWindow(QMainWindow):
 
     def open_settings(self):
         settings_dialog = SettingsDialog(parent=self, settings=self.settings)
+        settings_dialog.setWindowIcon(self.icon)
         settings_dialog.exec_()
         if settings_dialog.result() == 1:
             settings_dialog.store_settings()
