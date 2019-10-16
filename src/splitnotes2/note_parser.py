@@ -72,7 +72,7 @@ class Notes:
 
         for idx in range(start, end):
             raw_split = self.notes[idx]
-            if self.preprocessor:
+            if self.preprocessor:  # pragma: nocover
                 split = self.preprocessor(raw_split)
             else:
                 split_parts = (item[:-1] if item.endswith('\\') else f"{item}<br>"
