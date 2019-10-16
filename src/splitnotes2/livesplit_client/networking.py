@@ -72,7 +72,7 @@ class LivesplitConnection:
                 f"the timeout period ({self.timeout}s)"
             )
 
-        if data_received == b'':
+        if data_received == b"":
             self.sock.close()
             self.sock = None
             raise ConnectionError("The connection has been closed by the host")

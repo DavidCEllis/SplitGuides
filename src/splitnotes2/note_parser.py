@@ -7,7 +7,8 @@ class Notes:
     """
     Class to handle splitnotes and formatting
     """
-    def __init__(self, note_stream, separator='', preprocessor=None):
+
+    def __init__(self, note_stream, separator="", preprocessor=None):
         """
         Note_stream should be an iterable object providing notes line by line
 
@@ -26,7 +27,7 @@ class Notes:
         split = []
         for line in note_stream:
             line = line.rstrip()  # remove newlines
-            if line.startswith('[') and line.endswith(']'):
+            if line.startswith("[") and line.endswith("]"):
                 pass  # Ignore comment lines
             elif line == self.separator:
                 # If the split is empty and the separator is blank
@@ -44,7 +45,7 @@ class Notes:
         self.notes = split_notes
 
     @classmethod
-    def from_file(cls, path, separator='', formatter=None):
+    def from_file(cls, path, separator="", formatter=None):
         """
         Helper method to parse a set of notes read from a given file path.
 
@@ -53,7 +54,7 @@ class Notes:
         :param formatter: The formatter to tidy up the notes
         :return: Instance of Notes parsed from the provided file
         """
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             notes = Notes(f, separator, formatter)
         return notes
 
@@ -75,10 +76,12 @@ class Notes:
             if self.preprocessor:  # pragma: nocover
                 split = self.preprocessor(raw_split)
             else:
-                split_parts = (item[:-1] if item.endswith('\\') else f"{item}<br>"
-                               for item in raw_split.split('\n'))
+                split_parts = (
+                    item[:-1] if item.endswith("\\") else f"{item}<br>"
+                    for item in raw_split.split("\n")
+                )
 
-                split = '\n'.join(split_parts)
+                split = "\n".join(split_parts)
             result.append(split)
 
         return result

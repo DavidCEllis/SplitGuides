@@ -18,23 +18,23 @@ class Options:
 def build_ui():
 
     root = Path(__file__).parent
-    ui_files = root.glob('*.ui')
+    ui_files = root.glob("*.ui")
 
-    Path(root / 'build').mkdir(exist_ok=True)
-    Path(root / 'build' / '__init__.py').touch(exist_ok=True)
+    Path(root / "build").mkdir(exist_ok=True)
+    Path(root / "build" / "__init__.py").touch(exist_ok=True)
 
     print("Building user interface files.")
 
     for infile in ui_files:
 
-        outfile = root / 'build' / infile.with_suffix('.py').name
+        outfile = root / "build" / infile.with_suffix(".py").name
         options_dict = {
-            'output': str(outfile),
-            'execute': False,
-            'preview': False,
-            'debug': False,
-            'indent': 4,
-            'from_imports': False
+            "output": str(outfile),
+            "execute": False,
+            "preview": False,
+            "debug": False,
+            "indent": 4,
+            "from_imports": False,
         }
 
         # Usually the options are parsed by optparse which makes an object
@@ -44,8 +44,8 @@ def build_ui():
         # Generate the .py file
         invoke(Driver(options, arguments))
 
-        print(f'Read: {infile}\nBuilt: {outfile}\n')
+        print(f"Read: {infile}\nBuilt: {outfile}\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build_ui()

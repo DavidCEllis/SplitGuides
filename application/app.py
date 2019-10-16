@@ -3,7 +3,7 @@ from PySide2.QtWidgets import QApplication
 
 from splitnotes2.ui.main_window import MainWindow
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

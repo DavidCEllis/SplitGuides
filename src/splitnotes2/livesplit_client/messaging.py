@@ -16,12 +16,12 @@ class LivesplitMessaging:
         self.connection.close()
 
     def send(self, message):
-        m = message.encode('UTF8')
-        self.connection.send(m + b'\r\n')
+        m = message.encode("UTF8")
+        self.connection.send(m + b"\r\n")
 
     def receive(self, datatype="text"):
         result = self.connection.receive()
-        result = result.strip().decode('UTF8')
+        result = result.strip().decode("UTF8")
         if datatype == "time":
             result = parse_time(result)
         elif datatype == "int":
@@ -183,10 +183,10 @@ def parse_time(time_str):
     :return:
     """
     match = pattern.match(time_str)
-    hours = int(match['hours']) if match['hours'] else 0
-    minutes = int(match['minutes'])
-    seconds = int(match['seconds'])
-    milliseconds = int(match['centiseconds']) * 10
+    hours = int(match["hours"]) if match["hours"] else 0
+    minutes = int(match["minutes"])
+    seconds = int(match["seconds"])
+    milliseconds = int(match["centiseconds"]) * 10
 
     result = timedelta(
         hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds

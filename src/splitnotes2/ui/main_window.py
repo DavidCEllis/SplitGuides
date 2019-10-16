@@ -14,12 +14,12 @@ from ..note_parser import Notes
 from ..livesplit_client import get_client
 
 
-if getattr(sys, 'frozen', False):
+if getattr(sys, "frozen", False):
     base_path = Path(sys.executable).parent
-    icon_file = str(base_path / 'logo_alpha.png')
+    icon_file = str(base_path / "logo_alpha.png")
 else:
     base_path = Path(__file__).parent
-    icon_file = str(base_path.parents[2] / 'resources' / 'logo_alpha.png')
+    icon_file = str(base_path.parents[2] / "resources" / "logo_alpha.png")
 
 
 class MainWindow(QMainWindow):
@@ -50,10 +50,10 @@ class MainWindow(QMainWindow):
 
         self.j2_environment = Environment(
             loader=FileSystemLoader(str(self.settings.html_template_folder)),
-            autoescape=False
+            autoescape=False,
         )
         self.template = None
-        self.css = ''
+        self.css = ""
         self.load_template()
         self.load_css()
 
@@ -121,15 +121,19 @@ class MainWindow(QMainWindow):
         self.rc_menu.popup(QCursor.pos())
 
     def open_notes(self):
-        notefile, _ = QFileDialog.getOpenFileName(self,
-                                                  "Open Notes",
-                                                  self.settings.notes_folder,
-                                                  "Note Files (*.txt *.md);;All Files (*.*)")
+        notefile, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open Notes",
+            self.settings.notes_folder,
+            "Note Files (*.txt *.md);;All Files (*.*)",
+        )
 
         if notefile:
             self.notefile = notefile
             # Reset split index and load notes
-            self.notes = Notes.from_file(notefile, separator=self.settings.split_separator)
+            self.notes = Notes.from_file(
+                notefile, separator=self.settings.split_separator
+            )
             self.settings.notes_folder = str(Path(notefile).parent)
             self.update_notes(idx=0, refresh=True)
 
@@ -139,7 +143,7 @@ class MainWindow(QMainWindow):
             font_color=self.settings.font_color,
             bg_color=self.settings.background_color,
             css=self.css,
-            notes=["<h1>Right Click to Load Notes</h1>"]
+            notes=["<h1>Right Click to Load Notes</h1>"],
         )
         self.ui.notes.setHtml(html)
 
@@ -155,7 +159,7 @@ class MainWindow(QMainWindow):
                 font_color=self.settings.font_color,
                 bg_color=self.settings.background_color,
                 css=self.css,
-                notes=self.notes.render_splits(start, end)
+                notes=self.notes.render_splits(start, end),
             )
 
             self.ui.notes.setHtml(html)
@@ -168,8 +172,10 @@ class MainWindow(QMainWindow):
         if settings_dialog.result() == 1:
             settings_dialog.store_settings()
             # Kill and restart connection if server ip or port change
-            if (self.client.connection.server != self.settings.hostname
-                    or self.client.connection.port != self.settings.port):
+            if (
+                self.client.connection.server != self.settings.hostname
+                or self.client.connection.port != self.settings.port
+            ):
                 self.ls.close()
                 self.client = get_client(self.settings.hostname, self.settings.port)
                 self.ls = LivesplitLink(self.client, self)
@@ -177,7 +183,9 @@ class MainWindow(QMainWindow):
 
             # Reread notes with separator
             if self.notefile:
-                self.notes = Notes.from_file(self.notefile, separator=self.settings.split_separator)
+                self.notes = Notes.from_file(
+                    self.notefile, separator=self.settings.split_separator
+                )
                 self.update_notes(self.split_index, refresh=True)
 
 
@@ -185,6 +193,7 @@ class LivesplitLink(QtCore.QObject):
     """
     Handle the loop running the livesplit connection and linking to the main window
     """
+
     # Have to message via signals or the program crashes
     note_signal = QtCore.Signal(int)
 

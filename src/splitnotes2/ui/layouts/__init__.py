@@ -3,6 +3,7 @@ try:
     from .build.settings import Ui_Settings
 except ImportError:
     from .build_ui import build_ui
+
     build_ui()
 
     try:
