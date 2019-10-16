@@ -15,24 +15,28 @@ notes_base = [
     "This is the second split",
     "Second Split Continued",
     "",
-    "Third Split"
+    "Third Split",
 ]
 
 delimiter = "<split>"
 
-notes_blank_delimiter = '\n'.join(notes_base)
-notes_split_delimiter = '\n'.join(item if item != "" else delimiter for item in notes_base)
+notes_blank_delimiter = "\n".join(notes_base)
+notes_split_delimiter = "\n".join(
+    item if item != "" else delimiter for item in notes_base
+)
 
 
 def assert_notes_match(notes):
     assert len(notes.notes) == 3
-    assert notes.notes[0] == '\n'.join([notes_base[0], notes_base[2]])
-    assert notes.notes[1] == '\n'.join(notes_base[6:8])
-    assert notes.notes[2] == '\n'.join([notes_base[-1]])
+    assert notes.notes[0] == "\n".join([notes_base[0], notes_base[2]])
+    assert notes.notes[1] == "\n".join(notes_base[6:8])
+    assert notes.notes[2] == "\n".join([notes_base[-1]])
 
 
-@pytest.mark.parametrize('separator, notes',
-                         [("", notes_blank_delimiter), (delimiter, notes_split_delimiter)])
+@pytest.mark.parametrize(
+    "separator, notes",
+    [("", notes_blank_delimiter), (delimiter, notes_split_delimiter)],
+)
 def test_parse(separator, notes):
     note_file = StringIO(notes)
     notes = Notes(note_file, separator)
@@ -59,12 +63,11 @@ def test_ignore_blank():
 
 
 def test_from_file():
-    pth = 'path/to/notes'
+    pth = "path/to/notes"
     m = mock_open(read_data=notes_blank_delimiter)
-    with patch('builtins.open', m):
+    with patch("builtins.open", m):
         notes = Notes.from_file(pth)
 
-    m.assert_called_once_with(pth, 'r')
+    m.assert_called_once_with(pth, "r")
 
     assert_notes_match(notes)
-
