@@ -3,6 +3,10 @@ Handle parsing a notes file into separate pages of notes.
 """
 
 
+class SecurityError(Exception):
+    pass
+
+
 class Notes:
     """
     Class to handle splitnotes and formatting
@@ -22,13 +26,15 @@ class Notes:
         self.notes = []
         self.get_notes(note_stream)
 
-    def get_notes(self, note_stream):
+    def get_notes(self, note_stream, safe_mode=True):
         split_notes = []
         split = []
         for line in note_stream:
             line = line.rstrip()  # remove newlines
             if line.startswith("[") and line.endswith("]"):
                 pass  # Ignore comment lines
+            elif "<script" in line and safe_mode is True:
+                raise SecurityError("Script tags are not allowed in safe mode.")
             elif line == self.separator:
                 # If the split is empty and the separator is blank
                 # Ignore the break
