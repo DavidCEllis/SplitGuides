@@ -19,7 +19,7 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     package_dir={"": "src"},
-    install_requires=["pyside2", "jinja2"],
+    install_requires=["pyside2", "jinja2", "bleach"],
     tests_require=["pytest", "pytest-cov"],
     extras_require={"build_exe": ["cx-freeze"], "dev": ["black"]},
 )

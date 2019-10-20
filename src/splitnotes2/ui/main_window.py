@@ -6,14 +6,14 @@ from concurrent.futures import ThreadPoolExecutor
 from jinja2 import Environment, FileSystemLoader
 from PySide2 import QtCore
 from PySide2.QtGui import QCursor, QIcon
-from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu, QMessageBox
+from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu
 
 from .settings import Settings, SettingsDialog
 from .layouts import Ui_MainWindow
-from ..note_parser import Notes, SecurityError
+from ..note_parser import Notes
 from ..livesplit_client import get_client
 
-
+# Get correct paths
 if getattr(sys, "frozen", False):
     base_path = Path(sys.executable).parent
     icon_file = str(base_path / "logo_alpha.png")
@@ -131,22 +131,11 @@ class MainWindow(QMainWindow):
         if notefile:
             self.notefile = notefile
             # Reset split index and load notes
-            try:
-                self.notes = Notes.from_file(
-                    notefile, separator=self.settings.split_separator
-                )
-            except SecurityError:
-                QMessageBox.critical(
-                    self,
-                    "Script detected.",
-                    (
-                        "The notes selected have not been loaded as they contain html script tags "
-                        "that could allow them to execute arbitrary JavaScript!"
-                    ),
-                )
-            else:
-                self.settings.notes_folder = str(Path(notefile).parent)
-                self.update_notes(idx=0, refresh=True)
+            self.notes = Notes.from_file(
+                notefile, separator=self.settings.split_separator
+            )
+            self.settings.notes_folder = str(Path(notefile).parent)
+            self.update_notes(idx=0, refresh=True)
 
     def render_blank(self):
         html = self.template.render(

@@ -1,10 +1,37 @@
 """
 Handle parsing a notes file into separate pages of notes.
 """
+import bleach
 
 
-class SecurityError(Exception):
-    pass
+PERMITTED_TAGS = [
+    "br",
+    "del",
+    "ins",
+    "mark",
+    "small",
+    "sub",
+    "sup",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "div",
+]
+
+PERMITTED_ATTRIBUTES = {"*": ["class", "style"]}
+
+
+PERMITTED_STYLES = [
+    "background-color",
+    "color",
+    "font-family",
+    "font-size",
+    "font-weight",
+    "text-align",
+]
 
 
 class Notes:
@@ -25,16 +52,23 @@ class Notes:
 
         self.notes = []
         self.get_notes(note_stream)
+        self.safe_mode = True
+        self.cleaner = get_cleaner(
+            PERMITTED_TAGS, PERMITTED_ATTRIBUTES, PERMITTED_STYLES
+        )
 
-    def get_notes(self, note_stream, safe_mode=True):
+    def get_notes(self, note_stream):
+        """
+        Parse the note stream and obtain the text to be rendered.
+
+        :param note_stream: iterable containing notes by line
+        """
         split_notes = []
         split = []
         for line in note_stream:
             line = line.rstrip()  # remove newlines
             if line.startswith("[") and line.endswith("]"):
                 pass  # Ignore comment lines
-            elif "<script" in line and safe_mode is True:
-                raise SecurityError("Script tags are not allowed in safe mode.")
             elif line == self.separator:
                 # If the split is empty and the separator is blank
                 # Ignore the break
@@ -90,4 +124,29 @@ class Notes:
                 split = "\n".join(split_parts)
             result.append(split)
 
+        # If in safe mode clean the HTML of unsafe data
+        if self.safe_mode:
+            result = [self.cleaner.clean(html) for html in result]
+
         return result
+
+
+def get_cleaner(extra_tags, extra_attributes, extra_styles):
+    """
+    Get a HTML cleaner to remove dangerous tags
+    :param extra_tags:
+    :param extra_attributes:
+    :param extra_styles:
+    :return:
+    """
+    valid_tags = bleach.sanitizer.ALLOWED_TAGS.copy()
+    valid_tags.extend(extra_tags)
+    valid_attributes = bleach.sanitizer.ALLOWED_ATTRIBUTES.copy()
+    valid_attributes.update(extra_attributes)
+    valid_styles = bleach.sanitizer.ALLOWED_STYLES.copy()
+    valid_styles.extend(extra_styles)
+
+    cleaner = bleach.sanitizer.Cleaner(
+        tags=valid_tags, attributes=PERMITTED_ATTRIBUTES, styles=PERMITTED_STYLES
+    )
+    return cleaner
