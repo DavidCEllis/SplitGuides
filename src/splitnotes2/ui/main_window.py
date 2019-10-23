@@ -14,7 +14,7 @@ from ..note_parser import Notes
 from ..livesplit_client import get_client
 
 # Get correct paths
-if getattr(sys, "frozen", False):
+if getattr(sys, "frozen", False):  # pragma: nocover
     base_path = Path(sys.executable).parent
     icon_file = str(base_path / "logo_alpha.png")
 else:
@@ -25,13 +25,14 @@ else:
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        # Setup the UI and get an icon
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-
         self.icon = QIcon(icon_file)
         self.setWindowIcon(self.icon)
 
-        self.ui.statusbar.showMessage("Not connected to server")
+        # Initial statusbar message
+        self.ui.statusbar.showMessage("Not connected to server.")
 
         # Get settings
         self.settings = Settings()
@@ -43,22 +44,24 @@ class MainWindow(QMainWindow):
         self.menu_on_top = None
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
 
+        # Setup notes variables
         self.notefile = None
         self.notes = None
 
+        # Right Click Menu
         self.rc_menu = None
+        self.build_menu()
+        self.setup_actions()
 
         self.j2_environment = Environment(
             loader=FileSystemLoader(str(self.settings.html_template_folder)),
             autoescape=False,
         )
         self.template = None
-        self.css = ""
         self.load_template()
-        self.load_css()
 
-        self.build_menu()
-        self.setup_actions()
+        self.css = ""
+        self.load_css()
 
         self.render_blank()
 
@@ -70,31 +73,35 @@ class MainWindow(QMainWindow):
         self.start_loops()
 
     def toggle_on_top(self):
+        """Toggle window always on top, update settings and window flag to match."""
         self.settings.on_top = not self.settings.on_top
         self.menu_on_top.setChecked(self.settings.on_top)
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
         self.show()
 
     def start_loops(self):
+        """Start the livesplit server connection thread."""
         self.ls.start_loops()
 
     def closeEvent(self, event):
+        """On close save settings and close the livesplit connection."""
         self.settings.save()
         self.ls.close()
         event.accept()
 
     def resizeEvent(self, event):
-        # Store the new width and height to keep it
-        # between launches
+        """Store the new window height and width to keep it between launches."""
         self.settings.width = self.width()
         self.settings.height = self.height()
         event.accept()
 
     def setup_actions(self):
+        """Make the context menu for the UI the custom menu."""
         self.ui.notes.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.ui.notes.customContextMenuRequested.connect(self.show_menu)
 
     def build_menu(self):
+        """Create the custom context menu."""
         self.rc_menu = QMenu()
         open_notes = self.rc_menu.addAction("Open Notes")
         open_notes.triggered.connect(self.open_notes)
@@ -107,20 +114,24 @@ class MainWindow(QMainWindow):
         self.menu_on_top.setChecked(self.settings.on_top)
         self.menu_on_top.triggered.connect(self.toggle_on_top)
 
+    def show_menu(self):
+        """Display the context menu at the cursor position."""
+        if not self.rc_menu:
+            self.build_menu()
+        self.rc_menu.popup(QCursor.pos())
+
     def load_template(self):
+        """Load the HTML template for the split rendering."""
         self.template = self.j2_environment.get_template(
             str(self.settings.html_template_file)
         )
 
     def load_css(self):
+        """Read the CSS file into memory."""
         self.css = self.settings.full_css_path.read_text()
 
-    def show_menu(self):
-        if not self.rc_menu:
-            self.build_menu()
-        self.rc_menu.popup(QCursor.pos())
-
     def open_notes(self):
+        """Open the a file dialog and create a Notes instance from the file."""
         notefile, _ = QFileDialog.getOpenFileName(
             self,
             "Open Notes",
@@ -134,10 +145,12 @@ class MainWindow(QMainWindow):
             self.notes = Notes.from_file(
                 notefile, separator=self.settings.split_separator
             )
+            # Remember this notes folder next time notes are loaded.
             self.settings.notes_folder = str(Path(notefile).parent)
             self.update_notes(idx=0, refresh=True)
 
     def render_blank(self):
+        """Render the initial blank template."""
         html = self.template.render(
             font_size=self.settings.font_size,
             font_color=self.settings.font_color,
@@ -148,6 +161,7 @@ class MainWindow(QMainWindow):
         self.ui.notes.setHtml(html)
 
     def update_notes(self, idx, refresh=False):
+        """Update the notes to the index given."""
         idx = max(idx, 0)
 
         if self.notes and idx != self.split_index or refresh:
@@ -166,6 +180,7 @@ class MainWindow(QMainWindow):
             self.split_index = idx
 
     def open_settings(self):
+        """Open the settings dialog, refresh everything if the settings have changed."""
         settings_dialog = SettingsDialog(parent=self, settings=self.settings)
         settings_dialog.setWindowIcon(self.icon)
         settings_dialog.exec_()
@@ -191,7 +206,7 @@ class MainWindow(QMainWindow):
 
 class LivesplitLink(QtCore.QObject):
     """
-    Handle the loop running the livesplit connection and linking to the main window
+    Handle the thread running the livesplit connection and linking to the main window.
     """
 
     # Have to message via signals or the program crashes
@@ -239,6 +254,7 @@ class LivesplitLink(QtCore.QObject):
                     self.connected = False
                     self.client.close()
                 else:
+                    # Send the signal to the main window to update.
                     # noinspection PyUnresolvedReferences
                     self.note_signal.emit(split_index)
             else:
