@@ -41,3 +41,49 @@ def test_rc_menu_open(qtbot, fake_link):
         )
 
         mock_method.assert_called_once()
+
+
+def test_toggle_on_top(qtbot, fake_link):
+    with patch.object(MainWindow, "show") as fake_show:
+        main_window = MainWindow()
+        qtbot.add_widget(main_window)
+
+        on_top = main_window.settings.on_top
+        assert on_top is False  # Default Settinng
+
+        # Toggle On
+        main_window.toggle_on_top()
+        # Check settings have changed
+        assert main_window.settings.on_top is not on_top
+
+        # Check menu item checked matches setting
+        assert main_window.menu_on_top.isChecked() is main_window.settings.on_top
+
+        # Check window flag has been set
+        # noinspection PyUnresolvedReferences
+        assert (
+            bool(main_window.windowFlags() & QtCore.Qt.WindowStaysOnTopHint)
+            is main_window.settings.on_top
+        )
+
+        # Check window shown
+        fake_show.assert_called_once()
+        fake_show.reset_mock()
+
+        # Toggle Back
+        main_window.toggle_on_top()
+        # Check settings have reverted
+        assert main_window.settings.on_top is on_top
+
+        # Check menu item checked matches setting
+        assert main_window.menu_on_top.isChecked() is main_window.settings.on_top
+
+        # Check window flag has been set
+        # noinspection PyUnresolvedReferences
+        assert (
+            bool(main_window.windowFlags() & QtCore.Qt.WindowStaysOnTopHint)
+            is main_window.settings.on_top
+        )
+
+        # Check window shown again
+        fake_show.assert_called_once()
