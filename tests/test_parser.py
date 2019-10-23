@@ -44,12 +44,31 @@ def test_parse(separator, notes):
 
 
 def test_render():
+    # Basic renderer test
     note_file = StringIO(notes_blank_delimiter)
     notes = Notes(note_file)
 
     expected = "This is the first split<br>\nThere is some text here<br>"
 
     assert notes.render_splits(0, 1)[0] == expected
+
+
+@pytest.mark.parametrize(
+    "safe_mode, expected",
+    [
+        (True, "&lt;script&gt;Escape these tags&lt;/script&gt;"),
+        (False, "<script>Escape these tags</script>"),
+    ],
+)
+def test_render_safe(safe_mode, expected):
+    # Test notes are being scrubbed for script tags correctly.
+    unsafe_note = "<script>Escape these tags</script>\\"
+    notes = Notes(StringIO(unsafe_note))
+
+    notes.safe_mode = safe_mode
+
+    result = notes.render_splits(0, 1)
+    assert result[0] == expected
 
 
 def test_ignore_blank():
