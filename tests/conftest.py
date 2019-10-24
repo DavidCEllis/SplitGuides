@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 src_folder = Path("./src").resolve()
 sys.path.insert(0, str(src_folder))
 
@@ -17,4 +19,8 @@ def delete_settings_file():
             pass
 
 
-delete_settings_file()
+@pytest.fixture(scope="function")
+def clear_settings():
+    delete_settings_file()
+    yield
+    delete_settings_file()
