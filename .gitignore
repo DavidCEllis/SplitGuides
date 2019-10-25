@@ -184,4 +184,4 @@ $RECYCLE.BIN/
 *.pyproject.user
 
 # Project settings file
-settings.json
+src/*/settings.json
