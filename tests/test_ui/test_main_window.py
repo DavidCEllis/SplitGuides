@@ -133,12 +133,13 @@ def test_blank_notes_render(qtbot, fake_link):
     assert "<h1>Right Click to Load Notes</h1>" in note_mock.setHtml.call_args[0][0]
 
 
+# fmt: off
 def test_open_notes(qtbot, fake_link):
-    with patch.object(
-        QtWidgets.QFileDialog, "getOpenFileName"
-    ) as mock_filedialog, patch.object(Notes, "from_file") as mock_notes, patch.object(
-        MainWindow, "update_notes"
-    ) as mock_update_notes:
+    """Test notes are opened correctly when a file is given"""
+    # Black likes to make multiple with statements unreadable
+    with patch.object(QtWidgets.QFileDialog, "getOpenFileName") as mock_filedialog, \
+            patch.object(Notes, "from_file") as mock_notes, \
+            patch.object(MainWindow, "update_notes") as mock_update_notes:
         main_window = MainWindow()
         qtbot.add_widget(main_window)
 
@@ -165,3 +166,105 @@ def test_open_notes(qtbot, fake_link):
         assert main_window.settings.notes_folder == str(fake_folder)
 
         mock_update_notes.assert_called_once_with(idx=0, refresh=True)
+# fmt: on
+
+
+# fmt: off
+def test_no_notes(qtbot, fake_link):
+    """Test that notes are not read if no file is given"""
+    with patch.object(
+        QtWidgets.QFileDialog, "getOpenFileName"
+    ) as mock_filedialog, patch.object(Notes, "from_file") as mock_notes:
+        main_window = MainWindow()
+        qtbot.add_widget(main_window)
+
+        mock_filedialog.return_value = (None, "Note Files (*.txt *.md)")
+
+        main_window.open_notes()
+
+        mock_notes.assert_not_called()
+
+
+# fmt: on
+
+
+@pytest.mark.parametrize("idx", [-10, 0, 10, 20])
+def test_update_notes(qtbot, fake_link, idx):
+    """Test the update method renders as expected"""
+    main_window = MainWindow()
+    qtbot.add_widget(main_window)
+
+    main_window.settings.previous_splits = 0
+    main_window.settings.next_splits = 2
+
+    fake_notes = MagicMock(main_window.notes)
+    fake_template = MagicMock(main_window.template)
+    fake_note_ui = MagicMock(main_window.ui.notes)
+
+    main_window.notes = fake_notes
+    main_window.template = fake_template
+    main_window.ui.notes = fake_note_ui
+
+    fake_notes.render_splits.return_value = "Fake Splits"
+    fake_template.render.return_value = "Fake HTML"
+
+    main_window.update_notes(idx, refresh=True)
+
+    used_idx = max(idx, 0)
+
+    fake_notes.render_splits.assert_called_once_with(used_idx - 0, used_idx + 3)
+    fake_template.render.assert_called_once_with(
+        font_size=main_window.settings.font_size,
+        font_color=main_window.settings.font_color,
+        bg_color=main_window.settings.background_color,
+        css=main_window.css,
+        notes="Fake Splits",
+    )
+    fake_note_ui.setHtml.assert_called_once_with("Fake HTML")
+
+    assert main_window.split_index == used_idx
+
+
+# fmt: off
+def test_open_settings(qtbot, fake_link):
+    fake_link_inst = MagicMock()
+    fake_link.return_value = fake_link_inst
+
+    with patch("splitnotes2.ui.main_window.SettingsDialog") as fake_settings_dialog_cls, \
+            patch.object(Notes, "from_file") as mock_notes:
+        # Mock setup
+        fake_settings_dialog = MagicMock()
+        fake_settings_dialog_cls.return_value = fake_settings_dialog
+
+        fake_settings_dialog.result.return_value = 1
+
+        main_window = MainWindow()
+        qtbot.add_widget(main_window)
+
+        fake_link.assert_called_once_with(main_window.client, main_window)
+
+        # Change hostname to trigger reconnect
+        main_window.settings.hostname = "newhost"
+
+        # Change separator to /split
+        main_window.settings.split_separator = "/split"
+        main_window.notefile = "fake_file"
+        main_window.split_index = 2
+
+        assert main_window.client.connection.server != main_window.settings.hostname
+
+        main_window.open_settings()
+
+        fake_settings_dialog.setWindowIcon.assert_called_once_with(main_window.icon)
+        fake_settings_dialog.exec_.assert_called_once()
+        fake_settings_dialog.result.assert_called_once()
+        fake_settings_dialog.store_settings.assert_called_once()
+
+        fake_link_inst.close.assert_called_once()
+        fake_link.assert_called_with(main_window.client, main_window)
+        assert fake_link_inst.start_loops.call_count == 2
+
+        mock_notes.assert_called_once_with("fake_file", separator="/split")
+
+
+# fmt: on

@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
         """Update the notes to the index given."""
         idx = max(idx, 0)
 
-        if self.notes and idx != self.split_index or refresh:
+        if self.notes and (idx != self.split_index or refresh):
             start = idx - self.settings.previous_splits
             end = idx + self.settings.next_splits + 1
 
