@@ -7,12 +7,12 @@
   "font_size": 22,
   "font_color": "#000001",
   "background_color": "#f1f8f1",
-  "html_template_folder": "C:\\Users\\David\\Source\\splitnotes2\\src\\splitnotes2\\ui\\html",
-  "html_template_file": "default.html",
-  "css_folder": "C:\\Users\\David\\Source\\splitnotes2\\src\\splitnotes2\\ui\\html",
-  "css_file": "default.css",
-  "on_top": false,
-  "width": 800,
-  "height": 800,
-  "notes_folder": "C:\\Users\\David\\Documents"
+  "html_template_folder": "fake/html/folder",
+  "html_template_file": "fakehtml.html",
+  "css_folder": "fake/css/folder",
+  "css_file": "fakecss.css",
+  "on_top": true,
+  "width": 1000,
+  "height": 1100,
+  "notes_folder": "fake/documents/folder"
 }
