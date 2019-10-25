@@ -1,0 +1,18 @@
+{
+  "hostname": "fakehost",
+  "port": 12345,
+  "split_separator": "/split",
+  "previous_splits": 1,
+  "next_splits": 3,
+  "font_size": 22,
+  "font_color": "#000001",
+  "background_color": "#f1f8f1",
+  "html_template_folder": "C:\\Users\\David\\Source\\splitnotes2\\src\\splitnotes2\\ui\\html",
+  "html_template_file": "default.html",
+  "css_folder": "C:\\Users\\David\\Source\\splitnotes2\\src\\splitnotes2\\ui\\html",
+  "css_file": "default.css",
+  "on_top": false,
+  "width": 800,
+  "height": 800,
+  "notes_folder": "C:\\Users\\David\\Documents"
+}
