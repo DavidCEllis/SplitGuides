@@ -10,7 +10,7 @@ from PySide2.QtGui import QIntValidator, QRegExpValidator, QColor
 from .layouts import Ui_Settings
 
 
-if getattr(sys, "frozen", False):
+if getattr(sys, "frozen", False):  # pragma: nocover
     # Application is .exe, use visible files
     base_path = Path(sys.executable).parent
 else:
