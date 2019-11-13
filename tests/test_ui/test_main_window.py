@@ -33,7 +33,8 @@ def test_init_link(qtbot, fake_link):
 
 
 @pytest.mark.xfail(
-    reason="Possibly a Qt Bug - https://bugreports.qt.io/browse/QTBUG-52552"
+    raises=AssertionError,
+    reason="Possibly a Qt Bug - https://bugreports.qt.io/browse/QTBUG-52552",
 )
 def test_rc_menu_open(qtbot, fake_link):
     with patch.object(MainWindow, "show_menu") as mock_method:
@@ -236,7 +237,7 @@ def test_open_settings(qtbot, fake_link):
         fake_settings_dialog = MagicMock()
         fake_settings_dialog_cls.return_value = fake_settings_dialog
 
-        fake_settings_dialog.result.return_value = 1
+        fake_settings_dialog.exec_.return_value = 1
 
         main_window = MainWindow()
         qtbot.add_widget(main_window)
@@ -257,14 +258,11 @@ def test_open_settings(qtbot, fake_link):
 
         fake_settings_dialog.setWindowIcon.assert_called_once_with(main_window.icon)
         fake_settings_dialog.exec_.assert_called_once()
-        fake_settings_dialog.result.assert_called_once()
-        fake_settings_dialog.store_settings.assert_called_once()
 
         fake_link_inst.close.assert_called_once()
         fake_link.assert_called_with(main_window.client, main_window)
         assert fake_link_inst.start_loops.call_count == 2
 
         mock_notes.assert_called_once_with("fake_file", separator="/split")
-
 
 # fmt: on

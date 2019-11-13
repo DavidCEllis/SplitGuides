@@ -183,9 +183,8 @@ class MainWindow(QMainWindow):
         """Open the settings dialog, refresh everything if the settings have changed."""
         settings_dialog = SettingsDialog(parent=self, settings=self.settings)
         settings_dialog.setWindowIcon(self.icon)
-        settings_dialog.exec_()
-        if settings_dialog.result() == 1:
-            settings_dialog.store_settings()
+        result = settings_dialog.exec_()
+        if result == 1:
             # Kill and restart connection if server ip or port change
             if (
                 self.client.connection.server != self.settings.hostname

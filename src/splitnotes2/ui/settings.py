@@ -165,7 +165,8 @@ class SettingsDialog(QDialog):
         Pop up a color dialog for the text color.
         """
         color = QColorDialog.getColor(QColor(self.settings.font_color), parent=self)
-        self.ui.textcolor_edit.setText(color.name())
+        if color.isValid():
+            self.ui.textcolor_edit.setText(color.name())
 
     def bg_color_dialog(self):
         """
@@ -174,7 +175,8 @@ class SettingsDialog(QDialog):
         color = QColorDialog.getColor(
             QColor(self.settings.background_color), parent=self
         )
-        self.ui.bgcolor_edit.setText(color.name())
+        if color.isValid():
+            self.ui.bgcolor_edit.setText(color.name())
 
     def html_template_dialog(self):
         htmlfile, _ = QFileDialog.getOpenFileName(
@@ -199,3 +201,10 @@ class SettingsDialog(QDialog):
         if cssfile:
             self.temp_css_path = cssfile
             self.ui.css_edit.setText(Path(cssfile).name)
+
+    def accept(self):
+        """If the dialog is accepted save the settings"""
+        # Normal cleanup
+        super().accept()
+        # Store the settings in the settings object
+        self.store_settings()
