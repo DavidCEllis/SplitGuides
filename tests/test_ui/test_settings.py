@@ -46,7 +46,8 @@ class TestSettings:
 
         with pytest.raises(AttributeError) as err:
             _ = s.fake_attribute
-            assert err.value == "Settings has no attribute 'fake_attribute'"
+
+        assert str(err.value) == "Settings has no attribute 'fake_attribute'"
 
 
 class TestSettingsUI:
