@@ -52,7 +52,10 @@ class Settings:
     }
 
     def __init__(self):
+        # Start with the defaults
         self.settings = {**self.defaults}
+
+        # Load additional settings from thte settings file if it exists
         if settings_file.exists():
             new_settings = json.loads(settings_file.read_text())
 
@@ -65,19 +68,26 @@ class Settings:
             self.settings.update(**new_settings)
 
     def __getattr__(self, item):
+        """
+        Display the contents of the settings dict as if they are the attributes of
+        this settings object.
+        """
         try:
             return self.settings[item]
         except KeyError:
             raise AttributeError(f"{self.__class__.__name__} has no attribute '{item}'")
 
     def __setattr__(self, key, value):
+        """
+        When an attribute is updated, if it exists as a key in the settings dict,
+        instead update that item.
+        """
         # If the key is a settings value update it, otherwise update the instance dict.
         if key in self.defaults:
             self.settings[key] = value
         else:
             super().__setattr__(key, value)
 
-    # noinspection PyAttributeOutsideInit
     def save(self):
         output = json.dumps(self.settings, indent=2, default=str)
         settings_file.write_text(output)
