@@ -13,7 +13,7 @@ else:
     base_path = Path(__file__).parent
 
 settings_file = Path(base_path / "settings.json")
-default_template_folder = Path(base_path / "templates")
+default_template_folder = Path(base_path / "ui" / "templates")
 user_path = str(Path(os.path.expanduser("~")) / "Documents")
 
 
