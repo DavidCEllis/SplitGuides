@@ -5,7 +5,8 @@ import pytest
 from PySide2 import QtWidgets, QtGui
 from PySide2.QtCore import Qt, QTimer
 
-from splitnotes2.ui.settings import Settings, SettingsDialog, settings_file
+from splitnotes2.settings import Settings, settings_file
+from splitnotes2.ui.settings_ui import SettingsDialog
 
 test_settings = Path(__file__).parent / "settings.json"
 

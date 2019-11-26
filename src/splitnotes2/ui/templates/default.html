@@ -6,14 +6,14 @@
   <style>
     :root {
       font-size: {{ font_size }}px;
-      color: {{font_color}};
-      background-color: {{bg_color}};
+      color: {{ font_color }};
+      background-color: {{ bg_color }};
     }
     {{ css }}
   </style>
 </head>
 <body>
-<div class="main-content">
+<div id="splits" class="main-content">
   {% for split in notes %}
     {{ split }}
     {% if not loop.last %}

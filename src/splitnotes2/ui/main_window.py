@@ -8,7 +8,8 @@ from PySide2 import QtCore
 from PySide2.QtGui import QCursor, QIcon
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu
 
-from .settings import Settings, SettingsDialog
+from ..settings import Settings
+from .settings_ui import SettingsDialog
 from .layouts import Ui_MainWindow
 from ..note_parser import Notes
 from ..livesplit_client import get_client
@@ -249,7 +250,7 @@ class LivesplitLink(QtCore.QObject):
             if self.connected:
                 try:
                     split_index = self.client.get_split_index()
-                except (ConnectionError, ConnectionAbortedError, TimeoutError):
+                except (ConnectionError, TimeoutError):
                     self.connected = False
                     self.client.close()
                 else:
