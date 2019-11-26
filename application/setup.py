@@ -31,7 +31,7 @@ executables = [
 
 setup(
     name="splitnotes2",
-    version="0.0.1",
+    version="0.3.2",
     description="Speedrun splitnotes tool with HTML rendering",
     options=options,
     executables=executables,
