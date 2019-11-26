@@ -7,7 +7,14 @@ Reduced to the main-content element and modified to remove most color variation.
   box-sizing: border-box;
 }
 
+:root {
+  font-size: 24px;
+  padding-top: 0;
+}
+
 body {
+  color: #000000;
+  background-color: #f1f8ff;
   padding: 0;
   margin: 0;
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -37,7 +44,7 @@ a {
   @media screen and (max-width: 42em) {
     .main-content {
       padding: 2rem 1rem;
-      font-size: 1rem; } }
+      font-size: 1.0rem; } }
   .main-content img {
     max-width: 100%; }
   .main-content h1,

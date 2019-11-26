@@ -250,7 +250,7 @@ class LivesplitLink(QtCore.QObject):
             if self.connected:
                 try:
                     split_index = self.client.get_split_index()
-                except (ConnectionError, ConnectionAbortedError, TimeoutError):
+                except (ConnectionError, TimeoutError):
                     self.connected = False
                     self.client.close()
                 else:
