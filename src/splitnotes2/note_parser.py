@@ -1,6 +1,7 @@
 """
 Handle parsing a notes file into separate pages of notes.
 """
+import os
 import bleach
 
 
@@ -47,6 +48,17 @@ class Notes:
         :param separator: The separator between split segments (default blank line)
         :param preprocessor: Tool if there is preprocessing to do on the notes
         """
+        if isinstance(note_stream, str):
+            raise TypeError(
+                "Expected file-like object for note_stream, but received string. "
+                "Use Notes.from_file for paths."
+            )
+        elif isinstance(note_stream, os.PathLike):
+            raise TypeError(
+                "Expected file-like object for note_stream, but received path-like object. "
+                "Use Notes.from_file for paths."
+            )
+
         self.preprocessor = preprocessor
         self.separator = separator
 
