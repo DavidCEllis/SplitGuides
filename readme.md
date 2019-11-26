@@ -73,7 +73,7 @@ Darksign
 
 #### Result ####
 
-![Image of splitnotes rendering](resources/notes_demo.png)
+![Image of splitnotes rendering](resources/demo_notes.png)
 
 ## Configuration ##
 
