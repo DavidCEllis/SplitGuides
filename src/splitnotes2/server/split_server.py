@@ -19,6 +19,7 @@ static_folder = str(Path(__file__).parent / "static")
 
 app = Flask("splitnotes2", template_folder=template_folder, static_folder=static_folder)
 
+notefile = None
 notes = None
 
 settings = Settings()
@@ -31,16 +32,28 @@ app.secret_key = "".join(
 # noinspection PyUnresolvedReferences
 @app.route("/")
 def notes_page():
-    return render_template("index.html")
+    """
+    Render the basic page as index.
+    :return:
+    """
+    global notefile
+    return render_template("index.html", notefile=notefile.stem)
 
 
 @app.route("/splits")
 def split():
-    current_note_index = None
-    last_update = 0
+    """
+    Server-sent events handler
+    :return: server-sent events
+    """
 
     def event_stream():
-        nonlocal current_note_index, last_update
+        """
+        Handle the stream of note updates, when the note index changes - push the update
+        otherwise just keep alive every 10s.
+        """
+        current_note_index = None
+        last_update = 0
         client = get_client(settings.hostname, settings.port)
         connected = client.connect()
 
@@ -58,6 +71,7 @@ def split():
                         current_note_index = new_index
                         split_text = notes.render_splits(new_index, new_index + 1)
                         if len(split_text) > 0:
+                            # Remove newlines from the notes as they break the send
                             data = split_text[0].replace("\n", "")
                             yield f"data: {data}\n\n"
                         else:
@@ -76,7 +90,7 @@ def split():
 def get_filename():
     temp_app = QApplication()
 
-    notefile, _ = QFileDialog.getOpenFileName(
+    filepath, _ = QFileDialog.getOpenFileName(
         None,
         "Open Notes",
         settings.notes_folder,
@@ -85,11 +99,12 @@ def get_filename():
 
     temp_app.quit()
 
-    return notefile
+    filepath = Path(filepath)
+    return filepath
 
 
 def launch():
-    global notes
+    global notes, notefile
     notefile = get_filename()
     settings.notes_folder = str(Path(notefile).parent)
     settings.save()
