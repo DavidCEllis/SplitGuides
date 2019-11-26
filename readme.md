@@ -88,6 +88,6 @@ The settings page offers some customisation and connection settings including:
 
 --- 
 
-Inspired by the original splitnotes: https://github.com/joeloskarsson/SplitNotes
+Inspired by (but otherwise unassociated with) the original splitnotes: https://github.com/joeloskarsson/SplitNotes
 
 [*] approximately 19x larger in file size :) (Mostly Qt and PySide2)
