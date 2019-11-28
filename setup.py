@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 __author__ = "DavidCEllis"
 
 
@@ -19,7 +19,7 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     package_dir={"": "src"},
-    install_requires=["pyside2", "jinja2", "bleach", "flask"],
+    install_requires=["pyside2", "jinja2", "bleach", "flask", "attrs"],
     tests_require=["pytest", "pytest-cov", "pytest-qt"],
     extras_require={"build_exe": ["cx-freeze"], "dev": ["black"]},
 )

@@ -22,7 +22,7 @@ app = Flask("splitnotes2", template_folder=template_folder, static_folder=static
 notefile = None
 notes = None
 
-settings = Settings()
+settings = Settings.load()
 
 app.secret_key = "".join(
     secrets.choice(string.printable) for _ in range(random.randint(30, 40))
@@ -69,7 +69,10 @@ def split():
                     if current_note_index != new_index:
                         last_update = now
                         current_note_index = new_index
-                        split_text = notes.render_splits(new_index, new_index + 1)
+                        split_text = notes.render_splits(
+                            new_index - settings.server_previous_splits,
+                            new_index + settings.server_next_splits + 1,
+                        )
                         if len(split_text) > 0:
                             # Remove newlines from the notes as they break the send
                             data = split_text[0].replace("\n", "")

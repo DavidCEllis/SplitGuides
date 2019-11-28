@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         self.ui.statusbar.showMessage("Not connected to server.")
 
         # Get settings
-        self.settings = Settings()
+        self.settings = Settings.load()
 
         # Window size
         self.resize(self.settings.width, self.settings.height)
