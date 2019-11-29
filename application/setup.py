@@ -26,7 +26,8 @@ options = {
 }
 
 executables = [
-    Executable("app.py", base=base, targetName="splitnotes2", icon=icon_file)
+    Executable("app.py", base=base, targetName="splitnotes2", icon=icon_file),
+    Executable("app_server.py", targetName="splitnotes2_server", icon=icon_file),
 ]
 
 setup(

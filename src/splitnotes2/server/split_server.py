@@ -8,9 +8,9 @@ from pathlib import Path
 from flask import Flask, render_template, Response
 from PySide2.QtWidgets import QApplication, QFileDialog
 
-from splitnotes2.settings import Settings
-from splitnotes2.livesplit_client import get_client
-from splitnotes2.note_parser import Notes
+from ..settings import Settings
+from ..livesplit_client import get_client
+from ..note_parser import Notes
 
 KEEP_ALIVE = 10
 
@@ -119,7 +119,3 @@ def launch():
     print(f"Connect a browser to http://{hostname}:{port}/")
 
     app.run(threaded=True, host=hostname, port=port)
-
-
-if __name__ == "__main__":
-    launch()
