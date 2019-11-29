@@ -24,7 +24,7 @@ class Settings:
     output_file = attr.ib(default=settings_file, converter=Path)
 
     # Networking Settings
-    hostname = attr.ib(default="hostname")
+    hostname = attr.ib(default="localhost")
     port = attr.ib(default=16834)
     # Parser Settings
     split_separator = attr.ib(default="")
