@@ -20,6 +20,15 @@ default_template_folder = Path(base_path / "templates")
 default_static_folder = Path(base_path / "static")
 user_path = str(Path(os.path.expanduser("~")) / "Documents")
 
+try:
+    local_address = socket.gethostname()
+except Exception:
+    local_address = "127.0.0.1"
+    print(
+        "Could not get local network hostname, using 127.0.0.1. "
+        "The server will only be accessible from this machine."
+    )
+
 
 @attr.s
 class Settings:
