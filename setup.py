@@ -21,5 +21,5 @@ setup(
     package_dir={"": "src"},
     install_requires=["pyside2", "jinja2", "bleach", "flask", "attrs"],
     tests_require=["pytest", "pytest-cov", "pytest-qt"],
-    extras_require={"build_exe": ["cx-freeze"], "dev": ["black"]},
+    extras_require={"build_exe": ["cx-freeze", "pywin32"], "dev": ["black"]},
 )
