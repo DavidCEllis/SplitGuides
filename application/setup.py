@@ -11,7 +11,7 @@ python3_dll = str(Path(sys.executable).parent / "python3.dll")
 
 base_path = Path(__file__).resolve().parents[1]
 templates = str(base_path / "src" / "splitnotes2" / "templates")
-static_folder = str(base_path / "src" / "splitnotes2" / "templates")
+static_folder = str(base_path / "src" / "splitnotes2" / "static")
 icon_file = str(base_path / "resources" / "logo_alpha.ico")
 icon_png = str(base_path / "resources" / "logo_alpha.png")
 
