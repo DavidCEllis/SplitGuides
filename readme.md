@@ -5,6 +5,8 @@
 SplitNotes2 is an application for displaying speedrun notes in sync with livesplit.
 Requires *livesplit server* to be running.
 
+There is now a server version included to allow reading from a browser on another device.
+
 ## Install/Setup ##
 
 1. Under the Livesplit layout editor add 'LiveSplit Server' (listed under 'control')
@@ -31,6 +33,14 @@ with some additional enhancements and exceptions.
    The formatter will automatically insert HTML breaks `<br>` between lines, 
    a backslash `\ ` at the end of a line will indicate that the line should **not**
    have a break inserted (useful for headers and lists).
+   
+## splitnotes2_server.exe ##
+
+Now included is a server version which launches a (local) webhost so you can view the splitnotes
+on another device on your local network. Launch splitnotes2_server.exe to start the service.
+
+If the hostname and port defaults aren't usable you can set them by editing server_hostname 
+and server_port in settings.json. There is no dialog for editing these settings yet.
    
 ### Example Notes ###
 
