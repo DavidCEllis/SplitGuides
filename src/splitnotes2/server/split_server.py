@@ -1,6 +1,5 @@
 import random
 import secrets
-import socket
 import string
 import time
 from pathlib import Path
@@ -14,15 +13,19 @@ from ..note_parser import Notes
 
 KEEP_ALIVE = 10
 
+settings = Settings.load()
+
 template_folder = str(Path(__file__).parent / "templates")
 static_folder = str(Path(__file__).parent / "static")
 
-app = Flask("splitnotes2", template_folder=template_folder, static_folder=static_folder)
+app = Flask(
+    "splitnotes2",
+    template_folder=settings.server_template_folder,
+    static_folder=settings.server_static_folder,
+)
 
 notefile = None
 notes = None
-
-settings = Settings.load()
 
 app.secret_key = "".join(
     secrets.choice(string.printable) for _ in range(random.randint(30, 40))
@@ -37,7 +40,7 @@ def notes_page():
     :return:
     """
     global notefile
-    return render_template("index.html", notefile=notefile.stem)
+    return render_template(settings.server_html_template_file, notefile=notefile.stem)
 
 
 @app.route("/splits")
@@ -56,6 +59,10 @@ def split():
         last_update = 0
         client = get_client(settings.hostname, settings.port)
         connected = client.connect()
+        # Note if the previous state was not connected
+        disconnected = True
+        # Define empty data, used to display the last notes even if disconnected
+        data = ""
 
         while True:
             if connected:
@@ -64,9 +71,11 @@ def split():
                     new_index = max(client.get_split_index(), 0)
                 except (ConnectionError, TimeoutError):
                     connected = client.connect()
-                    yield "data: <h1>Trying to connect to livesplit.</h1>\n\n"
+                    yield f"data: <h2>Trying to connect to livesplit.</h2>{data}\n\n"
                 else:
-                    if current_note_index != new_index:
+                    if current_note_index != new_index or disconnected:
+                        disconnected = False
+
                         last_update = now
                         current_note_index = new_index
                         split_text = notes.render_splits(
@@ -83,14 +92,16 @@ def split():
                         last_update = now
                         yield ":No update, keep connection\n\n"
             else:
+                disconnected = True
                 connected = client.connect()
-                yield "data: <h1>Trying to connect to livesplit.</h1>\n\n"
+                yield f"data: <h2>Trying to connect to livesplit.</h2>{data}\n\n"
             time.sleep(0.5)
 
     return Response(event_stream(), mimetype="text/event-stream")
 
 
-def get_filename():
+def get_notes():
+    global notes, notefile
     temp_app = QApplication()
 
     filepath, _ = QFileDialog.getOpenFileName(
@@ -102,20 +113,8 @@ def get_filename():
 
     temp_app.quit()
 
-    filepath = Path(filepath)
-    return filepath
-
-
-def launch():
-    global notes, notefile
-    notefile = get_filename()
-    settings.notes_folder = str(Path(notefile).parent)
-    settings.save()
+    notefile = Path(filepath)
     notes = Notes.from_file(notefile)
 
-    hostname = socket.gethostname()
-    port = 14250
-
-    print(f"Connect a browser to http://{hostname}:{port}/")
-
-    app.run(threaded=True, host=hostname, port=port)
+    settings.notes_folder = str(notefile.parent)
+    settings.save()

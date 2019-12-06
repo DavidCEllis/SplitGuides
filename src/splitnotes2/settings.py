@@ -1,4 +1,5 @@
 import os
+import socket
 import sys
 import json
 
@@ -14,7 +15,8 @@ else:
     base_path = Path(__file__).parent
 
 settings_file = Path(base_path / "settings.json")
-default_template_folder = Path(base_path / "ui" / "templates")
+default_template_folder = Path(base_path / "templates")
+default_static_folder = Path(base_path / "static")
 user_path = str(Path(os.path.expanduser("~")) / "Documents")
 
 
@@ -36,9 +38,9 @@ class Settings:
     background_color = attr.ib(default="#f1f8ff")
     # Templating
     html_template_folder = attr.ib(default=default_template_folder, converter=Path)
-    html_template_file = attr.ib(default="default.html")
-    css_folder = attr.ib(default=default_template_folder, converter=Path)
-    css_file = attr.ib(default="default.css")
+    html_template_file = attr.ib(default="desktop.html")
+    css_folder = attr.ib(default=default_static_folder, converter=Path)
+    css_file = attr.ib(default="desktop.css")
     # Window Settings
     on_top = attr.ib(default=False)
     width = attr.ib(default=800)
@@ -47,6 +49,13 @@ class Settings:
     # Server Settings
     server_previous_splits = attr.ib(default=0)
     server_next_splits = attr.ib(default=0)
+    server_hostname = attr.ib(default=socket.gethostname())
+    server_port = attr.ib(default=14250)
+
+    server_template_folder = attr.ib(default=default_template_folder, converter=Path)
+    server_html_template_file = attr.ib(default="server.html")
+    server_static_folder = attr.ib(default=default_static_folder)
+    server_css_file = attr.ib(default="server.css")
 
     def save(self):
         """
