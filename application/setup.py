@@ -21,7 +21,7 @@ if sys.platform == "win32":
 
 options = {
     "build_exe": {
-        "includes": "atexit",
+        "includes": ["atexit", "jinja2.ext"],
         "include_files": [python3_dll, templates, static_folder, icon_png],
     }
 }
