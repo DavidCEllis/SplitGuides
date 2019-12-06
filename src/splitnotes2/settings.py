@@ -21,9 +21,9 @@ default_static_folder = Path(base_path / "static")
 user_path = str(Path(os.path.expanduser("~")) / "Documents")
 
 try:
-    local_address = socket.gethostname()
+    local_hostname = socket.gethostname()
 except Exception:
-    local_address = "127.0.0.1"
+    local_hostname = "127.0.0.1"
     print(
         "Could not get local network hostname, using 127.0.0.1. "
         "The server will only be accessible from this machine."
@@ -59,7 +59,7 @@ class Settings:
     # Server Settings
     server_previous_splits = attr.ib(default=0)
     server_next_splits = attr.ib(default=0)
-    server_hostname = attr.ib(default=socket.gethostname())
+    server_hostname = attr.ib(default=local_hostname)
     server_port = attr.ib(default=14250)
 
     server_template_folder = attr.ib(default=default_template_folder, converter=Path)
