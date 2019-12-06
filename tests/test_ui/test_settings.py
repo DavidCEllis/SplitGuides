@@ -17,7 +17,7 @@ pytestmark = pytest.mark.usefixtures("clear_settings")
 
 @pytest.fixture
 def settings_ui(qtbot):
-    settings = Settings()
+    settings = Settings.load()
     settings_dialog = SettingsDialog(parent=None, settings=settings)
 
     qtbot.add_widget(settings_dialog)
@@ -57,7 +57,7 @@ class TestSettings:
 
         settings_file.write_text(test_settings.read_text())
 
-        s = Settings()
+        s = Settings.load(settings_file)
 
         assert s.hostname == "fakehost"
         assert s.port == 12345
@@ -75,14 +75,6 @@ class TestSettings:
         assert s.notes_folder == "fake/documents/folder"
 
         settings_file.unlink()  # Delete our fake settings file
-
-    def test_failed_getattr(self):
-        s = Settings()
-
-        with pytest.raises(AttributeError) as err:
-            _ = s.fake_attribute
-
-        assert str(err.value) == "Settings has no attribute 'fake_attribute'"
 
 
 class TestSettingsUI:
@@ -114,20 +106,22 @@ class TestSettingsUI:
 
         assert result == 0
 
-        assert settings.hostname == Settings.defaults["hostname"]
-        assert settings.port == Settings.defaults["port"]
-        assert settings.previous_splits == Settings.defaults["previous_splits"]
-        assert settings.next_splits == Settings.defaults["next_splits"]
-        assert settings.split_separator == Settings.defaults["split_separator"]
-        assert settings.font_size == Settings.defaults["font_size"]
-        assert settings.font_color == Settings.defaults["font_color"]
-        assert settings.background_color == Settings.defaults["background_color"]
+        default_settings = Settings()
+
+        assert settings.hostname == default_settings.hostname
+        assert settings.port == default_settings.port
+        assert settings.previous_splits == default_settings.previous_splits
+        assert settings.next_splits == default_settings.next_splits
+        assert settings.split_separator == default_settings.split_separator
+        assert settings.font_size == default_settings.font_size
+        assert settings.font_color == default_settings.font_color
+        assert settings.background_color == default_settings.background_color
 
     def test_settings_ui_colorpicker_font(self, qtbot):
         """
         Test font color picker
         """
-        settings = Settings()
+        settings = Settings.load()
         settings_dialog = SettingsDialog(parent=None, settings=settings)
 
         qtbot.add_widget(settings_dialog)
@@ -151,7 +145,7 @@ class TestSettingsUI:
         """
         Test BG color picker
         """
-        settings = Settings()
+        settings = Settings.load()
         settings_dialog = SettingsDialog(parent=None, settings=settings)
 
         qtbot.add_widget(settings_dialog)

@@ -100,7 +100,7 @@ class SettingsDialog(QDialog):
         cssfile, _ = QFileDialog.getOpenFileName(
             self,
             "Select Template File",
-            str(self.settings.html_template_folder),
+            str(self.settings.css_folder),
             "css files (*.css);;All Files (*.*)",
         )
 

@@ -25,6 +25,11 @@ class LivesplitConnection:
             self.sock.close()
             self.sock = None
             return False
+        except socket.gaierror:
+            # Could not resolve hostname
+            self.sock.close()
+            self.sock = None
+            return False
         else:
             self.sock.settimeout(self.timeout)
             return True
