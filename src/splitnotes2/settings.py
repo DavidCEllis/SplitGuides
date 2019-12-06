@@ -9,7 +9,8 @@ import attr
 
 if getattr(sys, "frozen", False):  # pragma: nocover
     # Application is .exe, use visible files
-    base_path = Path(sys.executable).parent
+    # base_path = Path(sys.executable).parent
+    base_path = Path(".")
 else:
     # Running as .py - use standard folder structure
     base_path = Path(__file__).parent
