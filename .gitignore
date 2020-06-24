@@ -6,6 +6,9 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 
+### Visual Studio
+.vs/*
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
