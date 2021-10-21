@@ -1,6 +1,6 @@
 # SplitNotes 2 #
 
-**SplitNotes but bigger***
+**Speedrun notes with markdown and html formatting**
 
 SplitNotes2 is an application for displaying speedrun notes in sync with livesplit.
 Requires *livesplit server* to be running.
@@ -20,19 +20,10 @@ There is now a server version included to allow reading from a browser on anothe
 2. Right click in the splitnotes window and select 'Open Notes' and find the text file
    containing the notes you wish to use.
    
-The formatting for notes basically follows the format used by the original SplitNotes 
-with some additional enhancements and exceptions.
-
-1. Comment lines still use square brackets.
-2. By default the splits will break on newlines. Multiple newlines and comments are ignored.
-3. The notes are now rendered as HTML and so can be formatted as such.
-
-   This means that it's easy to emphasise important part of the notes using basic HTML tags such as
-   `<strong>`, `<em>`, and `<mark>`.
-   
-   The formatter will automatically insert HTML breaks `<br>` between lines, 
-   a backslash `\ ` at the end of a line will indicate that the line should **not**
-   have a break inserted (useful for headers and lists).
+Formatting can now be done either using plain text and html tags or by using markdown formatting.
+Plain text files will automatically have breaks inserted for newlines, html files will not.
+Markdown files will also have breaks inserted on newlines.
+If a blank line is used as the split separator, multiple empty lines will be ignored.
    
 ## splitnotes2_server.exe ##
 
