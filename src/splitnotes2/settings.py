@@ -32,6 +32,10 @@ except Exception:
 
 @attr.s
 class Settings:
+    """
+    Global persistent settings handler
+    """
+
     # What file to use
     output_file = attr.ib(default=settings_file, converter=Path)
 
