@@ -70,6 +70,7 @@ class MainWindow(QMainWindow):
 
         self.ls = LivesplitLink(self.client, self)
         self.split_index = 0
+        self.split_offset = 0  # Offset for advancing/reversing split
 
         self.start_loops()
 
@@ -163,6 +164,7 @@ class MainWindow(QMainWindow):
 
     def update_notes(self, idx, refresh=False):
         """Update the notes to the index given."""
+        idx += self.split_offset  # Add the current split offset to the index
         idx = max(idx, 0)
 
         if self.notes and (idx != self.split_index or refresh):
