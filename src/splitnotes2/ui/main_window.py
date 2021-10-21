@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
             self,
             "Open Notes",
             self.settings.notes_folder,
-            "Note Files (*.txt *.md);;All Files (*.*)",
+            "Note Files (*.txt *.md *.html);;All Files (*.*)",
         )
 
         if notefile:

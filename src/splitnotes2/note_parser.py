@@ -2,7 +2,10 @@
 Handle parsing a notes file into separate pages of notes.
 """
 import os
+from pathlib import Path
+
 import bleach
+import markdown
 
 
 PERMITTED_TAGS = [
@@ -38,15 +41,26 @@ PERMITTED_STYLES = [
 class Notes:
     """
     Class to handle splitnotes and formatting
+
+    Processing order is:
+      Input -> Strip Comment lines (delimited by [ ])
+            -> Split by separator
+            -> Store
+            [Render Call]
+            -> Process
+            -> Sanitize
+            -> Render
+
     """
 
-    def __init__(self, note_stream, separator="", preprocessor=None):
+    def __init__(self, note_stream, separator="", *, preprocessor=None):
         """
         Note_stream should be an iterable object providing notes line by line
 
         :param note_stream: iterable object providing notes
         :param separator: The separator between split segments (default blank line)
         :param preprocessor: Tool if there is preprocessing to do on the notes
+                             This should be determined by the file extension
         """
         if isinstance(note_stream, str):
             raise TypeError(
@@ -97,17 +111,24 @@ class Notes:
         self.notes = split_notes
 
     @classmethod
-    def from_file(cls, path, separator="", formatter=None):
+    def from_file(cls, path, separator=""):
         """
         Helper method to parse a set of notes read from a given file path.
 
         :param path: path to notes text file
         :param separator: The separator between split segments (default blank line)
-        :param formatter: The formatter to tidy up the notes
         :return: Instance of Notes parsed from the provided file
         """
+        path = Path(path)
+        if path.suffix == ".txt":
+            preprocessor = TextProcessor()
+        elif path.suffix == ".md":
+            preprocessor = MarkdownProcessor()
+        else:
+            preprocessor = None
+
         with open(path, "r") as f:
-            notes = Notes(f, separator, formatter)
+            notes = Notes(f, separator, preprocessor=preprocessor)
         return notes
 
     def render_splits(self, start, end):
@@ -125,15 +146,10 @@ class Notes:
 
         for idx in range(start, end):
             raw_split = self.notes[idx]
-            if self.preprocessor:  # pragma: nocover
-                split = self.preprocessor(raw_split)
+            if self.preprocessor:
+                split = self.preprocessor.process(raw_split)
             else:
-                split_parts = (
-                    item[:-1] if item.endswith("\\") else f"{item}<br>"
-                    for item in raw_split.split("\n")
-                )
-
-                split = "\n".join(split_parts)
+                split = raw_split
             result.append(split)
 
         # If in safe mode clean the HTML of unsafe data
@@ -146,6 +162,8 @@ class Notes:
 def get_cleaner(extra_tags, extra_attributes, extra_styles):
     """
     Get a HTML cleaner to remove dangerous tags
+
+    This handles the external 'bleach' library.
     :param extra_tags:
     :param extra_attributes:
     :param extra_styles:
@@ -162,3 +180,55 @@ def get_cleaner(extra_tags, extra_attributes, extra_styles):
         tags=valid_tags, attributes=PERMITTED_ATTRIBUTES, styles=PERMITTED_STYLES
     )
     return cleaner
+
+
+class TextProcessor:
+    def __init__(self, *, continue_char="\\"):
+        """
+        Create a basic text processor
+
+        :param continue_char: Character used to indicate a <br> tag should not be added
+        """
+        self.continue_char = continue_char
+
+    def process(self, raw_text):
+        """
+        Basic processing for raw text, add breaks for newlines.
+        Don't add a break if the line ends with the continuation char but remove the char
+
+        :param raw_text: Basic split text
+        :return: Text with <br> inserted for new lines
+        """
+        split_parts = (
+            item[:-1] if item.endswith(self.continue_char) else f"{item}<br>"
+            for item in raw_text.split("\n")
+        )
+
+        return "\n".join(split_parts)
+
+
+class MarkdownProcessor:
+    default_extensions = ["nl2br", "sane_lists", "tables"]
+
+    def __init__(self, *, extensions=None):
+        """
+        Create a markdown processor using the markdown extension
+        By default this uses the extensions for sane lists, tables and new line to break
+
+        :param extensions: List of specific extensions, if not defined use defailts
+        """
+        self.extensions = (
+            extensions if extensions is not None else self.default_extensions
+        )
+
+        self.formatter = markdown.Markdown(extensions=self.extensions)
+
+    def process(self, raw_text):
+        """
+        Convert the raw MarkDown input into HTML
+        :param raw_text: Markdown input as a string
+        :return: processed HTML as a string
+        """
+        processed_text = self.formatter.convert(raw_text)
+        self.formatter.reset()
+        return processed_text

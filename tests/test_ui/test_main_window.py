@@ -151,7 +151,7 @@ def test_open_notes(qtbot, fake_link):
         fake_folder = Path("fake/folder")
         fake_file = str(fake_folder / "mock_notes.txt")
 
-        mock_filedialog.return_value = (fake_file, "Note Files (*.txt *.md)")
+        mock_filedialog.return_value = (fake_file, "Note Files (*.txt *.md *.html)")
         mock_notes.return_value = fake_notes
 
         main_window.open_notes()
@@ -160,7 +160,7 @@ def test_open_notes(qtbot, fake_link):
             main_window,
             "Open Notes",
             original_folder,
-            "Note Files (*.txt *.md);;All Files (*.*)",
+            "Note Files (*.txt *.md *.html);;All Files (*.*)",
         )
 
         mock_notes.assert_called_once_with(fake_file, separator="")
