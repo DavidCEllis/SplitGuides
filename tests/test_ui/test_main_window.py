@@ -37,6 +37,7 @@ def test_init_link(qtbot, fake_link):
     reason="Possibly a Qt Bug - https://bugreports.qt.io/browse/QTBUG-52552",
 )
 def test_rc_menu_open(qtbot, fake_link):
+    """Test the right click context menu works"""
     with patch.object(MainWindow, "show_menu") as mock_method:
         main_window = MainWindow()
         qtbot.add_widget(main_window)
