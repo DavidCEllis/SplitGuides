@@ -37,39 +37,35 @@ and server_port in settings.json. There is no dialog for editing these settings 
 
 #### Source ####
 
-```html
-<h3>Moonlight Butterfly</h3>\
-<em>Buy Crest of Artorias, Tower Kite Shield and max-1 large arrows</em>
-<strong>Prompt swap 99 titanite shards</strong>
-In Butterfly Fight:\
-<ul>\
-  <li>Prepare DGH equip in weapon slot 1</li>\
-  <li>Sort souls to top of inventory</li>\
-  <li>Equip Homeward Bone</li>\
-  <li>Mouse cursor in place for prompt swaps</li>\
-</ul>\
-Kill Moonlight Butterfly (3 Soul Spears)
-Darksign
+```markdown
+## High Hedge ##
+### Friendly Arm Inn ###
+* *East*
+* *Pick up the ring*
+* **Peldvale**
 
-<h3>Lord Vessel</h3>\
-Warp to Firelink Shrine
-In the warp sort Butterfly's soul above Estus
-Talk to Frampt and place the Lordvessel
-Warp back up with Frampt
-<em>Use prompt swap to sell 99 of each of each soul</em>
-<strong>Buy Homing Soulmass and Soul Spear from Griggs</strong>
-Homeward Bone
+### Peldvale ###
+* *South*
+* **High Hedge**
 
-<h3>Hydra</h3>\
-<mark>Level 23ATT 15END 10STR 45DEX 66INT</mark>
-<strong>Attune FC/GSA/Homing/Spears/Spears/GHSA</strong>
-DGH Fall RTSR Setup
-Kill Hydra (3 soul spears)
-Quitout after obtaining the items
-Kill the Gold Crystal Golem
-Talk to Dusk
-Summon Dusk and buy Hidden Body
-Darksign
+### High Hedge ###
+* Rest and Spin
+* *South to Shop*
+* Thalantyr (1, 1)
+* Shop:
+    * Sell the wand
+    * Identify the ring
+    * Sell the ring
+    * 3x Potion of Explosions
+    * Potion of Magic Blocking
+    * Protection from Magic
+    * Identify
+    * Shield
+    * Mirror Image
+    * 3x Invisibility
+* *South*
+* Go to Wilderness Map
+/split
 ```
 
 #### Result ####
@@ -86,6 +82,13 @@ The settings page offers some customisation and connection settings including:
   * Base font size
   * Default text and background colour
   * HTML (Jinja2) template and CSS files to use for rendering
+
+## Dependencies ##
+pyside2 - QT Gui Bindings
+jinja2 - Templating for the notes page
+bleach - Cleaning HTML to help protect if someone decided to make notes with a malicious script
+flask - Handling the server version
+attrs -  
 
 --- 
 
