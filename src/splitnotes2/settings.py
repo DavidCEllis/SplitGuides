@@ -9,8 +9,7 @@ import attr
 
 if getattr(sys, "frozen", False):  # pragma: nocover
     # Application is .exe, use visible files
-    # base_path = Path(sys.executable).parent
-    base_path = Path(".")
+    base_path = Path(sys.executable).parent
 else:
     # Running as .py - use standard folder structure
     base_path = Path(__file__).parent
@@ -91,7 +90,26 @@ class Settings:
         input_path = Path(input_filename)
         if input_path.exists():
             new_settings = json.loads(input_path.read_text())
-            return cls(output_file=input_filename, **new_settings)
+            loaded_settings = cls(output_file=input_filename, **new_settings)
+
+            # Check that the templates exist, reset otherwise
+            # This will happen if the executable folder is moved
+            # Absolute path ends up getting used because otherwise launching
+            # from an external folder doesn't work
+            if not Path(loaded_settings.full_template_path).exists():
+                loaded_settings.html_template_folder = default_template_folder
+                loaded_settings.html_template_file = "desktop.html"
+            if not Path(loaded_settings.full_css_path).exists():
+                loaded_settings.css_folder = default_static_folder
+                loaded_settings.css_file = "desktop.css"
+            if not Path(loaded_settings.server_template_folder).exists():
+                loaded_settings.server_template_folder = default_template_folder
+                loaded_settings.server_html_template_file = "server.html"
+            if not Path(loaded_settings.server_static_folder).exists():
+                loaded_settings.server_static_folder = default_static_folder
+                loaded_settings.server_css_file = "server.css"
+
+            return loaded_settings
         else:
             return cls(output_file=input_filename)
 
