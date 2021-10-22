@@ -70,7 +70,7 @@ and server_port in settings.json. There is no dialog for editing these settings 
 
 #### Result ####
 
-![Image of splitnotes rendering](resources/demo_notes.png)
+![Image of splitnotes rendering](resources/demo_notes_md.png)
 
 ## Configuration ##
 
