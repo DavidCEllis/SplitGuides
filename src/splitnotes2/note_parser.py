@@ -23,9 +23,26 @@ PERMITTED_TAGS = [
     "h5",
     "h6",
     "div",
+    "img",
+    "video",
+    "source",
 ]
 
-PERMITTED_ATTRIBUTES = {"*": ["class", "style"]}
+PERMITTED_ATTRIBUTES = {
+    "*": ["class", "style"],
+    "img": ["src", "alt", "width", "height"],
+    "video": [
+        "autoplay",
+        "controls",
+        "height",
+        "loop",
+        "muted",
+        "poster",
+        "src",
+        "width",
+    ],
+    "source": ["src", "type"],
+}
 
 
 PERMITTED_STYLES = [
