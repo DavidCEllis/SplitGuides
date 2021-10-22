@@ -103,6 +103,7 @@ class MainWindow(QMainWindow):
         self.split_offset -= 1
 
     def enable_hotkeys(self):
+        return  # Not tested yet
         keyboard.unhook_all()
 
         inc_hotkey = self.settings.increase_offset_hotkey
