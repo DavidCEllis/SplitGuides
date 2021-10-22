@@ -7,8 +7,6 @@ from pathlib import Path
 
 from cx_Freeze import setup, Executable
 
-python3_dll = str(Path(sys.executable).parent / "python3.dll")
-
 base_path = Path(__file__).resolve().parents[1]
 templates = str(base_path / "src" / "splitnotes2" / "templates")
 static_folder = str(base_path / "src" / "splitnotes2" / "static")
@@ -21,20 +19,20 @@ if sys.platform == "win32":
 
 options = {
     "build_exe": {
-        "includes": ["atexit", "jinja2.ext"],
-        "include_files": [python3_dll, templates, static_folder, icon_png],
+        "includes": ["atexit", "jinja2.ext", "html.parser"],
+        "include_files": [templates, static_folder, icon_png],
     }
 }
 
 executables = [
-    Executable("app.py", base=base, targetName="splitnotes2", icon=icon_file),
-    Executable("app_server.py", targetName="splitnotes2_server", icon=icon_file),
+    Executable("app.py", base=base, target_name="splitnotes2", icon=icon_file),
+    Executable("app_server.py", target_name="splitnotes2_server", icon=icon_file),
 ]
 
 setup(
     name="splitnotes2",
-    version="0.5.0",
-    description="Speedrun splitnotes tool with HTML rendering",
+    version="0.6.0",
+    description="Speedrun notes tool with HTML rendering",
     options=options,
     executables=executables,
 )
