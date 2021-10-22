@@ -20,12 +20,17 @@ There is now a server version included to allow reading from a browser on anothe
 2. Right click in the splitnotes window and select 'Open Notes' and find the text file
    containing the notes you wish to use.
    
-Formatting Notes:
-* Formatting can now be done either using plain text and html tags or by using markdown formatting.
-* The formatting used is chosen automatically by extension (.md/.txt/.html)
-* Plain text files will automatically have breaks inserted for newlines, html files will not.
-* Markdown files will also have breaks inserted on newlines.
-* If a blank line is used as the split separator, multiple empty lines will be ignored.
+The formatting for notes basically follows the format used by the original SplitNotes 
+with some additional enhancements and exceptions.
+
+Markdown and HTML formatted notes are supported.
+These will be interpreted based on file extension (.md, .txt or .html).
+Markdown and plain text formatted notes will automatically have line breaks 
+inserted in between lines.
+
+1. Comment lines still use square brackets.
+2. By default splits will break on newlines, multiple newlines are ignored in this case.
+3. The rendering is done as HTML so HTML formatting can be used.
    
 ## splitnotes2_server.exe ##
 
