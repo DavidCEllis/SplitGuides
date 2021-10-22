@@ -261,4 +261,4 @@ class LivesplitLink(QtCore.QObject):
                     self.note_signal.emit(split_index)
             else:
                 self.ls_connect()
-            time.sleep(0.5)
+            time.sleep(0.1)
