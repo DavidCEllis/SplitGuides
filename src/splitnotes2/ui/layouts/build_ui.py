@@ -1,50 +1,47 @@
-# A lot of staring at pyside2-uic source so I can just build the
-# ui files without leaving python
-
+# In v5.14 they removed pyside2uic so this invokes uic directly
+from subprocess import run
 from pathlib import Path
 
-from pyside2uic.driver import Driver
-from pyside2uic.port_v3.invoke import invoke
+import PySide2
+
+pyside_folder = Path(PySide2.__file__).parent
 
 
-class Options:
-    def __init__(self, options):
-        self._options = options
+def uic(infile, outfile):
+    """
+    Run the QT User Interface Compiler to convert a .ui file to a .py file
 
-    def __getattr__(self, key):
-        return self._options[key]
+    :param infile: Input path
+    :param outfile: Output path
+    :return: the CompletedProcess object from running the uic .exe
+    """
+    exe = pyside_folder / "uic.exe"
+    cmd = [exe, "-g", "python", "--o", str(outfile), str(infile)]
+    return run(cmd, capture_output=True)
 
 
 def build_ui():
-
+    """
+    Compile any .ui files in this folder to the build folder as .py files
+    """
+    # Scan this folder for .ui files
     root = Path(__file__).parent
     ui_files = root.glob("*.ui")
 
+    # Make the build and __init__ files if they do not exist
     Path(root / "build").mkdir(exist_ok=True)
     Path(root / "build" / "__init__.py").touch(exist_ok=True)
 
     print("Building user interface files.")
 
     for infile in ui_files:
-
         outfile = root / "build" / infile.with_suffix(".py").name
-        options_dict = {
-            "output": str(outfile),
-            "execute": False,
-            "preview": False,
-            "debug": False,
-            "indent": 4,
-            "from_imports": False,
-        }
+        result = uic(infile, outfile)
 
-        # Usually the options are parsed by optparse which makes an object
-        options = Options(options_dict)
-        arguments = str(infile)
-
-        # Generate the .py file
-        invoke(Driver(options, arguments))
-
-        print(f"Read: {infile}\nBuilt: {outfile}\n")
+        if result.returncode == 0:
+            print(f"Read: {infile}\nBuilt: {outfile}\n")
+        else:
+            print(f"Failed to convert: code{result.returncode}\n{result.stderr}")
 
 
 if __name__ == "__main__":
