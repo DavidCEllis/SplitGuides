@@ -20,10 +20,12 @@ There is now a server version included to allow reading from a browser on anothe
 2. Right click in the splitnotes window and select 'Open Notes' and find the text file
    containing the notes you wish to use.
    
-Formatting can now be done either using plain text and html tags or by using markdown formatting.
-Plain text files will automatically have breaks inserted for newlines, html files will not.
-Markdown files will also have breaks inserted on newlines.
-If a blank line is used as the split separator, multiple empty lines will be ignored.
+Formatting Notes:
+* Formatting can now be done either using plain text and html tags or by using markdown formatting.
+* The formatting used is chosen automatically by extension (.md/.txt/.html)
+* Plain text files will automatically have breaks inserted for newlines, html files will not.
+* Markdown files will also have breaks inserted on newlines.
+* If a blank line is used as the split separator, multiple empty lines will be ignored.
    
 ## splitnotes2_server.exe ##
 
@@ -84,11 +86,13 @@ The settings page offers some customisation and connection settings including:
   * HTML (Jinja2) template and CSS files to use for rendering
 
 ## Dependencies ##
-pyside2 - QT Gui Bindings
-jinja2 - Templating for the notes page
-bleach - Cleaning HTML to help protect if someone decided to make notes with a malicious script
-flask - Handling the server version
-attrs -  
+* pyside2 - QT Gui Bindings
+* jinja2 - Templating for the notes page
+* bleach - Cleaning HTML to help protect if someone decided to make notes with a malicious script
+* flask - Handling the server version
+* attrs - Made the settings classes a lot cleaner 
+* markdown - Converting markdown to html for rendering
+* keyboard - Global hotkeys to advance/reverse note offset to splits
 
 --- 
 
