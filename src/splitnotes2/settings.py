@@ -59,6 +59,11 @@ class Settings:
     width = attr.ib(default=800)
     height = attr.ib(default=800)
     notes_folder = attr.ib(default=user_path)
+    # Hotkey Settings
+    hotkeys_enabled = attr.ib(default=False)
+    increase_offset_hotkey = attr.ib(default=None)
+    decrease_offset_hotkey = attr.ib(default=None)
+
     # Server Settings
     server_previous_splits = attr.ib(default=0)
     server_next_splits = attr.ib(default=0)

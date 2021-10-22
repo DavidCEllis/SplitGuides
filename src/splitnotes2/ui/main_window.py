@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
+import keyboard
 from jinja2 import Environment, FileSystemLoader
 from PySide2 import QtCore
 from PySide2.QtGui import QCursor, QIcon
@@ -51,13 +52,16 @@ class MainWindow(QMainWindow):
 
         # Right Click Menu
         self.rc_menu = None
+        self.hotkeys_toggle = None
+
         self.build_menu()
         self.setup_actions()
 
         self.j2_environment = Environment(
-            loader=FileSystemLoader(str(self.settings.html_template_folder)),
+            loader=FileSystemLoader(self.settings.html_template_folder),
             autoescape=False,
         )
+
         self.template = None
         self.load_template()
 
@@ -70,7 +74,10 @@ class MainWindow(QMainWindow):
 
         self.ls = LivesplitLink(self.client, self)
         self.split_index = 0
+
         self.split_offset = 0  # Offset for advancing/reversing split
+        if self.settings.hotkeys_enabled:
+            self.enable_hotkeys()
 
         self.start_loops()
 
@@ -80,6 +87,31 @@ class MainWindow(QMainWindow):
         self.menu_on_top.setChecked(self.settings.on_top)
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
         self.show()
+
+    def toggle_hotkey_enable(self):
+        self.settings.hotkeys_enabled = not self.settings.hotkeys_enabled
+        self.hotkeys_toggle.setCheckable(self.settings.hotkeys_enabled)
+        if self.settings.hotkeys_enabled:
+            self.enable_hotkeys()
+        else:
+            keyboard.unhook_all()
+
+    def increase_offset(self):
+        self.split_offset += 1
+
+    def decrease_offset(self):
+        self.split_offset -= 1
+
+    def enable_hotkeys(self):
+        keyboard.unhook_all()
+
+        inc_hotkey = self.settings.increase_offset_hotkey
+        dec_hotkey = self.settings.decrease_offset_hotkey
+
+        if inc_hotkey:
+            keyboard.add_hotkey(inc_hotkey, self.increase_offset)
+        if dec_hotkey:
+            keyboard.add_hotkey(dec_hotkey, self.decrease_offset)
 
     def start_loops(self):
         """Start the livesplit server connection thread."""
@@ -115,6 +147,11 @@ class MainWindow(QMainWindow):
         self.menu_on_top.setCheckable(True)
         self.menu_on_top.setChecked(self.settings.on_top)
         self.menu_on_top.triggered.connect(self.toggle_on_top)
+
+        self.hotkeys_toggle = self.rc_menu.addAction("Enable Hotkeys")
+        self.hotkeys_toggle.setCheckable(True)
+        self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
+        self.hotkeys_toggle.triggered.connect(self.toggle_hotkey_enable)
 
     def show_menu(self):
         """Display the context menu at the cursor position."""
@@ -179,11 +216,14 @@ class MainWindow(QMainWindow):
                 notes=self.notes.render_splits(start, end),
             )
 
-            self.ui.notes.setHtml(html)
+            self.ui.notes.setHtml(html, baseUrl=self.notefile)
             self.split_index = idx
 
     def open_settings(self):
         """Open the settings dialog, refresh everything if the settings have changed."""
+        # Disable Hotkeys
+        keyboard.unhook_all()
+
         settings_dialog = SettingsDialog(parent=self, settings=self.settings)
         settings_dialog.setWindowIcon(self.icon)
         result = settings_dialog.exec_()

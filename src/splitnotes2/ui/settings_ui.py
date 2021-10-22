@@ -3,6 +3,7 @@ from pathlib import Path
 from PySide2.QtWidgets import QDialog, QColorDialog, QFileDialog
 from PySide2.QtCore import QRegExp
 from PySide2.QtGui import QIntValidator, QRegExpValidator, QColor
+import keyboard
 
 from .layouts import Ui_Settings
 
@@ -24,6 +25,9 @@ class SettingsDialog(QDialog):
         self.ui.bgcolor_button.clicked.connect(self.bg_color_dialog)
         self.ui.htmltemplate_button.clicked.connect(self.html_template_dialog)
         self.ui.css_button.clicked.connect(self.css_dialog)
+
+        self.ui.nextsplitkey_button.clicked.connect(self.get_increase_hotkey)
+        self.ui.previoussplitkey_button.clicked.connect(self.get_decrease_hotkey)
 
     def setup_validators(self):
         color_re = QRegExp(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})")
@@ -49,6 +53,9 @@ class SettingsDialog(QDialog):
         self.ui.htmltemplate_edit.setText(str(self.settings.html_template_file))
         self.ui.css_edit.setText(str(self.settings.css_file))
 
+        self.ui.nextsplitkey_edit.setText(self.settings.increase_offset_hotkey)
+        self.ui.previoussplitkey_edit.setText(self.settings.decrease_offset_hotkey)
+
     def store_settings(self):
         self.settings.hostname = self.ui.hostname_edit.text()
         self.settings.port = int(self.ui.port_edit.text())
@@ -58,6 +65,9 @@ class SettingsDialog(QDialog):
         self.settings.font_size = int(self.ui.fontsize_edit.text())
         self.settings.font_color = self.ui.textcolor_edit.text()
         self.settings.background_color = self.ui.bgcolor_edit.text()
+
+        self.settings.increase_offset_hotkey = self.ui.nextsplitkey_edit.text()
+        self.settings.decrease_offset_hotkey = self.ui.previoussplitkey_edit.text()
 
         # Paths get stored in temporary variables
         self.settings.html_template_folder = Path(self.temp_html_path).parent
@@ -107,6 +117,28 @@ class SettingsDialog(QDialog):
         if cssfile:
             self.temp_css_path = cssfile
             self.ui.css_edit.setText(Path(cssfile).name)
+
+    def get_increase_hotkey(self):
+        """Get a hotkey to use to increase the split offset"""
+        self.ui.nextsplitkey_edit.setText("Coming Soon")
+        return
+        # Sleep to avoid reading any held keys
+        hotkey = keyboard.read_hotkey(suppress=False)
+        if hotkey == "esc" or "backspace":
+            hotkey = None
+
+        self.ui.nextsplitkey_edit.setText(hotkey)
+
+    def get_decrease_hotkey(self):
+        """Get a hotkey to use to decrease the split offset"""
+        self.ui.previoussplitkey_edit.setText("Coming Soon")
+        return
+        # Sleep to avoid reading any held keys
+        hotkey = keyboard.read_hotkey(suppress=False)
+        if hotkey == "esc" or "backspace":
+            hotkey = None
+
+        self.ui.previoussplitkey_edit.setText(hotkey)
 
     def accept(self):
         """If the dialog is accepted save the settings"""
