@@ -19,7 +19,16 @@ if sys.platform == "win32":
 
 options = {
     "build_exe": {
-        "includes": ["atexit", "jinja2.ext", "html.parser"],
+        "includes": [
+            "atexit",
+            "jinja2.ext",
+            "html.parser",
+            "markdown",
+            "markdown.extensions",
+            "markdown.extensions.nl2br",
+            "markdown.extensions.sane_lists",
+            "markdown.extensions.tables",
+        ],
         "include_files": [templates, static_folder, icon_png],
     }
 }
