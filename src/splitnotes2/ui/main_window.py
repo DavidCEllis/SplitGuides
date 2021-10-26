@@ -94,7 +94,7 @@ class MainWindow(QMainWindow):
 
     def toggle_hotkey_enable(self):
         self.settings.hotkeys_enabled = not self.settings.hotkeys_enabled
-        self.hotkeys_toggle.setCheckable(self.settings.hotkeys_enabled)
+        self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
         if self.settings.hotkeys_enabled:
             self.enable_hotkeys()
         else:
@@ -110,9 +110,15 @@ class MainWindow(QMainWindow):
 
     def increase_offset(self):
         self.split_offset += 1
+        # Rerender if not connected (if connected this will happen automatically)
+        if not self.ls.connected:
+            self.update_notes(0)
 
     def decrease_offset(self):
         self.split_offset -= 1
+        # Rerender if not connected (if connected this will happen automatically)
+        if not self.ls.connected:
+            self.update_notes(0)
 
     def start_loops(self):
         """Start the livesplit server connection thread."""
@@ -253,6 +259,8 @@ class MainWindow(QMainWindow):
                 self.notes = Notes.from_file(
                     self.notefile, separator=self.settings.split_separator
                 )
+                # Reset the offset
+                self.split_offset = 0
                 self.update_notes(self.split_index, refresh=True)
 
         # Re-enable hotkeys if enabled

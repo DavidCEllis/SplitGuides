@@ -161,13 +161,16 @@ class Notes:
 
         result = []
 
-        for idx in range(start, end):
-            raw_split = self.notes[idx]
-            if self.preprocessor:
-                split = self.preprocessor.process(raw_split)
-            else:
-                split = raw_split
-            result.append(split)
+        if start >= end:
+            result = ["<h1>End of Splits</h1>"]
+        else:
+            for idx in range(start, end):
+                raw_split = self.notes[idx]
+                if self.preprocessor:
+                    split = self.preprocessor.process(raw_split)
+                else:
+                    split = raw_split
+                result.append(split)
 
         # If in safe mode clean the HTML of unsafe data
         if self.safe_mode:
