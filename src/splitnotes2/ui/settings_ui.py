@@ -139,6 +139,10 @@ class SettingsDialog(QDialog):
         self.ui.nextsplitkey_edit.setText(hotkey)
         self.ui.nextsplitkey_button.setText("Select")
 
+        # Unbind next split key if both are equal
+        if self.ui.previoussplitkey_edit.text() == hotkey:
+            self.ui.previoussplitkey_edit.setText("")
+
         # Disconnect the hotkey signal from this function
         self.hotkey_manager.hotkey_signal.disconnect(self.return_increase_hotkey)
 
@@ -159,6 +163,10 @@ class SettingsDialog(QDialog):
         """
         self.ui.previoussplitkey_edit.setText(hotkey)
         self.ui.previoussplitkey_button.setText("Select")
+
+        # Unbind next split key if both are equal
+        if self.ui.nextsplitkey_edit.text() == hotkey:
+            self.ui.nextsplitkey_edit.setText("")
 
         # Disconnect the hotkey signal from this function
         self.hotkey_manager.hotkey_signal.disconnect(self.return_decrease_hotkey)
