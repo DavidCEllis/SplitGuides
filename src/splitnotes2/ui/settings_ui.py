@@ -1,9 +1,9 @@
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
 from PySide2.QtWidgets import QDialog, QColorDialog, QFileDialog
-from PySide2.QtCore import QRegExp
+from PySide2.QtCore import QRegExp, Slot
 from PySide2.QtGui import QIntValidator, QRegExpValidator, QColor
-import keyboard
 
 from .layouts import Ui_Settings
 
@@ -13,6 +13,8 @@ class SettingsDialog(QDialog):
         super().__init__(parent=parent)
         self.ui = Ui_Settings()
         self.ui.setupUi(self)
+
+        self.hotkey_manager = parent.hotkey_manager
 
         self.settings = settings
         self.temp_html_path = self.settings.full_template_path
@@ -28,6 +30,8 @@ class SettingsDialog(QDialog):
 
         self.ui.nextsplitkey_button.clicked.connect(self.get_increase_hotkey)
         self.ui.previoussplitkey_button.clicked.connect(self.get_decrease_hotkey)
+
+        self.pool = ThreadPoolExecutor(max_workers=1)
 
     def setup_validators(self):
         color_re = QRegExp(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})")
@@ -120,25 +124,46 @@ class SettingsDialog(QDialog):
 
     def get_increase_hotkey(self):
         """Get a hotkey to use to increase the split offset"""
-        self.ui.nextsplitkey_edit.setText("Coming Soon")
-        return
-        # Sleep to avoid reading any held keys
-        hotkey = keyboard.read_hotkey(suppress=False)
-        if hotkey == "esc" or "backspace":
-            hotkey = None
+        # First set the buttons dialog and disable the interface
+        self.ui.nextsplitkey_button.setText("Listening...")
+        self.setEnabled(False)
+        fn = lambda: self.hotkey_manager.select_input(self.return_increase_hotkey)
+        self.pool.submit(fn)
 
+    @Slot(str)
+    def return_increase_hotkey(self, hotkey=None):
+        """
+        Get the returned hotkey or cancel if no hotkey is returned
+        :param hotkey:
+        """
         self.ui.nextsplitkey_edit.setText(hotkey)
+        self.ui.nextsplitkey_button.setText("Select")
+
+        # Disconnect the hotkey signal from this function
+        self.hotkey_manager.hotkey_signal.disconnect(self.return_increase_hotkey)
+
+        self.setEnabled(True)
 
     def get_decrease_hotkey(self):
         """Get a hotkey to use to decrease the split offset"""
-        self.ui.previoussplitkey_edit.setText("Coming Soon")
-        return
-        # Sleep to avoid reading any held keys
-        hotkey = keyboard.read_hotkey(suppress=False)
-        if hotkey == "esc" or "backspace":
-            hotkey = None
+        self.ui.previoussplitkey_button.setText("Listening...")
+        self.setEnabled(False)
+        fn = lambda: self.hotkey_manager.select_input(self.return_decrease_hotkey)
+        self.pool.submit(fn)
 
+    @Slot(str)
+    def return_decrease_hotkey(self, hotkey=None):
+        """
+        Get the returned hotkey or cancel if no hotkey is returned
+        :param hotkey:
+        """
         self.ui.previoussplitkey_edit.setText(hotkey)
+        self.ui.previoussplitkey_button.setText("Select")
+
+        # Disconnect the hotkey signal from this function
+        self.hotkey_manager.hotkey_signal.disconnect(self.return_decrease_hotkey)
+
+        self.setEnabled(True)
 
     def accept(self):
         """If the dialog is accepted save the settings"""
