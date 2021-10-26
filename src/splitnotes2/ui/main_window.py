@@ -107,6 +107,9 @@ class MainWindow(QMainWindow):
 
     def disable_hotkeys(self):
         self.hotkey_manager.disable_hotkeys()
+        self.split_offset = 0  # Reset the offset as you can no longer change it
+        if not self.ls.connected:
+            self.update_notes(0)
 
     def increase_offset(self):
         self.split_offset += 1
