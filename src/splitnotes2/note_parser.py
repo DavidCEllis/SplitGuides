@@ -144,7 +144,7 @@ class Notes:
         else:
             preprocessor = None
 
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             notes = Notes(f, separator, preprocessor=preprocessor)
         return notes
 
