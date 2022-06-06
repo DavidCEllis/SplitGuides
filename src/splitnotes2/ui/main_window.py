@@ -309,10 +309,14 @@ class LivesplitLink(QtCore.QObject):
         self.main_window.ui.statusbar.showMessage(message)
 
     def ls_connect(self):
-        self.update_status("Trying to connect to Livesplit.")
+        self.update_status(
+            f"Trying to connect to Livesplit. | Split Offset: {self.main_window.split_offset}"
+        )
         self.connected = self.client.connect()
         if self.connected:
-            self.update_status("Connected to Livesplit.")
+            self.update_status(
+                f"Connected to Livesplit. | Split Offset: {self.main_window.split_offset}"
+            )
 
     def loop_update_split(self):
         while not self.break_loop:
