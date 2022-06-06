@@ -22,7 +22,7 @@ setup(
     install_requires=[
         "pyside2",
         "jinja2",
-        "bleach",
+        "bleach[css]",
         "flask",
         "attrs",
         "markdown",

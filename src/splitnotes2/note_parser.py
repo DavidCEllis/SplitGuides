@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import bleach
+import bleach.css_sanitizer
 import markdown
 
 
@@ -193,11 +194,14 @@ def get_cleaner(extra_tags, extra_attributes, extra_styles):
     valid_tags.extend(extra_tags)
     valid_attributes = bleach.sanitizer.ALLOWED_ATTRIBUTES.copy()
     valid_attributes.update(extra_attributes)
-    valid_styles = bleach.sanitizer.ALLOWED_STYLES.copy()
+
+    # Bleach 5.0 changed how CSS works, to avoid changing internals we'll wrap around this
+    valid_styles = list(bleach.css_sanitizer.ALLOWED_CSS_PROPERTIES)
     valid_styles.extend(extra_styles)
+    css_sanitizer = bleach.css_sanitizer.CSSSanitizer(allowed_css_properties=valid_tags)
 
     cleaner = bleach.sanitizer.Cleaner(
-        tags=valid_tags, attributes=PERMITTED_ATTRIBUTES, styles=PERMITTED_STYLES
+        tags=valid_tags, attributes=PERMITTED_ATTRIBUTES, css_sanitizer=css_sanitizer
     )
     return cleaner
 
