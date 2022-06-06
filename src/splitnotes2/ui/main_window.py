@@ -79,9 +79,7 @@ class MainWindow(QMainWindow):
         # Set up hotkey manager
         self.hotkey_manager = HotkeyManager(self)
         if self.settings.hotkeys_enabled:
-            increase_key = self.settings.increase_offset_hotkey
-            decrease_key = self.settings.decrease_offset_hotkey
-            self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
+            self.enable_hotkeys()
 
         self.start_loops()
 
@@ -101,9 +99,14 @@ class MainWindow(QMainWindow):
             self.disable_hotkeys()
 
     def enable_hotkeys(self):
-        increase_key = self.settings.increase_offset_hotkey
-        decrease_key = self.settings.decrease_offset_hotkey
-        self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
+        try:
+            increase_key = self.settings.increase_offset_hotkey.scancodes
+            decrease_key = self.settings.decrease_offset_hotkey.scancodes
+            self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
+        except AttributeError:
+            # If keys don't exist then it will be trying to get scancodes from None
+            print("failed")
+            pass
 
     def disable_hotkeys(self):
         self.hotkey_manager.disable_hotkeys()

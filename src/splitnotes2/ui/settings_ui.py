@@ -1,11 +1,13 @@
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
+import json
 
 from PySide2.QtWidgets import QDialog, QColorDialog, QFileDialog
 from PySide2.QtCore import QRegExp, Slot
 from PySide2.QtGui import QIntValidator, QRegExpValidator, QColor
 
 from .layouts import Ui_Settings
+from ..hotkeys.keyboard_fixer import Hotkey
 
 
 class SettingsDialog(QDialog):
@@ -15,6 +17,8 @@ class SettingsDialog(QDialog):
         self.ui.setupUi(self)
 
         self.hotkey_manager = parent.hotkey_manager
+        self.nextsplitkey = None
+        self.previoussplitkey = None
 
         self.settings = settings
         self.temp_html_path = self.settings.full_template_path
@@ -57,8 +61,14 @@ class SettingsDialog(QDialog):
         self.ui.htmltemplate_edit.setText(str(self.settings.html_template_file))
         self.ui.css_edit.setText(str(self.settings.css_file))
 
-        self.ui.nextsplitkey_edit.setText(self.settings.increase_offset_hotkey)
-        self.ui.previoussplitkey_edit.setText(self.settings.decrease_offset_hotkey)
+        if self.settings.increase_offset_hotkey:
+            self.ui.nextsplitkey_edit.setText(self.settings.increase_offset_hotkey.name)
+        if self.settings.decrease_offset_hotkey:
+            self.ui.previoussplitkey_edit.setText(
+                self.settings.decrease_offset_hotkey.name
+            )
+        self.nextsplitkey = self.settings.increase_offset_hotkey
+        self.previoussplitkey = self.settings.decrease_offset_hotkey
 
     def store_settings(self):
         self.settings.hostname = self.ui.hostname_edit.text()
@@ -70,8 +80,8 @@ class SettingsDialog(QDialog):
         self.settings.font_color = self.ui.textcolor_edit.text()
         self.settings.background_color = self.ui.bgcolor_edit.text()
 
-        self.settings.increase_offset_hotkey = self.ui.nextsplitkey_edit.text()
-        self.settings.decrease_offset_hotkey = self.ui.previoussplitkey_edit.text()
+        self.settings.increase_offset_hotkey = self.nextsplitkey
+        self.settings.decrease_offset_hotkey = self.previoussplitkey
 
         # Paths get stored in temporary variables
         self.settings.html_template_folder = Path(self.temp_html_path).parent
@@ -136,12 +146,20 @@ class SettingsDialog(QDialog):
         Get the returned hotkey or cancel if no hotkey is returned
         :param hotkey:
         """
-        self.ui.nextsplitkey_edit.setText(hotkey)
+        if hotkey:
+            hotkey = Hotkey(**json.loads(hotkey))
+            self.ui.nextsplitkey_edit.setText(hotkey.name)
+            self.nextsplitkey = hotkey
+        else:
+            self.ui.nextsplitkey_edit.setText("")
+            self.nextsplitkey = None
+
         self.ui.nextsplitkey_button.setText("Select")
 
         # Unbind next split key if both are equal
-        if self.ui.previoussplitkey_edit.text() == hotkey:
+        if hotkey and self.ui.previoussplitkey_edit.text() == hotkey.name:
             self.ui.previoussplitkey_edit.setText("")
+            self.previoussplitkey = None
 
         # Disconnect the hotkey signal from this function
         self.hotkey_manager.hotkey_signal.disconnect(self.return_increase_hotkey)
@@ -161,12 +179,19 @@ class SettingsDialog(QDialog):
         Get the returned hotkey or cancel if no hotkey is returned
         :param hotkey:
         """
-        self.ui.previoussplitkey_edit.setText(hotkey)
+        if hotkey:
+            hotkey = Hotkey(**json.loads(hotkey))
+            self.ui.previoussplitkey_edit.setText(hotkey.name)
+            self.previoussplitkey = hotkey
+        else:
+            self.ui.previoussplitkey_edit.setText("")
+            self.previoussplitkey = None
         self.ui.previoussplitkey_button.setText("Select")
 
         # Unbind next split key if both are equal
-        if self.ui.nextsplitkey_edit.text() == hotkey:
+        if hotkey and self.ui.nextsplitkey_edit.text() == hotkey.name:
             self.ui.nextsplitkey_edit.setText("")
+            self.nextsplitkey = None
 
         # Disconnect the hotkey signal from this function
         self.hotkey_manager.hotkey_signal.disconnect(self.return_decrease_hotkey)

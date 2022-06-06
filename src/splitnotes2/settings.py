@@ -7,6 +7,8 @@ from pathlib import Path
 
 import attr
 
+from .hotkeys.keyboard_fixer import hotkey_or_none
+
 if getattr(sys, "frozen", False):  # pragma: nocover
     # Application is .exe, use visible files
     base_path = Path(sys.executable).parent
@@ -61,8 +63,9 @@ class Settings:
     notes_folder = attr.ib(default=user_path)
     # Hotkey Settings
     hotkeys_enabled = attr.ib(default=False)
-    increase_offset_hotkey = attr.ib(default=None)
-    decrease_offset_hotkey = attr.ib(default=None)
+
+    increase_offset_hotkey = attr.ib(default=None, converter=hotkey_or_none)
+    decrease_offset_hotkey = attr.ib(default=None, converter=hotkey_or_none)
 
     # Server Settings
     server_previous_splits = attr.ib(default=0)
@@ -95,6 +98,7 @@ class Settings:
         input_path = Path(input_filename)
         if input_path.exists():
             new_settings = json.loads(input_path.read_text())
+
             loaded_settings = cls(output_file=input_filename, **new_settings)
 
             # Check that the templates exist, reset otherwise

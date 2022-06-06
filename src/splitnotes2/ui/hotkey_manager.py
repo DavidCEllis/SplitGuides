@@ -12,6 +12,8 @@ import time
 import keyboard
 from PySide2 import QtCore
 
+from ..hotkeys.keyboard_fixer import read_hotkey
+
 
 class HotkeyManager(QtCore.QObject):
     hotkey_signal = QtCore.Signal(str)
@@ -37,12 +39,12 @@ class HotkeyManager(QtCore.QObject):
         if increase_key:
             # noinspection PyUnresolvedReferences
             self.increase_key = keyboard.add_hotkey(
-                increase_key, self.increase_signal.emit
+                tuple(increase_key), self.increase_signal.emit
             )
         if decrease_key:
             # noinspection PyUnresolvedReferences
             self.decrease_key = keyboard.add_hotkey(
-                decrease_key, self.decrease_signal.emit
+                tuple(decrease_key), self.decrease_signal.emit
             )
         self.enabled = True
 
@@ -69,10 +71,10 @@ class HotkeyManager(QtCore.QObject):
         # Sleep 100ms to allow inputs used to trigger
         # The detection to clear first
         time.sleep(0.1)
-        hotkey = keyboard.read_hotkey(False)
+        hotkey = read_hotkey(False)
 
         # Esc, Backspace or Delete can be used to clear the input
-        if hotkey in ["esc", "backspace", "delete"]:
-            hotkey = ""
+        if hotkey.name in ["esc", "backspace", "delete"]:
+            hotkey = None  # Blank will be converted to None
         # noinspection PyUnresolvedReferences
-        self.hotkey_signal.emit(hotkey)
+        self.hotkey_signal.emit(hotkey.to_json())  # Needs to be a string
