@@ -91,7 +91,7 @@ def test_from_file():
     with patch("builtins.open", m):
         notes = Notes.from_file(pth)
 
-    m.assert_called_once_with(pth, "r")
+    m.assert_called_once_with(pth, "r", encoding="utf-8")
 
     # Check the correct preprocessor is chosen
     assert isinstance(notes.preprocessor, TextProcessor)
