@@ -119,12 +119,26 @@ class MainWindow(QMainWindow):
         # Rerender if not connected (if connected this will happen automatically)
         if not self.ls.connected:
             self.update_notes(0)
+            self.ui.statusbar.showMessage(
+                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
+            )
+        else:
+            self.ui.statusbar.showMessage(
+                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
+            )
 
     def decrease_offset(self):
         self.split_offset -= 1
         # Rerender if not connected (if connected this will happen automatically)
         if not self.ls.connected:
             self.update_notes(0)
+            self.ui.statusbar.showMessage(
+                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
+            )
+        else:
+            self.ui.statusbar.showMessage(
+                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
+            )
 
     def start_loops(self):
         """Start the livesplit server connection thread."""
@@ -217,7 +231,12 @@ class MainWindow(QMainWindow):
         self.ui.notes.setHtml(html)
 
     def update_notes(self, idx, refresh=False):
-        """Update the notes to the index given."""
+        """
+        Update the notes to the index given.
+
+        :param idx: The new index
+        :param refresh: force a refresh even if the index is the same
+        """
 
         # Initial index can be -1 when livesplit is stopped
         # Add the offset and then make sure we're still above 0
