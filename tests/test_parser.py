@@ -1,9 +1,10 @@
 import pytest
 from io import StringIO
+from pathlib import Path
 
 from unittest.mock import patch, mock_open
 
-from splitnotes2.note_parser import Notes
+from splitnotes2.note_parser import Notes, TextProcessor
 
 notes_base = [
     "This is the first split",
@@ -39,14 +40,16 @@ def assert_notes_match(notes):
 )
 def test_parse(separator, notes):
     note_file = StringIO(notes)
-    notes = Notes(note_file, separator)
+    preprocessor = TextProcessor()
+    notes = Notes(note_file, separator, preprocessor=preprocessor)
     assert_notes_match(notes)
 
 
 def test_render():
     # Basic renderer test
     note_file = StringIO(notes_blank_delimiter)
-    notes = Notes(note_file)
+    preprocessor = TextProcessor()
+    notes = Notes(note_file, preprocessor=preprocessor)
 
     expected = "This is the first split<br>\nThere is some text here<br>"
 
@@ -62,7 +65,7 @@ def test_render():
 )
 def test_render_safe(safe_mode, expected):
     # Test notes are being scrubbed for script tags correctly.
-    unsafe_note = "<script>Escape these tags</script>\\"
+    unsafe_note = "<script>Escape these tags</script>"
     notes = Notes(StringIO(unsafe_note))
 
     notes.safe_mode = safe_mode
@@ -76,17 +79,21 @@ def test_ignore_blank():
     notes_modified.insert(4, "")  # insert an extra blank so there's a double
 
     note_file = StringIO("\n".join(notes_modified))
-    notes = Notes(note_file)
+    preprocessor = TextProcessor()
+    notes = Notes(note_file, preprocessor=preprocessor)
 
     assert_notes_match(notes)
 
 
 def test_from_file():
-    pth = "path/to/notes"
+    pth = Path("path/to/notes.txt")
     m = mock_open(read_data=notes_blank_delimiter)
     with patch("builtins.open", m):
         notes = Notes.from_file(pth)
 
-    m.assert_called_once_with(pth, "r")
+    m.assert_called_once_with(pth, "r", encoding="utf-8")
+
+    # Check the correct preprocessor is chosen
+    assert isinstance(notes.preprocessor, TextProcessor)
 
     assert_notes_match(notes)

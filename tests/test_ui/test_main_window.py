@@ -37,6 +37,7 @@ def test_init_link(qtbot, fake_link):
     reason="Possibly a Qt Bug - https://bugreports.qt.io/browse/QTBUG-52552",
 )
 def test_rc_menu_open(qtbot, fake_link):
+    """Test the right click context menu works"""
     with patch.object(MainWindow, "show_menu") as mock_method:
         main_window = MainWindow()
         qtbot.add_widget(main_window)
@@ -150,7 +151,7 @@ def test_open_notes(qtbot, fake_link):
         fake_folder = Path("fake/folder")
         fake_file = str(fake_folder / "mock_notes.txt")
 
-        mock_filedialog.return_value = (fake_file, "Note Files (*.txt *.md)")
+        mock_filedialog.return_value = (fake_file, "Note Files (*.txt *.md *.html)")
         mock_notes.return_value = fake_notes
 
         main_window.open_notes()
@@ -159,7 +160,7 @@ def test_open_notes(qtbot, fake_link):
             main_window,
             "Open Notes",
             original_folder,
-            "Note Files (*.txt *.md);;All Files (*.*)",
+            "Note Files (*.txt *.md *.html);;All Files (*.*)",
         )
 
         mock_notes.assert_called_once_with(fake_file, separator="")
@@ -205,6 +206,7 @@ def test_update_notes(qtbot, fake_link, idx):
     main_window.notes = fake_notes
     main_window.template = fake_template
     main_window.ui.notes = fake_note_ui
+    main_window.notefile = "Notes_URL"
 
     fake_notes.render_splits.return_value = "Fake Splits"
     fake_template.render.return_value = "Fake HTML"
@@ -221,7 +223,7 @@ def test_update_notes(qtbot, fake_link, idx):
         css=main_window.css,
         notes="Fake Splits",
     )
-    fake_note_ui.setHtml.assert_called_once_with("Fake HTML")
+    fake_note_ui.setHtml.assert_called_once_with("Fake HTML", baseUrl="Notes_URL")
 
     assert main_window.split_index == used_idx
 

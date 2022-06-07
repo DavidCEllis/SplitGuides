@@ -1,6 +1,6 @@
 # SplitNotes 2 #
 
-**SplitNotes but bigger***
+**Speedrun notes with markdown and html formatting**
 
 SplitNotes2 is an application for displaying speedrun notes in sync with livesplit.
 Requires *livesplit server* to be running.
@@ -23,16 +23,14 @@ There is now a server version included to allow reading from a browser on anothe
 The formatting for notes basically follows the format used by the original SplitNotes 
 with some additional enhancements and exceptions.
 
-1. Comment lines still use square brackets.
-2. By default the splits will break on newlines. Multiple newlines and comments are ignored.
-3. The notes are now rendered as HTML and so can be formatted as such.
+Markdown and HTML formatted notes are supported.
+These will be interpreted based on file extension (.md, .txt or .html).
+Markdown and plain text formatted notes will automatically have line breaks 
+inserted in between lines.
 
-   This means that it's easy to emphasise important part of the notes using basic HTML tags such as
-   `<strong>`, `<em>`, and `<mark>`.
-   
-   The formatter will automatically insert HTML breaks `<br>` between lines, 
-   a backslash `\ ` at the end of a line will indicate that the line should **not**
-   have a break inserted (useful for headers and lists).
+1. Comment lines still use square brackets.
+2. By default splits will break on newlines, multiple newlines are ignored in this case.
+3. The rendering is done as HTML so HTML formatting can be used.
    
 ## splitnotes2_server.exe ##
 
@@ -46,44 +44,40 @@ and server_port in settings.json. There is no dialog for editing these settings 
 
 #### Source ####
 
-```html
-<h3>Moonlight Butterfly</h3>\
-<em>Buy Crest of Artorias, Tower Kite Shield and max-1 large arrows</em>
-<strong>Prompt swap 99 titanite shards</strong>
-In Butterfly Fight:\
-<ul>\
-  <li>Prepare DGH equip in weapon slot 1</li>\
-  <li>Sort souls to top of inventory</li>\
-  <li>Equip Homeward Bone</li>\
-  <li>Mouse cursor in place for prompt swaps</li>\
-</ul>\
-Kill Moonlight Butterfly (3 Soul Spears)
-Darksign
+```markdown
+## High Hedge ##
+### Friendly Arm Inn ###
+* *East*
+* *Pick up the ring*
+* **Peldvale**
 
-<h3>Lord Vessel</h3>\
-Warp to Firelink Shrine
-In the warp sort Butterfly's soul above Estus
-Talk to Frampt and place the Lordvessel
-Warp back up with Frampt
-<em>Use prompt swap to sell 99 of each of each soul</em>
-<strong>Buy Homing Soulmass and Soul Spear from Griggs</strong>
-Homeward Bone
+### Peldvale ###
+* *South*
+* **High Hedge**
 
-<h3>Hydra</h3>\
-<mark>Level 23ATT 15END 10STR 45DEX 66INT</mark>
-<strong>Attune FC/GSA/Homing/Spears/Spears/GHSA</strong>
-DGH Fall RTSR Setup
-Kill Hydra (3 soul spears)
-Quitout after obtaining the items
-Kill the Gold Crystal Golem
-Talk to Dusk
-Summon Dusk and buy Hidden Body
-Darksign
+### High Hedge ###
+* Rest and Spin
+* *South to Shop*
+* Thalantyr (1, 1)
+* Shop:
+    * Sell the wand
+    * Identify the ring
+    * Sell the ring
+    * 3x Potion of Explosions
+    * Potion of Magic Blocking
+    * Protection from Magic
+    * Identify
+    * Shield
+    * Mirror Image
+    * 3x Invisibility
+* *South*
+* Go to Wilderness Map
+/split
 ```
 
 #### Result ####
 
-![Image of splitnotes rendering](resources/demo_notes.png)
+![Image of splitnotes rendering](resources/demo_notes_md.png)
 
 ## Configuration ##
 
@@ -95,6 +89,15 @@ The settings page offers some customisation and connection settings including:
   * Base font size
   * Default text and background colour
   * HTML (Jinja2) template and CSS files to use for rendering
+
+## Dependencies ##
+* pyside2 - QT Gui Bindings
+* jinja2 - Templating for the notes page
+* bleach - Cleaning HTML to help protect if someone decided to make notes with a malicious script
+* flask - Handling the server version
+* attrs - Made the settings classes a lot cleaner 
+* markdown - Converting markdown to html for rendering
+* keyboard - Global hotkeys to advance/reverse note offset to splits
 
 --- 
 

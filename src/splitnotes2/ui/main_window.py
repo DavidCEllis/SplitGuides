@@ -13,6 +13,7 @@ from .settings_ui import SettingsDialog
 from .layouts import Ui_MainWindow
 from ..note_parser import Notes
 from ..livesplit_client import get_client
+from .hotkey_manager import HotkeyManager
 
 # Get correct paths
 if getattr(sys, "frozen", False):  # pragma: nocover
@@ -51,13 +52,16 @@ class MainWindow(QMainWindow):
 
         # Right Click Menu
         self.rc_menu = None
+        self.hotkeys_toggle = None
+
         self.build_menu()
         self.setup_actions()
 
         self.j2_environment = Environment(
-            loader=FileSystemLoader(str(self.settings.html_template_folder)),
+            loader=FileSystemLoader(self.settings.html_template_folder),
             autoescape=False,
         )
+
         self.template = None
         self.load_template()
 
@@ -71,6 +75,12 @@ class MainWindow(QMainWindow):
         self.ls = LivesplitLink(self.client, self)
         self.split_index = 0
 
+        self.split_offset = 0  # Offset for advancing/reversing split
+        # Set up hotkey manager
+        self.hotkey_manager = HotkeyManager(self)
+        if self.settings.hotkeys_enabled:
+            self.enable_hotkeys()
+
         self.start_loops()
 
     def toggle_on_top(self):
@@ -80,6 +90,56 @@ class MainWindow(QMainWindow):
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
         self.show()
 
+    def toggle_hotkey_enable(self):
+        self.settings.hotkeys_enabled = not self.settings.hotkeys_enabled
+        self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
+        if self.settings.hotkeys_enabled:
+            self.enable_hotkeys()
+        else:
+            self.disable_hotkeys()
+
+    def enable_hotkeys(self):
+        try:
+            increase_key = self.settings.increase_offset_hotkey.scancodes
+            decrease_key = self.settings.decrease_offset_hotkey.scancodes
+            self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
+        except AttributeError:
+            # If keys don't exist then it will be trying to get scancodes from None
+            print("failed")
+            pass
+
+    def disable_hotkeys(self):
+        self.hotkey_manager.disable_hotkeys()
+        self.split_offset = 0  # Reset the offset as you can no longer change it
+        if not self.ls.connected:
+            self.update_notes(0)
+
+    def increase_offset(self):
+        self.split_offset += 1
+        # Rerender if not connected (if connected this will happen automatically)
+        if not self.ls.connected:
+            self.update_notes(0)
+            self.ui.statusbar.showMessage(
+                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
+            )
+        else:
+            self.ui.statusbar.showMessage(
+                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
+            )
+
+    def decrease_offset(self):
+        self.split_offset -= 1
+        # Rerender if not connected (if connected this will happen automatically)
+        if not self.ls.connected:
+            self.update_notes(0)
+            self.ui.statusbar.showMessage(
+                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
+            )
+        else:
+            self.ui.statusbar.showMessage(
+                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
+            )
+
     def start_loops(self):
         """Start the livesplit server connection thread."""
         self.ls.start_loops()
@@ -87,6 +147,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         """On close save settings and close the livesplit connection."""
         self.settings.save()
+        self.hotkey_manager.disable_all()  # Kill any hotkeys
         self.ls.close()
         event.accept()
 
@@ -115,6 +176,11 @@ class MainWindow(QMainWindow):
         self.menu_on_top.setChecked(self.settings.on_top)
         self.menu_on_top.triggered.connect(self.toggle_on_top)
 
+        self.hotkeys_toggle = self.rc_menu.addAction("Enable Hotkeys")
+        self.hotkeys_toggle.setCheckable(True)
+        self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
+        self.hotkeys_toggle.triggered.connect(self.toggle_hotkey_enable)
+
     def show_menu(self):
         """Display the context menu at the cursor position."""
         if not self.rc_menu:
@@ -137,7 +203,7 @@ class MainWindow(QMainWindow):
             self,
             "Open Notes",
             self.settings.notes_folder,
-            "Note Files (*.txt *.md);;All Files (*.*)",
+            "Note Files (*.txt *.md *.html);;All Files (*.*)",
         )
 
         if notefile:
@@ -148,6 +214,9 @@ class MainWindow(QMainWindow):
             )
             # Remember this notes folder next time notes are loaded.
             self.settings.notes_folder = str(Path(notefile).parent)
+            # Reset the split offset
+            self.split_offset = 0
+
             self.update_notes(idx=0, refresh=True)
 
     def render_blank(self):
@@ -162,10 +231,20 @@ class MainWindow(QMainWindow):
         self.ui.notes.setHtml(html)
 
     def update_notes(self, idx, refresh=False):
-        """Update the notes to the index given."""
+        """
+        Update the notes to the index given.
+
+        :param idx: The new index
+        :param refresh: force a refresh even if the index is the same
+        """
+
+        # Initial index can be -1 when livesplit is stopped
+        # Add the offset and then make sure we're still above 0
+        idx = max(idx, 0) + self.split_offset
         idx = max(idx, 0)
 
         if self.notes and (idx != self.split_index or refresh):
+
             start = idx - self.settings.previous_splits
             end = idx + self.settings.next_splits + 1
 
@@ -177,12 +256,18 @@ class MainWindow(QMainWindow):
                 notes=self.notes.render_splits(start, end),
             )
 
-            self.ui.notes.setHtml(html)
+            self.ui.notes.setHtml(html, baseUrl=self.notefile)
             self.split_index = idx
 
     def open_settings(self):
         """Open the settings dialog, refresh everything if the settings have changed."""
-        settings_dialog = SettingsDialog(parent=self, settings=self.settings)
+        # Block hotkeys while in the settings menu
+        if self.hotkey_manager.enabled:
+            self.disable_hotkeys()
+
+        settings_dialog = SettingsDialog(
+            parent=self, settings=self.settings, hotkey_manager=self.hotkey_manager
+        )
         settings_dialog.setWindowIcon(self.icon)
         result = settings_dialog.exec_()
         if result == 1:
@@ -201,7 +286,13 @@ class MainWindow(QMainWindow):
                 self.notes = Notes.from_file(
                     self.notefile, separator=self.settings.split_separator
                 )
+                # Reset the offset
+                self.split_offset = 0
                 self.update_notes(self.split_index, refresh=True)
+
+        # Re-enable hotkeys if enabled
+        if self.settings.hotkeys_enabled:
+            self.enable_hotkeys()
 
 
 class LivesplitLink(QtCore.QObject):
@@ -239,10 +330,14 @@ class LivesplitLink(QtCore.QObject):
         self.main_window.ui.statusbar.showMessage(message)
 
     def ls_connect(self):
-        self.update_status("Trying to connect to Livesplit.")
+        self.update_status(
+            f"Trying to connect to Livesplit. | Split Offset: {self.main_window.split_offset}"
+        )
         self.connected = self.client.connect()
         if self.connected:
-            self.update_status("Connected to Livesplit.")
+            self.update_status(
+                f"Connected to Livesplit. | Split Offset: {self.main_window.split_offset}"
+            )
 
     def loop_update_split(self):
         while not self.break_loop:
@@ -259,4 +354,4 @@ class LivesplitLink(QtCore.QObject):
                     self.note_signal.emit(split_index)
             else:
                 self.ls_connect()
-            time.sleep(0.5)
+            time.sleep(0.1)

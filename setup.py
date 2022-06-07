@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 __author__ = "DavidCEllis"
 
 
@@ -11,16 +11,23 @@ setup(
     url="",
     license="GPLv3",
     description="Speedrun notes tool for advancing notes automatically with Livesplit.",
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     classifiers=[
-        "Development Status :: 1 - Early Development",
+        "Development Status :: 3 - Alpha",
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     package_dir={"": "src"},
-    install_requires=["pyside2", "jinja2", "bleach", "flask", "attrs"],
+    install_requires=[
+        "pyside2",
+        "jinja2",
+        "bleach[css]",
+        "flask",
+        "attrs",
+        "markdown",
+        "keyboard",
+    ],
     tests_require=["pytest", "pytest-cov", "pytest-qt"],
     extras_require={"build_exe": ["cx-freeze", "pywin32"], "dev": ["black"]},
 )

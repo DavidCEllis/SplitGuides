@@ -6,6 +6,7 @@ from PySide2 import QtWidgets, QtGui
 from PySide2.QtCore import Qt, QTimer
 
 from splitnotes2.settings import Settings, settings_file
+from splitnotes2.settings import default_static_folder, default_template_folder
 from splitnotes2.ui.settings_ui import SettingsDialog
 
 test_settings = Path(__file__).parent / "settings.json"
@@ -18,7 +19,12 @@ pytestmark = pytest.mark.usefixtures("clear_settings")
 @pytest.fixture
 def settings_ui(qtbot):
     settings = Settings.load()
-    settings_dialog = SettingsDialog(parent=None, settings=settings)
+
+    fake_hotkey_manager = MagicMock()
+
+    settings_dialog = SettingsDialog(
+        parent=None, settings=settings, hotkey_manager=fake_hotkey_manager
+    )
 
     qtbot.add_widget(settings_dialog)
 
@@ -46,7 +52,7 @@ def settings_ui(qtbot):
     qtbot.mouseDClick(settings_dialog.ui.bgcolor_edit, Qt.LeftButton)
     qtbot.keyClicks(settings_dialog.ui.bgcolor_edit, "#AAAAAA")
 
-    return settings, settings_dialog
+    return settings, settings_dialog, fake_hotkey_manager
 
 
 class TestSettings:
@@ -57,7 +63,8 @@ class TestSettings:
 
         settings_file.write_text(test_settings.read_text())
 
-        s = Settings.load(settings_file)
+        with patch.object(Path, "exists", return_value=True):
+            s = Settings.load(settings_file)
 
         assert s.hostname == "fakehost"
         assert s.port == 12345
@@ -76,10 +83,25 @@ class TestSettings:
 
         settings_file.unlink()  # Delete our fake settings file
 
+    def test_default_paths(self):
+        """Test if the paths listed in the settings file do not exist that defaults are used"""
+        assert not settings_file.exists()  # Check there is no settings file
+
+        settings_file.write_text(test_settings.read_text())
+
+        s = Settings.load(settings_file)
+
+        # Check they are not what is listed
+        assert s.full_template_path != Path("fake/html/folder/fakehtml.html")
+        assert s.full_css_path != Path("fake/css/folder/fakecss.css")
+        # Check they are defaults
+        assert s.full_template_path == default_template_folder / "desktop.html"
+        assert s.full_css_path == default_static_folder / "desktop.css"
+
 
 class TestSettingsUI:
     def test_settings_ui_basic(self, qtbot, settings_ui):
-        settings, settings_dialog = settings_ui
+        settings, settings_dialog, hotkey_mock = settings_ui
 
         button = settings_dialog.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Ok)
 
@@ -98,7 +120,7 @@ class TestSettingsUI:
         assert settings.background_color == "#AAAAAA"
 
     def test_settings_ui_cancel(self, qtbot, settings_ui):
-        settings, settings_dialog = settings_ui
+        settings, settings_dialog, hotkey_mock = settings_ui
         button = settings_dialog.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel)
 
         QTimer.singleShot(0, button.clicked)
@@ -122,7 +144,10 @@ class TestSettingsUI:
         Test font color picker
         """
         settings = Settings.load()
-        settings_dialog = SettingsDialog(parent=None, settings=settings)
+
+        settings_dialog = SettingsDialog(
+            parent=None, settings=settings, hotkey_manager=MagicMock()
+        )
 
         qtbot.add_widget(settings_dialog)
 
@@ -146,7 +171,9 @@ class TestSettingsUI:
         Test BG color picker
         """
         settings = Settings.load()
-        settings_dialog = SettingsDialog(parent=None, settings=settings)
+        settings_dialog = SettingsDialog(
+            parent=None, settings=settings, hotkey_manager=MagicMock()
+        )
 
         qtbot.add_widget(settings_dialog)
         with patch.object(QtWidgets.QColorDialog, "getColor") as mock:
