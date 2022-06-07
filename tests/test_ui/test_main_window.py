@@ -206,6 +206,7 @@ def test_update_notes(qtbot, fake_link, idx):
     main_window.notes = fake_notes
     main_window.template = fake_template
     main_window.ui.notes = fake_note_ui
+    main_window.notefile = "Notes_URL"
 
     fake_notes.render_splits.return_value = "Fake Splits"
     fake_template.render.return_value = "Fake HTML"
@@ -222,7 +223,7 @@ def test_update_notes(qtbot, fake_link, idx):
         css=main_window.css,
         notes="Fake Splits",
     )
-    fake_note_ui.setHtml.assert_called_once_with("Fake HTML")
+    fake_note_ui.setHtml.assert_called_once_with("Fake HTML", baseUrl="Notes_URL")
 
     assert main_window.split_index == used_idx
 
