@@ -10,6 +10,7 @@ import markdown
 
 
 PERMITTED_TAGS = [
+    "p",
     "br",
     "del",
     "ins",
@@ -30,7 +31,7 @@ PERMITTED_TAGS = [
 ]
 
 PERMITTED_ATTRIBUTES = {
-    "*": ["class", "style"],
+    "*": ["class", "style", "href"],
     "img": ["src", "alt", "width", "height"],
     "video": [
         "autoplay",
