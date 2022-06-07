@@ -120,7 +120,7 @@ def get_notes():
     temp_app.quit()
 
     notefile = Path(filepath)
-    notes = Notes.from_file(notefile)
+    notes = Notes.from_file(notefile, settings.split_separator)
 
     settings.notes_folder = str(notefile.parent)
     settings.save()
