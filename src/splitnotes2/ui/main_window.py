@@ -246,7 +246,9 @@ class MainWindow(QMainWindow):
         if self.hotkey_manager.enabled:
             self.disable_hotkeys()
 
-        settings_dialog = SettingsDialog(parent=self, settings=self.settings)
+        settings_dialog = SettingsDialog(
+            parent=self, settings=self.settings, hotkey_manager=self.hotkey_manager
+        )
         settings_dialog.setWindowIcon(self.icon)
         result = settings_dialog.exec_()
         if result == 1:

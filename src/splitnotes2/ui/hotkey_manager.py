@@ -12,7 +12,7 @@ import time
 import keyboard
 from PySide2 import QtCore
 
-from ..hotkeys.keyboard_fixer import read_hotkey
+from ..hotkeys import read_hotkey
 
 
 class HotkeyManager(QtCore.QObject):

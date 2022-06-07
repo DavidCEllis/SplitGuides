@@ -7,7 +7,7 @@ from pathlib import Path
 
 import attr
 
-from .hotkeys.keyboard_fixer import hotkey_or_none
+from .hotkeys import hotkey_or_none
 
 if getattr(sys, "frozen", False):  # pragma: nocover
     # Application is .exe, use visible files

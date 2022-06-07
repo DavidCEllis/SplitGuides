@@ -7,16 +7,16 @@ from PySide2.QtCore import QRegExp, Slot
 from PySide2.QtGui import QIntValidator, QRegExpValidator, QColor
 
 from .layouts import Ui_Settings
-from ..hotkeys.keyboard_fixer import Hotkey
+from ..hotkeys import Hotkey
 
 
 class SettingsDialog(QDialog):
-    def __init__(self, parent, settings):
+    def __init__(self, parent, settings, hotkey_manager):
         super().__init__(parent=parent)
         self.ui = Ui_Settings()
         self.ui.setupUi(self)
 
-        self.hotkey_manager = parent.hotkey_manager
+        self.hotkey_manager = hotkey_manager
         self.nextsplitkey = None
         self.previoussplitkey = None
 
