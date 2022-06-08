@@ -7,6 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 from PySide2 import QtCore
 from PySide2.QtGui import QCursor, QIcon
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu
+from .custom_elements import ExtLinkWebEnginePage
 
 from ..settings import Settings
 from .settings_ui import SettingsDialog
@@ -158,9 +159,12 @@ class MainWindow(QMainWindow):
         event.accept()
 
     def setup_actions(self):
-        """Make the context menu for the UI the custom menu."""
+        """Setup the browser element with custom options"""
+        # Replace the context menu with the app context menu
         self.ui.notes.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.ui.notes.customContextMenuRequested.connect(self.show_menu)
+        # Allow links to open in an external browser
+        self.ui.notes.setPage(ExtLinkWebEnginePage(self))
 
     def build_menu(self):
         """Create the custom context menu."""
