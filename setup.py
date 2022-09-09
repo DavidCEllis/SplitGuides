@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
-__version__ = "0.6.1"
+__version__ = "0.7.0"
 __author__ = "DavidCEllis"
 
 
 setup(
-    name="splitnotes2",
+    name="splitguides",
     version=__version__,
     packages=find_packages("src"),
     url="",

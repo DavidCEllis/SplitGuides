@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from splitnotes2.ui.main_window import MainWindow
-from splitnotes2.note_parser import Notes
+from splitguides.ui.main_window import MainWindow
+from splitguides.note_parser import Notes
 
 
 # Default settings for each test
@@ -15,7 +15,7 @@ pytestmark = pytest.mark.usefixtures("clear_settings")
 
 @pytest.fixture(scope="function")
 def fake_link():
-    with patch("splitnotes2.ui.main_window.LivesplitLink") as fake_link:
+    with patch("splitguides.ui.main_window.LivesplitLink") as fake_link:
         yield fake_link
 
 
@@ -233,7 +233,7 @@ def test_open_settings(qtbot, fake_link):
     fake_link_inst = MagicMock()
     fake_link.return_value = fake_link_inst
 
-    with patch("splitnotes2.ui.main_window.SettingsDialog") as fake_settings_dialog_cls, \
+    with patch("splitguides.ui.main_window.SettingsDialog") as fake_settings_dialog_cls, \
             patch.object(Notes, "from_file") as mock_notes:
         # Mock setup
         fake_settings_dialog = MagicMock()

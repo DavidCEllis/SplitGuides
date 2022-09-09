@@ -59,7 +59,7 @@ PERMITTED_STYLES = [
 
 class Notes:
     """
-    Class to handle splitnotes and formatting
+    Class to handle notes and formatting
 
     Processing order is:
       Input -> Strip Comment lines (delimited by [ ])

@@ -1,4 +1,4 @@
-from splitnotes2.livesplit_client import get_client
+from splitguides.livesplit_client import get_client
 
 
 def test_get_client():
