@@ -9,7 +9,7 @@ def launch():
     get_notes()  # Sets internal 'notes' and 'notefile' variables
 
     print(
-        "This server version of Splitnotes2 allows you view splitnotes via a browser window "
+        "This server version of SplitGuides allows you view splitnotes via a browser window "
         "and should work across a local network.\n"
         "It is not intended to be used over the internet and as such is not based on a "
         "production server."
