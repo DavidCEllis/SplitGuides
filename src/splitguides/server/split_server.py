@@ -19,7 +19,7 @@ template_folder = str(Path(__file__).parent / "templates")
 static_folder = str(Path(__file__).parent / "static")
 
 app = Flask(
-    "splitnotes2",
+    "splitguides",
     template_folder=settings.server_template_folder,
     static_folder=settings.server_static_folder,
 )

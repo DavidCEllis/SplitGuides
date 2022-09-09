@@ -1,8 +1,8 @@
-# SplitNotes 2 #
+# SplitGuides #
 
 **Speedrun notes with markdown and html formatting**
 
-SplitNotes2 is an application for displaying speedrun notes in sync with livesplit.
+SplitGuides is an application for displaying speedrun notes in sync with livesplit.
 Requires *livesplit server* to be running.
 
 There is now a server version included to allow reading from a browser on another device.
@@ -10,20 +10,20 @@ There is now a server version included to allow reading from a browser on anothe
 ## Install/Setup ##
 
 1. Under the Livesplit layout editor add 'LiveSplit Server' (listed under 'control')
-2. Download SplitNotes2 from the [**releases page**](https://github.com/DavidCEllis/SplitNotes-2/releases)
-3. Extract anywhere and run *splitnotes2.exe*
+2. Download SplitGuides from the [**releases page**](https://github.com/DavidCEllis/SplitGuides/releases)
+3. Extract anywhere and run *splitguides.exe*
 
 ## Usage ##
 
 1. Connect with livesplit by starting the livesplit server component selecting 
    'Control' and 'Start Server'
-2. Right click in the splitnotes window and select 'Open Notes' and find the text file
+2. Right click in the splitguides window and select 'Open Notes' and find the text file
    containing the notes you wish to use.
    
-The formatting for notes basically follows the format used by the original SplitNotes 
-with some additional enhancements and exceptions.
+Plain text formatting works the same way as SplitNotes. 
+Notes made for that should function fine in SplitGuides. 
 
-Markdown and HTML formatted notes are supported.
+Additionally Markdown and HTML formatted notes are supported.
 These will be interpreted based on file extension (.md, .txt or .html).
 Markdown and plain text formatted notes will automatically have line breaks 
 inserted in between lines.
@@ -32,10 +32,10 @@ inserted in between lines.
 2. By default splits will break on newlines, multiple newlines are ignored in this case.
 3. The rendering is done as HTML so HTML formatting can be used.
    
-## splitnotes2_server.exe ##
+## splitguides_server.exe ##
 
-Now included is a server version which launches a (local) webhost so you can view the splitnotes
-on another device on your local network. Launch splitnotes2_server.exe to start the service.
+Now included is a server version which launches a (local) webhost so you can view the notes
+on another device on your local network. Launch splitguides_server.exe to start the service.
 
 If the hostname and port defaults aren't usable you can set them by editing server_hostname 
 and server_port in settings.json. There is no dialog for editing these settings yet.
@@ -77,7 +77,7 @@ and server_port in settings.json. There is no dialog for editing these settings 
 
 #### Result ####
 
-![Image of splitnotes rendering](resources/demo_notes_md.png)
+![Image of splitguides rendering](resources/demo_notes_md.png)
 
 ## Configuration ##
 
@@ -102,5 +102,3 @@ The settings page offers some customisation and connection settings including:
 --- 
 
 Inspired by (but otherwise unassociated with) the original splitnotes: https://github.com/joeloskarsson/SplitNotes
-
-[*] approximately 19x larger in file size :) (Mostly Qt and PySide2)

@@ -15,7 +15,7 @@ pytestmark = pytest.mark.usefixtures("clear_settings")
 
 @pytest.fixture(scope="function")
 def fake_link():
-    with patch("splitnotes2.ui.main_window.LivesplitLink") as fake_link:
+    with patch("splitguides.ui.main_window.LivesplitLink") as fake_link:
         yield fake_link
 
 
@@ -233,7 +233,7 @@ def test_open_settings(qtbot, fake_link):
     fake_link_inst = MagicMock()
     fake_link.return_value = fake_link_inst
 
-    with patch("splitnotes2.ui.main_window.SettingsDialog") as fake_settings_dialog_cls, \
+    with patch("splitguides.ui.main_window.SettingsDialog") as fake_settings_dialog_cls, \
             patch.object(Notes, "from_file") as mock_notes:
         # Mock setup
         fake_settings_dialog = MagicMock()
