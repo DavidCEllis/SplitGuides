@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from splitnotes2.ui.main_window import MainWindow
-from splitnotes2.note_parser import Notes
+from splitguides.ui.main_window import MainWindow
+from splitguides.note_parser import Notes
 
 
 # Default settings for each test

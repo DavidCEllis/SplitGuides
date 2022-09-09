@@ -4,7 +4,7 @@ from pathlib import Path
 
 from unittest.mock import patch, mock_open
 
-from splitnotes2.note_parser import Notes, TextProcessor
+from splitguides.note_parser import Notes, TextProcessor
 
 notes_base = [
     "This is the first split",

@@ -1,4 +1,4 @@
-from splitnotes2.server import app, get_notes, settings
+from splitguides.server import app, get_notes, settings
 import flask.cli as cli
 
 # Stop flask from giving users an unhelpful warning.

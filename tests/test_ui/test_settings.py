@@ -5,9 +5,9 @@ import pytest
 from PySide2 import QtWidgets, QtGui
 from PySide2.QtCore import Qt, QTimer
 
-from splitnotes2.settings import Settings, settings_file
-from splitnotes2.settings import default_static_folder, default_template_folder
-from splitnotes2.ui.settings_ui import SettingsDialog
+from splitguides.settings import Settings, settings_file
+from splitguides.settings import default_static_folder, default_template_folder
+from splitguides.ui.settings_ui import SettingsDialog
 
 test_settings = Path(__file__).parent / "settings.json"
 

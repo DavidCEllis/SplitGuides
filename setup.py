@@ -5,7 +5,7 @@ __author__ = "DavidCEllis"
 
 
 setup(
-    name="splitnotes2",
+    name="splitguides",
     version=__version__,
     packages=find_packages("src"),
     url="",
