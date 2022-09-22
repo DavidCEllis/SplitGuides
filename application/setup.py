@@ -1,5 +1,7 @@
 """
 Special setup.py file for building the app
+
+`python setup.py build` in this folder to create the application.
 """
 
 import sys
