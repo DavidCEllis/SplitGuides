@@ -4,6 +4,9 @@ __version__ = "0.7.0"
 __author__ = "DavidCEllis"
 
 
+test_requirements = ["pytest", "pytest-cov", "pytest-qt"]
+
+
 setup(
     name="splitguides",
     version=__version__,
@@ -20,7 +23,7 @@ setup(
     ],
     package_dir={"": "src"},
     install_requires=[
-        "pyside2",
+        "pyside6",
         "jinja2",
         "bleach[css]",
         "flask",
@@ -28,6 +31,10 @@ setup(
         "markdown",
         "keyboard",
     ],
-    tests_require=["pytest", "pytest-cov", "pytest-qt"],
-    extras_require={"build_exe": ["cx-freeze", "pywin32"], "dev": ["black"]},
+    tests_require=test_requirements,
+    extras_require={
+        "build_exe": ["cx-freeze", "pywin32"],
+        "dev": ["black"],
+        "tests": test_requirements,
+    },
 )

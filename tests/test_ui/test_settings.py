@@ -2,8 +2,8 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 import pytest
-from PySide2 import QtWidgets, QtGui
-from PySide2.QtCore import Qt, QTimer
+from PySide6 import QtWidgets, QtGui
+from PySide6.QtCore import Qt, QTimer
 
 from splitguides.settings import Settings, settings_file
 from splitguides.settings import default_static_folder, default_template_folder
@@ -106,7 +106,7 @@ class TestSettingsUI:
         button = settings_dialog.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Ok)
 
         QTimer.singleShot(0, button.clicked)
-        result = settings_dialog.exec_()
+        result = settings_dialog.exec()
 
         assert result == 1
 
@@ -124,7 +124,7 @@ class TestSettingsUI:
         button = settings_dialog.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel)
 
         QTimer.singleShot(0, button.clicked)
-        result = settings_dialog.exec_()
+        result = settings_dialog.exec()
 
         assert result == 0
 

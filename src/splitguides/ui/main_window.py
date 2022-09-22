@@ -4,9 +4,9 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 from jinja2 import Environment, FileSystemLoader
-from PySide2 import QtCore
-from PySide2.QtGui import QCursor, QIcon
-from PySide2.QtWidgets import QMainWindow, QFileDialog, QMenu
+from PySide6 import QtCore
+from PySide6.QtGui import QCursor, QIcon
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu
 from .custom_elements import ExtLinkWebEnginePage
 
 from ..settings import Settings
@@ -273,7 +273,7 @@ class MainWindow(QMainWindow):
             parent=self, settings=self.settings, hotkey_manager=self.hotkey_manager
         )
         settings_dialog.setWindowIcon(self.icon)
-        result = settings_dialog.exec_()
+        result = settings_dialog.exec()
         if result == 1:
             # Kill and restart connection if server ip or port change
             if (

@@ -2,9 +2,9 @@
 from subprocess import run
 from pathlib import Path
 
-import PySide2
+import PySide6
 
-pyside_folder = Path(PySide2.__file__).parent
+pyside_folder = Path(PySide6.__file__).parent
 
 
 def uic(infile, outfile):

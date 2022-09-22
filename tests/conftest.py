@@ -3,24 +3,14 @@ from pathlib import Path
 
 import pytest
 
+from splitguides.settings import settings_file
+
 src_folder = Path("./src").resolve()
 sys.path.insert(0, str(src_folder))
 
 
-def delete_settings_file():
-    """
-    Delete any existing settings file to ensure test consistency
-    """
-    settings_files = src_folder.glob("**/settings.json")
-    for f in settings_files:
-        try:
-            f.unlink()
-        except FileNotFoundError:
-            pass
-
-
 @pytest.fixture(scope="function")
 def clear_settings():
-    delete_settings_file()
+    settings_file.unlink(missing_ok=True)
     yield
-    delete_settings_file()
+    settings_file.unlink(missing_ok=True)

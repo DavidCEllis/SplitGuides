@@ -10,7 +10,7 @@ library myself for this one small task.
 import time
 
 import keyboard
-from PySide2 import QtCore
+from PySide6 import QtCore
 
 from ..hotkeys import read_hotkey
 
