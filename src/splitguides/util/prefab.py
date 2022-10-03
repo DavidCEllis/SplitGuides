@@ -180,10 +180,18 @@ class Prefab:
 
     @autogen
     def __init__(cls):
-        args = ', '.join(
-            f'{name}=DefaultValue("{getattr(cls, name)!r}")' if hasattr(cls, name) else name
-            for name in cls._attribute_names
-        )
+        arglist = []
+        for name in cls._attribute_names:
+            if hasattr(cls, name):
+                attr = getattr(cls, name)
+                if isinstance(attr, (str, int, float, bool)):
+                    arg = f'{name}={getattr(cls, name)!r}'
+                else:
+                    arg = f'{name}=DefaultValue("{getattr(cls, name)!r}")'
+            else:
+                arg = name
+            arglist.append(arg)
+        args = ', '.join(arglist)
         body = '\n'.join(f"    self.{name} = {name}" for name in cls._attribute_names)
         code = f"def __init__(self, {args}):\n{body}\n"
         return code
