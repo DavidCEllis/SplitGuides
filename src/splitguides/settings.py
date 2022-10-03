@@ -3,10 +3,9 @@ import socket
 import sys
 import json
 
-from pathlib import Path
+from pathlib import Path, WindowsPath, PosixPath
 
-import attr
-
+from .util.prefab import Prefab, Attribute
 from .hotkeys import hotkey_or_none
 
 if getattr(sys, "frozen", False):  # pragma: nocover
@@ -31,60 +30,59 @@ except Exception:
     )
 
 
-@attr.s
-class Settings:
+class Settings(Prefab):
     """
     Global persistent settings handler
     """
+    _globals = globals()
 
     # What file to use
-    output_file = attr.ib(default=settings_file, converter=Path)
+    output_file = Attribute(default=settings_file, converter=Path)
 
     # Networking Settings
-    hostname = attr.ib(default="localhost")
-    port = attr.ib(default=16834)
+    hostname = Attribute(default="localhost")
+    port = Attribute(default=16834)
     # Parser Settings
-    split_separator = attr.ib(default="")
+    split_separator = Attribute(default="")
     # User Preferences
-    previous_splits = attr.ib(default=0)
-    next_splits = attr.ib(default=2)
-    font_size = attr.ib(default=20)
-    font_color = attr.ib(default="#000000")
-    background_color = attr.ib(default="#f1f8ff")
+    previous_splits = Attribute(default=0)
+    next_splits = Attribute(default=2)
+    font_size = Attribute(default=20)
+    font_color = Attribute(default="#000000")
+    background_color = Attribute(default="#f1f8ff")
     # Templating
-    html_template_folder = attr.ib(default=default_template_folder, converter=Path)
-    html_template_file = attr.ib(default="desktop.html")
-    css_folder = attr.ib(default=default_static_folder, converter=Path)
-    css_file = attr.ib(default="desktop.css")
+    html_template_folder = Attribute(default=default_template_folder, converter=Path)
+    html_template_file = Attribute(default="desktop.html")
+    css_folder = Attribute(default=default_static_folder, converter=Path)
+    css_file = Attribute(default="desktop.css")
     # Window Settings
-    on_top = attr.ib(default=False)
-    width = attr.ib(default=800)
-    height = attr.ib(default=800)
-    notes_folder = attr.ib(default=user_path)
+    on_top = Attribute(default=False)
+    width = Attribute(default=800)
+    height = Attribute(default=800)
+    notes_folder = Attribute(default=user_path)
     # Hotkey Settings
-    hotkeys_enabled = attr.ib(default=False)
+    hotkeys_enabled = Attribute(default=False)
 
-    increase_offset_hotkey = attr.ib(default=None, converter=hotkey_or_none)
-    decrease_offset_hotkey = attr.ib(default=None, converter=hotkey_or_none)
+    increase_offset_hotkey = Attribute(default=None, converter=hotkey_or_none)
+    decrease_offset_hotkey = Attribute(default=None, converter=hotkey_or_none)
 
     # Server Settings
-    server_previous_splits = attr.ib(default=0)
-    server_next_splits = attr.ib(default=0)
-    server_hostname = attr.ib(default=local_hostname)
-    server_port = attr.ib(default=14250)
+    server_previous_splits = Attribute(default=0)
+    server_next_splits = Attribute(default=0)
+    server_hostname = Attribute(default=local_hostname)
+    server_port = Attribute(default=14250)
 
-    server_template_folder = attr.ib(default=default_template_folder, converter=Path)
-    server_html_template_file = attr.ib(default="server.html")
-    server_static_folder = attr.ib(default=default_static_folder)
-    server_css_file = attr.ib(default="server.css")
+    server_template_folder = Attribute(default=default_template_folder, converter=Path)
+    server_html_template_file = Attribute(default="server.html")
+    server_static_folder = Attribute(default=default_static_folder)
+    server_css_file = Attribute(default="server.css")
 
     def save(self):
         """
         Save settings as JSON
         """
-        as_dict = attr.asdict(self)
-        del as_dict["output_file"]  # Don't save the name of the output file
-        self.output_file.write_text(json.dumps(as_dict, indent=2, default=str))
+        json_str = self.to_json(excludes=["output_file"])
+        self.output_file.write_text(json_str)
 
     @classmethod
     def load(cls, input_filename=settings_file):
@@ -99,7 +97,7 @@ class Settings:
         if input_path.exists():
             new_settings = json.loads(input_path.read_text())
 
-            loaded_settings = cls(output_file=input_filename, **new_settings)
+            loaded_settings = Settings(output_file=input_filename, **new_settings)
 
             # Check that the templates exist, reset otherwise
             # This will happen if the executable folder is moved
@@ -120,7 +118,7 @@ class Settings:
 
             return loaded_settings
         else:
-            return cls(output_file=input_filename)
+            return Settings(output_file=input_filename)
 
     @property
     def full_template_path(self):

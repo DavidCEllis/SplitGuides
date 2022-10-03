@@ -48,8 +48,7 @@ seems rather heavyweight for that.
 
 Based on ideas (and some code) from Cluegen by David Beazley https://github.com/dabeaz/cluegen
 """
-
-__version__ = "v0.1.0"
+__version__ = "v0.2.0"
 
 
 # EXCEPTIONS #
@@ -76,9 +75,13 @@ def autogen(func):
     which should be used to replace the function itself for that specific class.
     """
     def __get__(self, instance, cls):
+        # We might need locals if there are some default values that use classes
+        # However these won't be the locals from this module but those where
+        # the class is defined
+        global_vars = cls._globals
         local_vars = {}
         code = func(cls)
-        exec(code, local_vars)
+        exec(code, global_vars, local_vars)
         # Having executed the code, the method should now exist
         # and can be retrieved by name from the dict
         method = local_vars[func.__name__]
@@ -137,6 +140,7 @@ class Prefab:
     """
     _attribute_names = []
     _methods = []
+    _globals = globals()
 
     def __init_subclass__(cls):
         super().__init_subclass__()
