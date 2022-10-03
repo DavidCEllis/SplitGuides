@@ -48,7 +48,7 @@ seems rather heavyweight for that.
 
 Based on ideas (and some code) from Cluegen by David Beazley https://github.com/dabeaz/cluegen
 """
-__version__ = "v0.2.0"
+__version__ = "v0.3.0"
 
 
 # EXCEPTIONS #
@@ -66,6 +66,18 @@ class NotAPrefabError(AttributeError):
 _NOTHING = object()
 
 
+class DefaultValue:
+    """
+    Dummy class for default values.
+    This avoids the actual default value being interpreted when exec is called.
+    """
+    def __init__(self, value):
+        """
+        Dummy init function, note that the value is never used or even stored.
+        """
+        pass
+
+
 def autogen(func):
     """
     Basically the cluegen function from David Beazley's cluegen
@@ -78,7 +90,7 @@ def autogen(func):
         # We might need locals if there are some default values that use classes
         # However these won't be the locals from this module but those where
         # the class is defined
-        global_vars = cls._globals
+        global_vars = {"DefaultValue": DefaultValue}
         local_vars = {}
         code = func(cls)
         exec(code, global_vars, local_vars)
@@ -124,6 +136,10 @@ class Attribute:
         return getattr(obj, self.private_name, self.default)
 
     def __set__(self, obj, value):
+        # Detect if the value is a default placeholder and replace
+        # it with the real value.
+        if isinstance(value, DefaultValue):
+            value = self.default
         if self.converter:
             value = self.converter(value)
         setattr(obj, self.private_name, value)
@@ -165,7 +181,7 @@ class Prefab:
     @autogen
     def __init__(cls):
         args = ', '.join(
-            f"{name}={getattr(cls, name)!r}" if hasattr(cls, name) else name
+            f'{name}=DefaultValue("{getattr(cls, name)!r}")' if hasattr(cls, name) else name
             for name in cls._attribute_names
         )
         body = '\n'.join(f"    self.{name} = {name}" for name in cls._attribute_names)

@@ -1,7 +1,7 @@
 import pytest
 
 from splitguides.util.prefab import Prefab, Attribute, ClassGenError, NotAPrefabError
-from pathlib import Path, WindowsPath
+from pathlib import Path
 
 
 def test_basic_subclass():
@@ -248,7 +248,6 @@ def test_difficult_defaults():
         """
         Global persistent settings handler
         """
-        _globals = globals()
         output_file = Attribute(default=Path("Settings.json"))
 
     x = Settings()
