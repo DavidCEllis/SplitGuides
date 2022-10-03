@@ -156,7 +156,6 @@ class Prefab:
     """
     _attribute_names = []
     _methods = []
-    _globals = globals()
 
     def __init_subclass__(cls):
         super().__init_subclass__()
