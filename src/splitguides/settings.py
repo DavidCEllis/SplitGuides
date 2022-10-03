@@ -3,7 +3,7 @@ import socket
 import sys
 import json
 
-from pathlib import Path, WindowsPath, PosixPath
+from pathlib import Path
 
 from .util.prefab import Prefab, Attribute
 from .hotkeys import hotkey_or_none
@@ -34,8 +34,6 @@ class Settings(Prefab):
     """
     Global persistent settings handler
     """
-    _globals = globals()
-
     # What file to use
     output_file = Attribute(default=settings_file, converter=Path)
 
