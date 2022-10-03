@@ -72,7 +72,7 @@ class Settings(Prefab):
 
     server_template_folder = Attribute(default=default_template_folder, converter=Path)
     server_html_template_file = Attribute(default="server.html")
-    server_static_folder = Attribute(default=default_static_folder)
+    server_static_folder = Attribute(default=default_static_folder, converter=Path)
     server_css_file = Attribute(default="server.css")
 
     def save(self):
