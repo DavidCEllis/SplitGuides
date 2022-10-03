@@ -27,7 +27,6 @@ setup(
         "jinja2",
         "bleach[css]",
         "flask",
-        "attrs",
         "markdown",
         "keyboard",
     ],
