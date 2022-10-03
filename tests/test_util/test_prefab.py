@@ -137,33 +137,6 @@ def test_neq():
     assert x != y
 
 
-def test_hash():
-    class Coordinate(Prefab):
-        x = Attribute(default=0)
-        y = Attribute(default=0)
-
-    x = Coordinate()
-    y = Coordinate(0, 0)
-
-    assert x.__hash__() == y.__hash__() == hash((0, 0))
-
-
-def test_dict_key():
-    class Coordinate(Prefab):
-        x = Attribute(default=0)
-        y = Attribute(default=0)
-
-    x = Coordinate()
-    y = Coordinate(0, 0)
-    z = Coordinate(0, 1)
-
-    d = {x: 0}
-    assert d[y] == 0
-
-    with pytest.raises(KeyError):
-        d[z]
-
-
 def test_todict():
     class Coordinate(Prefab):
         x = Attribute()

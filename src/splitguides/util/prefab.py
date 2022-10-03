@@ -220,12 +220,6 @@ class Prefab:
         )
         return code
 
-    @autogen
-    def __hash__(cls):
-        comma_data = ','.join(f'self.{name}' for name in cls._attribute_names)
-        data_tuple = f'({comma_data},)'
-        return f'def __hash__(self): return hash({data_tuple})\n'
-
     # Additional motivating methods
     def to_dict(self):
         return {name: getattr(self, name) for name in self._attribute_names}
