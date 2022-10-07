@@ -1,16 +1,41 @@
 import pytest
 
-from splitguides.util.prefab import Prefab, Attribute, ClassGenError, NotAPrefabError
+from splitguides.util.prefab import Prefab, Attribute, PrefabError, NotPrefabClassError
 from pathlib import Path
 
 
-def test_basic_subclass():
+def test_basic():
     class Coordinate(Prefab):
         x = Attribute()
         y = Attribute()
 
     x = Coordinate(1, 2)
 
+    assert (x.x, x.y) == (1, 2)
+
+
+def test_basic_kwargs():
+    class Coordinate(Prefab):
+        x = Attribute()
+        y = Attribute()
+
+    x = Coordinate(x=1, y=2)
+
+    assert (x.x, x.y) == (1, 2)
+
+
+def test_no_default_no_init_error():
+    with pytest.raises(PrefabError):
+        class Construct(Prefab):
+            x = Attribute(init=False)
+
+
+def test_init_exclude():
+    class Coordinate(Prefab):
+        x = Attribute()
+        y = Attribute(default=2, init=False)
+
+    x = Coordinate(x=1)
     assert (x.x, x.y) == (1, 2)
 
 
@@ -82,6 +107,15 @@ def test_repr():
     expected_repr = "Coordinate(x=1, y=2)"
 
     assert repr(Coordinate(1, 2)) == expected_repr
+
+
+def test_repr_exclude():
+    class Coordinate(Prefab):
+        x = Attribute(repr=False)
+        y = Attribute()
+
+    expected_repr = "Coordinate(y=2)"
+    assert repr(Coordinate(1, 2) == expected_repr)
 
 
 def test_iter():
@@ -202,7 +236,7 @@ def test_no_default():
 
 
 def test_dumb_error():
-    with pytest.raises(ClassGenError):
+    with pytest.raises(PrefabError):
         class Empty(Prefab):
             pass
 
@@ -212,7 +246,7 @@ def test_not_prefab():
         class Rebuild:
             x = Attribute()
 
-    assert isinstance(e.value.__cause__, NotAPrefabError)
+    assert isinstance(e.value.__cause__, NotPrefabClassError)
 
 
 def test_difficult_defaults():
