@@ -87,9 +87,7 @@ def autogen(func):
     which should be used to replace the function itself for that specific class.
     """
     def __get__(self, instance, cls):
-        # We might need locals if there are some default values that use classes
-        # However these won't be the locals from this module but those where
-        # the class is defined
+        # Include the defaultvalue class used as a placeholder for defaults
         global_vars = {"DefaultValue": DefaultValue}
         local_vars = {}
         code = func(cls)
@@ -119,6 +117,7 @@ class Attribute:
         # Here we append any generated attributes to a private variable
         # This will be used instead of cluegen's all_clues.
         if not issubclass(owner, Prefab):
+            # This will show up in a runtime error
             raise NotPrefabClassError(
                 "Attempted to use Attribute outside of a Prefab derived class."
             )
@@ -147,20 +146,32 @@ class Attribute:
         setattr(obj, self.private_name, value)
 
     # noinspection PyShadowingBuiltins
-    def __init__(self, *, default=_NOTHING, converter=None, init=True, repr=True):
+    def __init__(
+            self,
+            *,
+            default=_NOTHING,
+            converter=None,
+            init=True,
+            repr=True,
+            kw_only=False
+    ):
         """
         Create an Attribute for a prefab
         :param default: Default value for this attribute
         :param converter: prefab.attr = x -> prefab.attr = converter(x)
         :param init: Include this attribute in the __init__ parameters
         :param repr: Include this attribute in the class __repr__
+        :param kw_only: Make this argument keyword only in init
         """
         if not init and default is _NOTHING:
             raise PrefabError("Must provide a default value if the attribute is not in init.")
+        if kw_only and not init:
+            raise PrefabError("Attribute cannot be keyword only if it is not in init.")
         self.default = default
         self.converter = converter
         self.init = init
         self.repr = repr
+        self.kw_only = kw_only
 
 
 # noinspection PyReturnFromInit,PyMethodParameters
@@ -186,7 +197,6 @@ class Prefab:
         if not attributes:
             # It's easier to throw an error than to rewrite
             # The code for the useless case of a class with no attributes.
-            # Note - this will show up as a runtime error with this as the cause.
             raise PrefabError("Class must contain at least 1 attribute.")
         cls._attributes = attributes
         cls.__match_args__ = tuple(name for name in cls._attributes)
@@ -194,6 +204,7 @@ class Prefab:
     @autogen
     def __init__(cls):
         arglist = []
+        kw_only_arglist = []
         for name, attrib in cls._attributes.items():
             if attrib.init:
                 if hasattr(cls, name):
@@ -204,8 +215,18 @@ class Prefab:
                         arg = f'{name}=DefaultValue("{name}")'
                 else:
                     arg = name
-                arglist.append(arg)
-        args = ', '.join(arglist)
+                if attrib.kw_only:
+                    kw_only_arglist.append(arg)
+                else:
+                    arglist.append(arg)
+        pos_args = ', '.join(arglist)
+        kw_args = ', '.join(kw_only_arglist)
+        if pos_args and kw_args:
+            args = f"{pos_args}, *, {kw_args}"
+        elif kw_args:
+            args = f"*, {kw_args}"
+        else:
+            args = pos_args
 
         assignments = (
             (name, name) if attrib.init else (name, f'DefaultValue("{name}")')

@@ -1,6 +1,6 @@
-import pytest
-
 from splitguides.util.prefab import Prefab, Attribute, PrefabError, NotPrefabClassError
+
+import pytest
 from pathlib import Path
 
 
@@ -24,10 +24,47 @@ def test_basic_kwargs():
     assert (x.x, x.y) == (1, 2)
 
 
+def test_kw_only():
+    class Coordinate(Prefab):
+        x = Attribute()
+        y = Attribute(kw_only=True)
+
+    # Check the typeerror is raised for trying to use y as a positional argument
+    with pytest.raises(TypeError):
+        x = Coordinate(1, 2)
+
+    x = Coordinate(1, y=2)
+    assert (x.x, x.y) == (1, 2)
+
+
+def test_only_kw_only():
+
+    class Coordinate(Prefab):
+        x = Attribute(kw_only=True)
+        y = Attribute(kw_only=True)
+
+    # Check the typeerror is raised for trying to use y as a positional argument
+    with pytest.raises(TypeError):
+        x = Coordinate(1, 2)
+
+    x = Coordinate(x=1, y=2)
+    assert (x.x, x.y) == (1, 2)
+
+
+def test_kw_not_in_init():
+    with pytest.raises(PrefabError) as e_info:
+        class Construct(Prefab):
+            x = Attribute(default="test", kw_only=True, init=False)
+
+    assert e_info.value.args[0] == "Attribute cannot be keyword only if it is not in init."
+
+
 def test_no_default_no_init_error():
-    with pytest.raises(PrefabError):
+    with pytest.raises(PrefabError) as e_info:
         class Construct(Prefab):
             x = Attribute(init=False)
+
+    assert e_info.value.args[0] == "Must provide a default value if the attribute is not in init."
 
 
 def test_init_exclude():
@@ -236,9 +273,11 @@ def test_no_default():
 
 
 def test_dumb_error():
-    with pytest.raises(PrefabError):
+    with pytest.raises(PrefabError) as e_info:
         class Empty(Prefab):
             pass
+
+    assert e_info.value.args[0] == "Class must contain at least 1 attribute."
 
 
 def test_not_prefab():
