@@ -5,9 +5,8 @@ This is a rewrite of the relevant functions to handle this.
 """
 
 import queue as _queue
-import json
 
-import attr
+from ..util.prefab import Attribute, Prefab
 import keyboard
 
 
@@ -15,15 +14,9 @@ KEY_DOWN = "down"
 KEY_UP = "up"
 
 
-# Hotkey = namedtuple("Hotkey", "scancodes, name")
-@attr.s
-class Hotkey:
-    scancodes = attr.ib(default=None)
-    name = attr.ib(default=None)
-
-    def to_json(self):
-        as_dict = attr.asdict(self)
-        return json.dumps(as_dict)
+class Hotkey(Prefab):
+    scancodes = Attribute(default=None)
+    name = Attribute(default=None)
 
 
 def hotkey_or_none(keydict):

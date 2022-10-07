@@ -4,10 +4,11 @@ Handle livesplit
 import re
 from datetime import timedelta
 
+from ..util.prefab import Attribute, Prefab
 
-class LivesplitMessaging:
-    def __init__(self, connection):
-        self.connection = connection
+
+class LivesplitMessaging(Prefab):
+    connection = Attribute()
 
     def connect(self):
         return self.connection.connect()
