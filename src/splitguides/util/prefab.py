@@ -141,7 +141,8 @@ class Attribute:
         # it with the real value.
         if isinstance(value, DefaultValue):
             value = self.default
-        if self.converter:
+        if self.converter and (self._converter_unused or self.always_convert):
+            self._converter_unused = False
             value = self.converter(value)
         setattr(obj, self.private_name, value)
 
@@ -153,7 +154,8 @@ class Attribute:
             converter=None,
             init=True,
             repr=True,
-            kw_only=False
+            kw_only=False,
+            always_convert=False
     ):
         """
         Create an Attribute for a prefab
@@ -162,13 +164,18 @@ class Attribute:
         :param init: Include this attribute in the __init__ parameters
         :param repr: Include this attribute in the class __repr__
         :param kw_only: Make this argument keyword only in init
+        :param always_convert: Run the converter whenever the argument is set, not just in init
         """
         if not init and default is _NOTHING:
             raise PrefabError("Must provide a default value if the attribute is not in init.")
         if kw_only and not init:
             raise PrefabError("Attribute cannot be keyword only if it is not in init.")
         self.default = default
+
         self.converter = converter
+        self.always_convert = always_convert
+        self._converter_unused = True
+
         self.init = init
         self.repr = repr
         self.kw_only = kw_only
