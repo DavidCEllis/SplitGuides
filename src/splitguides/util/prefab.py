@@ -276,8 +276,20 @@ class Prefab:
         return code
 
     # Additional motivating methods
-    def to_dict(self):
-        return {name: getattr(self, name) for name in self._attributes.keys()}
+    def to_dict(self, *, recurse=True):
+        """
+        Represent the prefab as a dictionary of attribute names and values.
+
+        :param recurse: Convert attributes that are prefab instances to dictionaries
+        :return: dictionary {attribute_name: attribute_value, ...}
+        """
+        result = {}
+        for name in self._attributes.keys():
+            value = getattr(self, name)
+            if recurse and isinstance(value, Prefab):
+                value = value.to_dict(recurse=True)
+            result[name] = value
+        return result
 
     def to_json(self, *, excludes=None, indent=2, default=str, **kwargs):
         """

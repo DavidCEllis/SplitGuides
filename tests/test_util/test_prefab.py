@@ -220,6 +220,31 @@ def test_todict():
     assert x.to_dict() == expected_dict
 
 
+def test_todict_recurse():
+    class Coordinate(Prefab):
+        x = Attribute()
+        y = Attribute()
+
+    class Circle(Prefab):
+        radius = Attribute(default=1)
+        origin = Attribute(default=Coordinate(0, 0))
+
+    circ = Circle()
+
+    circ_dict = {
+        "radius": 1,
+        "origin": {"x": 0, "y": 0}
+    }
+
+    circ_norecurse = {
+        "radius": 1,
+        "origin": Coordinate(0, 0)
+    }
+
+    assert circ.to_dict(recurse=True) == circ_dict
+    assert circ.to_dict(recurse=False) == circ_norecurse
+
+
 def test_tojson():
     import json
     from pathlib import PurePosixPath  # Not looking to handle windows '\' issues
