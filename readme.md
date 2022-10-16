@@ -95,7 +95,6 @@ The settings page offers some customisation and connection settings including:
 * jinja2 - Templating for the notes page
 * bleach - Cleaning HTML to help protect if someone decided to make notes with a malicious script
 * flask - Handling the server version
-* attrs - Made the settings classes a lot cleaner 
 * markdown - Converting markdown to html for rendering
 * keyboard - Global hotkeys to advance/reverse note offset to splits
 
