@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from jinja2 import Environment, FileSystemLoader
 from PySide6 import QtCore
 from PySide6.QtGui import QCursor, QIcon
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu, QErrorMessage
 from .custom_elements import ExtLinkWebEnginePage
 
 from ..settings import Settings
@@ -80,7 +80,15 @@ class MainWindow(QMainWindow):
         # Set up hotkey manager
         self.hotkey_manager = HotkeyManager(self)
         if self.settings.hotkeys_enabled:
-            self.enable_hotkeys()
+            try:
+                self.enable_hotkeys()
+            except AttributeError:
+                QErrorMessage(parent=self).showMessage(
+                    "Could not enable hotkeys."
+                )
+                self.disable_hotkeys()
+                self.settings.hotkeys_enabled = False
+                self.hotkeys_toggle.setChecked(False)
 
         self.start_loops()
 
@@ -92,22 +100,26 @@ class MainWindow(QMainWindow):
         self.show()
 
     def toggle_hotkey_enable(self):
-        self.settings.hotkeys_enabled = not self.settings.hotkeys_enabled
-        self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
-        if self.settings.hotkeys_enabled:
-            self.enable_hotkeys()
-        else:
-            self.disable_hotkeys()
+        try:
+            if self.settings.hotkeys_enabled:
+                self.disable_hotkeys()
+                self.settings.hotkeys_enabled = False
+                self.hotkeys_toggle.setChecked(False)
+            else:
+                self.enable_hotkeys()
+                self.settings.hotkeys_enabled = True
+                self.hotkeys_toggle.setChecked(True)
+        except AttributeError:
+            QErrorMessage(parent=self).showMessage(
+                "Could not enable hotkeys."
+            )
+            self.settings.hotkeys_enabled = False
+            self.hotkeys_toggle.setChecked(False)
 
     def enable_hotkeys(self):
-        try:
-            increase_key = self.settings.increase_offset_hotkey.scancodes
-            decrease_key = self.settings.decrease_offset_hotkey.scancodes
-            self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
-        except AttributeError:
-            # If keys don't exist then it will be trying to get scancodes from None
-            print("failed")
-            pass
+        increase_key = self.settings.increase_offset_hotkey.scancodes
+        decrease_key = self.settings.decrease_offset_hotkey.scancodes
+        self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
 
     def disable_hotkeys(self):
         self.hotkey_manager.disable_hotkeys()

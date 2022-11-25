@@ -12,6 +12,8 @@ import time
 import keyboard
 from PySide6 import QtCore
 
+from prefab_classes.serializers import to_json
+
 from ..hotkeys import read_hotkey
 
 
@@ -77,4 +79,4 @@ class HotkeyManager(QtCore.QObject):
         if hotkey.name in ["esc", "backspace", "delete"]:
             hotkey = None  # Blank will be converted to None
         # noinspection PyUnresolvedReferences
-        self.hotkey_signal.emit(hotkey.to_json())  # Needs to be a string
+        self.hotkey_signal.emit(to_json(hotkey))  # Needs to be a string

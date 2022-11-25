@@ -137,7 +137,9 @@ class SettingsDialog(QDialog):
         # First set the buttons dialog and disable the interface
         self.ui.nextsplitkey_button.setText("Listening...")
         self.setEnabled(False)
-        fn = lambda: self.hotkey_manager.select_input(self.return_increase_hotkey)
+        fn = lambda: self.hotkey_manager.select_input(
+            self.return_increase_hotkey
+        )
         self.pool.submit(fn)
 
     @Slot(str)
@@ -162,7 +164,9 @@ class SettingsDialog(QDialog):
             self.previoussplitkey = None
 
         # Disconnect the hotkey signal from this function
-        self.hotkey_manager.hotkey_signal.disconnect(self.return_increase_hotkey)
+        self.hotkey_manager.hotkey_signal.disconnect(
+            self.return_increase_hotkey
+        )
 
         self.setEnabled(True)
 
@@ -170,7 +174,9 @@ class SettingsDialog(QDialog):
         """Get a hotkey to use to decrease the split offset"""
         self.ui.previoussplitkey_button.setText("Listening...")
         self.setEnabled(False)
-        fn = lambda: self.hotkey_manager.select_input(self.return_decrease_hotkey)
+        fn = lambda: self.hotkey_manager.select_input(
+            self.return_decrease_hotkey
+        )
         self.pool.submit(fn)
 
     @Slot(str)
@@ -194,7 +200,9 @@ class SettingsDialog(QDialog):
             self.nextsplitkey = None
 
         # Disconnect the hotkey signal from this function
-        self.hotkey_manager.hotkey_signal.disconnect(self.return_decrease_hotkey)
+        self.hotkey_manager.hotkey_signal.disconnect(
+            self.return_decrease_hotkey
+        )
 
         self.setEnabled(True)
 
