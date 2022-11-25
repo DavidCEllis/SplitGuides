@@ -14,12 +14,12 @@ setup(
     url="",
     license="GPLv3",
     description="Speedrun notes tool for advancing notes automatically with Livesplit.",
-    python_requires=">=3.10",
+    python_requires=">=3.11",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.11",
     ],
     package_dir={"": "src"},
     install_requires=[

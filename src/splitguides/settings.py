@@ -5,7 +5,8 @@ import json
 
 from pathlib import Path
 
-from .util.prefab import Prefab, Attribute
+from prefab_classes import prefab, attribute
+from prefab_classes.serializers import to_json
 from .hotkeys import hotkey_or_none
 
 if getattr(sys, "frozen", False):  # pragma: nocover
@@ -30,56 +31,65 @@ except Exception:
     )
 
 
-class Settings(Prefab):
+@prefab
+class Settings:
     """
     Global persistent settings handler
     """
     # What file to use
-    output_file = Attribute(default=settings_file, converter=Path)
+    output_file = attribute(default=settings_file, converter=Path)
 
     # Networking Settings
-    hostname = Attribute(default="localhost")
-    port = Attribute(default=16834)
+    hostname = attribute(default="localhost")
+    port = attribute(default=16834)
     # Parser Settings
-    split_separator = Attribute(default="")
+    split_separator = attribute(default="")
     # User Preferences
-    previous_splits = Attribute(default=0)
-    next_splits = Attribute(default=2)
-    font_size = Attribute(default=20)
-    font_color = Attribute(default="#000000")
-    background_color = Attribute(default="#f1f8ff")
+    previous_splits = attribute(default=0)
+    next_splits = attribute(default=2)
+    font_size = attribute(default=20)
+    font_color = attribute(default="#000000")
+    background_color = attribute(default="#f1f8ff")
     # Templating
-    html_template_folder = Attribute(default=default_template_folder, converter=Path)
-    html_template_file = Attribute(default="desktop.html")
-    css_folder = Attribute(default=default_static_folder, converter=Path)
-    css_file = Attribute(default="desktop.css")
+    html_template_folder = attribute(default=default_template_folder, converter=Path)
+    html_template_file = attribute(default="desktop.html")
+    css_folder = attribute(default=default_static_folder, converter=Path)
+    css_file = attribute(default="desktop.css")
     # Window Settings
-    on_top = Attribute(default=False)
-    width = Attribute(default=800)
-    height = Attribute(default=800)
-    notes_folder = Attribute(default=user_path)
+    on_top = attribute(default=False)
+    width = attribute(default=800)
+    height = attribute(default=800)
+    notes_folder = attribute(default=user_path)
     # Hotkey Settings
-    hotkeys_enabled = Attribute(default=False)
+    hotkeys_enabled = attribute(default=False)
 
-    increase_offset_hotkey = Attribute(default=None, converter=hotkey_or_none)
-    decrease_offset_hotkey = Attribute(default=None, converter=hotkey_or_none)
+    increase_offset_hotkey = attribute(default=None, converter=hotkey_or_none)
+    decrease_offset_hotkey = attribute(default=None, converter=hotkey_or_none)
 
     # Server Settings
-    server_previous_splits = Attribute(default=0)
-    server_next_splits = Attribute(default=0)
-    server_hostname = Attribute(default=local_hostname)
-    server_port = Attribute(default=14250)
+    server_previous_splits = attribute(default=0)
+    server_next_splits = attribute(default=0)
+    server_hostname = attribute(default=local_hostname)
+    server_port = attribute(default=14250)
 
-    server_template_folder = Attribute(default=default_template_folder, converter=Path)
-    server_html_template_file = Attribute(default="server.html")
-    server_static_folder = Attribute(default=default_static_folder, converter=Path)
-    server_css_file = Attribute(default="server.css")
+    server_template_folder = attribute(default=default_template_folder, converter=Path)
+    server_html_template_file = attribute(default="server.html")
+    server_static_folder = attribute(default=default_static_folder, converter=Path)
+    server_css_file = attribute(default="server.css")
 
     def save(self):
         """
         Save settings as JSON
         """
-        json_str = self.to_json(excludes=["output_file"])
+        def path_to_json(o):
+            if isinstance(o, Path):
+                return str(o)
+            else:
+                raise TypeError(
+                    f"Object of type {o.__class__} is not JSON Serializable"
+                )
+
+        json_str = to_json(self, excludes=["output_file"], default=path_to_json)
         self.output_file.write_text(json_str)
 
     @classmethod
@@ -95,7 +105,8 @@ class Settings(Prefab):
         if input_path.exists():
             new_settings = json.loads(input_path.read_text())
 
-            loaded_settings = Settings(output_file=input_filename, **new_settings)
+            # noinspection PyArgumentList
+            loaded_settings = cls(output_file=input_filename, **new_settings)
 
             # Check that the templates exist, reset otherwise
             # This will happen if the executable folder is moved

@@ -6,7 +6,7 @@ This is a rewrite of the relevant functions to handle this.
 
 import queue as _queue
 
-from ..util.prefab import Attribute, Prefab
+from prefab_classes import prefab, attribute
 import keyboard
 
 
@@ -14,9 +14,10 @@ KEY_DOWN = "down"
 KEY_UP = "up"
 
 
-class Hotkey(Prefab):
-    scancodes = Attribute(default=None)
-    name = Attribute(default=None)
+@prefab
+class Hotkey:
+    scancodes = attribute(default=None)
+    name = attribute(default=None)
 
 
 def hotkey_or_none(keydict):

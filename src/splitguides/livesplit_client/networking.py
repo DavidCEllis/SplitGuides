@@ -3,16 +3,17 @@ Socket based connection model
 """
 import socket
 
-from ..util.prefab import Attribute, Prefab
+from prefab_classes import prefab, attribute
 
 BUFFER_SIZE = 4096
 
 
-class LivesplitConnection(Prefab):
-    server = Attribute(default="localhost")
-    port = Attribute(default=16834)
-    timeout = Attribute(default=1)
-    sock = Attribute(default=None, init=False, repr=False)
+@prefab
+class LivesplitConnection:
+    server = attribute(default="localhost")
+    port = attribute(default=16834)
+    timeout = attribute(default=1)
+    sock = attribute(default=None, init=False, repr=False)
 
     def connect(self):
         """

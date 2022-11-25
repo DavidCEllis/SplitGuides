@@ -5,6 +5,8 @@ import pytest
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt, QTimer
 
+from prefab_classes.serializers import as_dict
+
 from splitguides.settings import Settings, settings_file
 from splitguides.settings import default_static_folder, default_template_folder
 from splitguides.ui.settings_ui import SettingsDialog
@@ -98,8 +100,8 @@ class TestSettings:
 
         s2 = Settings.load(temp_settings)
 
-        for key in s.to_dict():
-            assert s.to_dict()[key] == s2.to_dict()[key], key
+        for key in as_dict(s):
+            assert as_dict(s)[key] == as_dict(s2)[key], key
 
         temp_settings.unlink()
 
