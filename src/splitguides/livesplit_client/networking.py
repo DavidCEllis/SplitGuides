@@ -1,3 +1,4 @@
+# COMPILE_PREFABS
 """
 Socket based connection model
 """
@@ -8,7 +9,7 @@ from prefab_classes import prefab, attribute
 BUFFER_SIZE = 4096
 
 
-@prefab
+@prefab(compile_prefab=True)
 class LivesplitConnection:
     server = attribute(default="localhost")
     port = attribute(default=16834)

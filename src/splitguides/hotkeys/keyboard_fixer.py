@@ -1,3 +1,4 @@
+# COMPILE_PREFABS
 """
 The keyboard library does not handle numpad hotkeys correctly.
 
@@ -14,7 +15,7 @@ KEY_DOWN = "down"
 KEY_UP = "up"
 
 
-@prefab
+@prefab(compile_prefab=True)
 class Hotkey:
     scancodes = attribute(default=None)
     name = attribute(default=None)

@@ -1,3 +1,4 @@
+# COMPILE_PREFABS
 import os
 import socket
 import sys
@@ -7,14 +8,15 @@ from pathlib import Path
 
 from prefab_classes import prefab, attribute
 from prefab_classes.serializers import to_json
-from .hotkeys import hotkey_or_none
+
+from ..hotkeys import hotkey_or_none
 
 if getattr(sys, "frozen", False):  # pragma: nocover
     # Application is .exe, use visible files
     base_path = Path(sys.executable).parent
 else:
     # Running as .py - use standard folder structure
-    base_path = Path(__file__).parent
+    base_path = Path(__file__).parents[1]
 
 settings_file = Path(base_path / "settings.json")
 default_template_folder = Path(base_path / "templates")
@@ -31,7 +33,7 @@ except Exception:
     )
 
 
-@prefab
+@prefab(compile_prefab=True)
 class Settings:
     """
     Global persistent settings handler

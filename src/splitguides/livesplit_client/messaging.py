@@ -1,3 +1,4 @@
+# COMPILE_PREFABS
 """
 Handle livesplit
 """
@@ -7,7 +8,7 @@ from datetime import timedelta
 from prefab_classes import prefab, attribute
 
 
-@prefab
+@prefab(compile_prefab=True)
 class LivesplitMessaging:
     connection = attribute()
 

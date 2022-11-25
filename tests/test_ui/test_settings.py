@@ -7,8 +7,9 @@ from PySide6.QtCore import Qt, QTimer
 
 from prefab_classes.serializers import as_dict
 
-from splitguides.settings import Settings, settings_file
+from splitguides.settings import Settings
 from splitguides.settings import default_static_folder, default_template_folder
+
 from splitguides.ui.settings_ui import SettingsDialog
 
 test_settings = Path(__file__).parent / "settings.json"
