@@ -33,7 +33,7 @@ except Exception:
     )
 
 
-@prefab(compile_prefab=True)
+@prefab(compile_prefab=True, compile_fallback=True)
 class Settings:
     """
     Global persistent settings handler

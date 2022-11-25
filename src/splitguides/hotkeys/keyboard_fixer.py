@@ -15,7 +15,7 @@ KEY_DOWN = "down"
 KEY_UP = "up"
 
 
-@prefab(compile_prefab=True)
+@prefab(compile_prefab=True, compile_fallback=True)
 class Hotkey:
     scancodes = attribute(default=None)
     name = attribute(default=None)

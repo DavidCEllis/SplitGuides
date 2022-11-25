@@ -8,7 +8,7 @@ from datetime import timedelta
 from prefab_classes import prefab, attribute
 
 
-@prefab(compile_prefab=True)
+@prefab(compile_prefab=True, compile_fallback=True)
 class LivesplitMessaging:
     connection = attribute()
 

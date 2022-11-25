@@ -9,7 +9,7 @@ from prefab_classes import prefab, attribute
 BUFFER_SIZE = 4096
 
 
-@prefab(compile_prefab=True)
+@prefab(compile_prefab=True, compile_fallback=True)
 class LivesplitConnection:
     server = attribute(default="localhost")
     port = attribute(default=16834)
