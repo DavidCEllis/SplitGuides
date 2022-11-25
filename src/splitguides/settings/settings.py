@@ -6,8 +6,7 @@ import json
 
 from pathlib import Path
 
-from prefab_classes import prefab, attribute
-from prefab_classes.serializers import to_json
+from prefab_classes import prefab, attribute, to_json
 
 from ..hotkeys import hotkey_or_none
 
