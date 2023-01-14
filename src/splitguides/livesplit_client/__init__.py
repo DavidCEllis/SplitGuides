@@ -1,4 +1,4 @@
-from prefab_classes import prefab_compiler
+from prefab_classes.compiled import prefab_compiler
 
 with prefab_compiler():
     from .messaging import LivesplitMessaging

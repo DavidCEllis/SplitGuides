@@ -29,6 +29,7 @@ setup(
         "flask",
         "markdown",
         "keyboard",
+        "prefab-classes",
     ],
     tests_require=test_requirements,
     extras_require={

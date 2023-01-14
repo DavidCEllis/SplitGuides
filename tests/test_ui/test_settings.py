@@ -5,7 +5,7 @@ import pytest
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt, QTimer
 
-from prefab_classes import as_dict
+from prefab_classes.funcs import as_dict
 
 from splitguides.settings import Settings
 from splitguides.settings import default_static_folder, default_template_folder

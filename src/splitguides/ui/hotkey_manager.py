@@ -12,7 +12,7 @@ import time
 import keyboard
 from PySide6 import QtCore
 
-from prefab_classes import to_json
+from prefab_classes.funcs import to_json
 
 from ..hotkeys import read_hotkey
 

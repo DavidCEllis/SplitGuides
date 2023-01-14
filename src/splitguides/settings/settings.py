@@ -6,7 +6,8 @@ import json
 
 from pathlib import Path
 
-from prefab_classes import prefab, attribute, to_json
+from prefab_classes import prefab, attribute
+from prefab_classes.funcs import to_json
 
 from ..hotkeys import hotkey_or_none
 
@@ -38,7 +39,7 @@ class Settings:
     Global persistent settings handler
     """
     # What file to use
-    output_file = attribute(default=settings_file, converter=Path)
+    output_file = attribute(default=settings_file)
 
     # Networking Settings
     hostname = attribute(default="localhost")
@@ -52,9 +53,9 @@ class Settings:
     font_color = attribute(default="#000000")
     background_color = attribute(default="#f1f8ff")
     # Templating
-    html_template_folder = attribute(default=default_template_folder, converter=Path)
+    html_template_folder = attribute(default=default_template_folder)
     html_template_file = attribute(default="desktop.html")
-    css_folder = attribute(default=default_static_folder, converter=Path)
+    css_folder = attribute(default=default_static_folder)
     css_file = attribute(default="desktop.css")
     # Window Settings
     on_top = attribute(default=False)
@@ -64,8 +65,8 @@ class Settings:
     # Hotkey Settings
     hotkeys_enabled = attribute(default=False)
 
-    increase_offset_hotkey = attribute(default=None, converter=hotkey_or_none)
-    decrease_offset_hotkey = attribute(default=None, converter=hotkey_or_none)
+    increase_offset_hotkey = attribute(default=None)
+    decrease_offset_hotkey = attribute(default=None)
 
     # Server Settings
     server_previous_splits = attribute(default=0)
@@ -73,10 +74,29 @@ class Settings:
     server_hostname = attribute(default=local_hostname)
     server_port = attribute(default=14250)
 
-    server_template_folder = attribute(default=default_template_folder, converter=Path)
+    server_template_folder = attribute(default=default_template_folder)
     server_html_template_file = attribute(default="server.html")
-    server_static_folder = attribute(default=default_static_folder, converter=Path)
+    server_static_folder = attribute(default=default_static_folder)
     server_css_file = attribute(default="server.css")
+
+    def __prefab_post_init__(
+            self,
+            output_file,
+            html_template_folder,
+            css_folder,
+            increase_offset_hotkey,
+            decrease_offset_hotkey,
+            server_template_folder,
+            server_static_folder,
+    ):
+        self.output_file = Path(output_file)
+        self.html_template_folder = Path(html_template_folder)
+        self.css_folder = Path(css_folder)
+        self.server_template_folder = Path(server_template_folder)
+        self.server_static_folder = Path(server_static_folder)
+
+        self.increase_offset_hotkey = hotkey_or_none(increase_offset_hotkey)
+        self.decrease_offset_hotkey = hotkey_or_none(decrease_offset_hotkey)
 
     def save(self):
         """
@@ -90,7 +110,7 @@ class Settings:
                     f"Object of type {o.__class__} is not JSON Serializable"
                 )
 
-        json_str = to_json(self, excludes=["output_file"], default=path_to_json)
+        json_str = to_json(self, excludes=("output_file", ), default=path_to_json)
         self.output_file.write_text(json_str)
 
     @classmethod
