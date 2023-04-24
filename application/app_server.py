@@ -1,12 +1,32 @@
-from splitguides.server import app, get_notes, settings
+from PySide6.QtWidgets import QApplication, QMainWindow
 import flask.cli as cli
+
+from splitguides.server import app, get_notes, settings
+from splitguides.ui.server_settings_ui import ServerSettingsDialog
+
 
 # Stop flask from giving users an unhelpful warning.
 cli.show_server_banner = lambda *x: None
 
 
 def launch():
+    base_app = QApplication()
+    main_window = QMainWindow()
+
+    settings_dialog = ServerSettingsDialog(
+        parent=main_window,
+        settings=settings,
+    )
+
+    result = settings_dialog.exec()
+
+    if result == 0:  # Rejected, close without launching server
+        print("Settings cancelled, closing application.")
+        return
+
     get_notes()  # Sets internal 'notes' and 'notefile' variables
+
+    base_app.quit()
 
     print(
         "This server version of SplitGuides allows you view notes via a browser window "

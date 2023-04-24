@@ -105,7 +105,7 @@ def split():
 
 def get_notes():
     global notes, notefile
-    temp_app = QApplication()
+    # temp_app = QApplication()
 
     # noinspection PyTypeChecker
     filepath, _ = QFileDialog.getOpenFileName(
@@ -115,7 +115,7 @@ def get_notes():
         "Note Files (*.txt *.md);;All Files (*.*)",
     )
 
-    temp_app.quit()
+    # temp_app.quit()
 
     notefile = Path(filepath)
     notes = Notes.from_file(notefile, settings.split_separator)

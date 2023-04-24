@@ -1,43 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Settings</class>
- <widget class="QDialog" name="Settings">
-  <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
-  </property>
+ <class>ServerSettings</class>
+ <widget class="QDialog" name="ServerSettings">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>478</height>
+    <height>535</height>
    </rect>
   </property>
-  <property name="font">
-   <font>
-    <pointsize>10</pointsize>
-   </font>
-  </property>
   <property name="windowTitle">
-   <string>Settings</string>
+   <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
+   <item row="0" column="0">
     <layout class="QFormLayout" name="formLayout">
      <property name="leftMargin">
       <number>5</number>
@@ -100,7 +77,7 @@
       </widget>
      </item>
      <item row="2" column="0" colspan="2">
-      <widget class="Line" name="divider_1">
+      <widget class="Line" name="line_1">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -172,7 +149,7 @@
       </widget>
      </item>
      <item row="6" column="0" colspan="2">
-      <widget class="Line" name="divider_2">
+      <widget class="Line" name="line_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -230,6 +207,13 @@
        </item>
       </layout>
      </item>
+     <item row="10" column="0" colspan="2">
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
      <item row="11" column="0">
       <widget class="QLabel" name="htmltemplate_label">
        <property name="text">
@@ -280,15 +264,8 @@
        </item>
       </layout>
      </item>
-     <item row="10" column="0" colspan="2">
-      <widget class="Line" name="divider_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
      <item row="13" column="0" colspan="2">
-      <widget class="Line" name="divider_4">
+      <widget class="Line" name="line">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -298,13 +275,6 @@
       <widget class="QLabel" name="nextsplitkey_label">
        <property name="text">
         <string>Next Split Hotkey:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="15" column="0">
-      <widget class="QLabel" name="previoussplitkey_label">
-       <property name="text">
-        <string>Previous Split Hotkey:</string>
        </property>
       </widget>
      </item>
@@ -326,6 +296,13 @@
        </item>
       </layout>
      </item>
+     <item row="15" column="0">
+      <widget class="QLabel" name="previoussplitkey_label">
+       <property name="text">
+        <string>Previous Split Hotkey:</string>
+       </property>
+      </widget>
+     </item>
      <item row="15" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
@@ -344,7 +321,53 @@
        </item>
       </layout>
      </item>
+     <item row="17" column="0">
+      <widget class="QLabel" name="noteserverhost_label">
+       <property name="text">
+        <string>Note Server Hostname:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="1">
+      <widget class="QLineEdit" name="noteserverhost_edit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="18" column="0">
+      <widget class="QLabel" name="noteserverport_label">
+       <property name="text">
+        <string>Note Server Port:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="18" column="1">
+      <widget class="QLineEdit" name="noteserverport_edit"/>
+     </item>
+     <item row="16" column="0" colspan="2">
+      <widget class="Line" name="line_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="confirm_cancel_box">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -363,20 +386,13 @@
   <tabstop>htmltemplate_button</tabstop>
   <tabstop>css_edit</tabstop>
   <tabstop>css_button</tabstop>
+  <tabstop>nextsplitkey_edit</tabstop>
+  <tabstop>nextsplitkey_button</tabstop>
+  <tabstop>previoussplitkey_edit</tabstop>
+  <tabstop>previoussplitkey_button</tabstop>
+  <tabstop>noteserverhost_edit</tabstop>
+  <tabstop>noteserverport_edit</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>Settings</receiver>
-   <slot>accept()</slot>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>Settings</receiver>
-   <slot>reject()</slot>
-  </connection>
- </connections>
+ <connections/>
 </ui>
