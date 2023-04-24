@@ -5,11 +5,12 @@ import os
 from pathlib import Path
 
 import bleach
+import bleach.sanitizer
 import bleach.css_sanitizer
 import markdown
 
 
-PERMITTED_TAGS = [
+PERMITTED_TAGS = {
     "p",
     "br",
     "del",
@@ -28,7 +29,7 @@ PERMITTED_TAGS = [
     "img",
     "video",
     "source",
-]
+}
 
 PERMITTED_ATTRIBUTES = {
     "*": ["class", "style", "href"],
@@ -47,14 +48,14 @@ PERMITTED_ATTRIBUTES = {
 }
 
 
-PERMITTED_STYLES = [
+PERMITTED_STYLES = {
     "background-color",
     "color",
     "font-family",
     "font-size",
     "font-weight",
     "text-align",
-]
+}
 
 
 class Notes:
@@ -191,18 +192,18 @@ def get_cleaner(extra_tags, extra_attributes, extra_styles):
     :param extra_styles:
     :return:
     """
-    valid_tags = bleach.sanitizer.ALLOWED_TAGS.copy()
-    valid_tags.extend(extra_tags)
+    valid_tags = set(bleach.sanitizer.ALLOWED_TAGS)
+    valid_tags.update(extra_tags)
     valid_attributes = bleach.sanitizer.ALLOWED_ATTRIBUTES.copy()
     valid_attributes.update(extra_attributes)
 
     # Bleach 5.0 changed how CSS works, to avoid changing internals we'll wrap around this
-    valid_styles = list(bleach.css_sanitizer.ALLOWED_CSS_PROPERTIES)
-    valid_styles.extend(extra_styles)
+    valid_styles = set(bleach.css_sanitizer.ALLOWED_CSS_PROPERTIES)
+    valid_styles.update(extra_styles)
     css_sanitizer = bleach.css_sanitizer.CSSSanitizer(allowed_css_properties=valid_tags)
 
     cleaner = bleach.sanitizer.Cleaner(
-        tags=valid_tags, attributes=PERMITTED_ATTRIBUTES, css_sanitizer=css_sanitizer
+        tags=valid_tags, attributes=valid_attributes, css_sanitizer=css_sanitizer
     )
     return cleaner
 
