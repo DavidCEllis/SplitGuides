@@ -5,7 +5,8 @@ import json
 
 from pathlib import Path
 
-import attr
+from prefab_classes import prefab, attribute
+from prefab_classes.funcs import to_json
 
 from .hotkeys import hotkey_or_none
 
@@ -31,60 +32,90 @@ except Exception:
     )
 
 
-@attr.s
+@prefab
 class Settings:
     """
     Global persistent settings handler
     """
-
     # What file to use
-    output_file = attr.ib(default=settings_file, converter=Path)
+    output_file = attribute(default=settings_file)
 
     # Networking Settings
-    hostname = attr.ib(default="localhost")
-    port = attr.ib(default=16834)
+    hostname = attribute(default="localhost")
+    port = attribute(default=16834)
     # Parser Settings
-    split_separator = attr.ib(default="")
+    split_separator = attribute(default="")
     # User Preferences
-    previous_splits = attr.ib(default=0)
-    next_splits = attr.ib(default=2)
-    font_size = attr.ib(default=20)
-    font_color = attr.ib(default="#000000")
-    background_color = attr.ib(default="#f1f8ff")
+    previous_splits = attribute(default=0)
+    next_splits = attribute(default=2)
+    font_size = attribute(default=20)
+    font_color = attribute(default="#000000")
+    background_color = attribute(default="#f1f8ff")
     # Templating
-    html_template_folder = attr.ib(default=default_template_folder, converter=Path)
-    html_template_file = attr.ib(default="desktop.html")
-    css_folder = attr.ib(default=default_static_folder, converter=Path)
-    css_file = attr.ib(default="desktop.css")
+    html_template_folder = attribute(default=default_template_folder)
+    html_template_file = attribute(default="desktop.html")
+    css_folder = attribute(default=default_static_folder)
+    css_file = attribute(default="desktop.css")
     # Window Settings
-    on_top = attr.ib(default=False)
-    width = attr.ib(default=800)
-    height = attr.ib(default=800)
-    notes_folder = attr.ib(default=user_path)
+    on_top = attribute(default=False)
+    width = attribute(default=800)
+    height = attribute(default=800)
+    notes_folder = attribute(default=user_path)
     # Hotkey Settings
-    hotkeys_enabled = attr.ib(default=False)
+    hotkeys_enabled = attribute(default=False)
 
-    increase_offset_hotkey = attr.ib(default=None, converter=hotkey_or_none)
-    decrease_offset_hotkey = attr.ib(default=None, converter=hotkey_or_none)
+    increase_offset_hotkey = attribute(default=None)
+    decrease_offset_hotkey = attribute(default=None)
 
     # Server Settings
-    server_previous_splits = attr.ib(default=0)
-    server_next_splits = attr.ib(default=0)
-    server_hostname = attr.ib(default=local_hostname)
-    server_port = attr.ib(default=14250)
+    server_previous_splits = attribute(default=0)
+    server_next_splits = attribute(default=0)
+    server_hostname = attribute(default=local_hostname)
+    server_port = attribute(default=14250)
 
-    server_template_folder = attr.ib(default=default_template_folder, converter=Path)
-    server_html_template_file = attr.ib(default="server.html")
-    server_static_folder = attr.ib(default=default_static_folder)
-    server_css_file = attr.ib(default="server.css")
+    server_template_folder = attribute(default=default_template_folder)
+    server_html_template_file = attribute(default="server.html")
+    server_static_folder = attribute(default=default_static_folder)
+    server_css_file = attribute(default="server.css")
+
+    def __prefab_post_init__(
+            self,
+            output_file,
+            html_template_folder,
+            css_folder,
+            increase_offset_hotkey,
+            decrease_offset_hotkey,
+            server_template_folder,
+            server_static_folder,
+    ):
+        self.output_file = Path(output_file)
+        self.html_template_folder = Path(html_template_folder)
+        self.css_folder = Path(css_folder)
+        self.server_template_folder = Path(server_template_folder)
+        self.server_static_folder = Path(server_static_folder)
+
+        self.increase_offset_hotkey = hotkey_or_none(increase_offset_hotkey)
+        self.decrease_offset_hotkey = hotkey_or_none(decrease_offset_hotkey)
 
     def save(self):
         """
         Save settings as JSON
         """
-        as_dict = attr.asdict(self)
-        del as_dict["output_file"]  # Don't save the name of the output file
-        self.output_file.write_text(json.dumps(as_dict, indent=2, default=str))
+        def path_to_json(o):
+            if isinstance(o, Path):
+                return str(o)
+            else:
+                raise TypeError(
+                    f"Object of type {o.__class__} is not JSON Serializable"
+                )
+
+        json_str = to_json(
+            self,
+            excludes=("output_file", ),
+            default=path_to_json,
+            indent=2,
+        )
+        self.output_file.write_text(json_str)
 
     @classmethod
     def load(cls, input_filename=settings_file):
@@ -99,6 +130,7 @@ class Settings:
         if input_path.exists():
             new_settings = json.loads(input_path.read_text())
 
+            # noinspection PyArgumentList
             loaded_settings = cls(output_file=input_filename, **new_settings)
 
             # Check that the templates exist, reset otherwise
@@ -120,7 +152,7 @@ class Settings:
 
             return loaded_settings
         else:
-            return cls(output_file=input_filename)
+            return Settings(output_file=input_filename)
 
     @property
     def full_template_path(self):

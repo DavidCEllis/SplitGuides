@@ -2,9 +2,9 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 import json
 
-from PySide2.QtWidgets import QDialog, QColorDialog, QFileDialog
-from PySide2.QtCore import QRegExp, Slot
-from PySide2.QtGui import QIntValidator, QRegExpValidator, QColor
+from PySide6.QtWidgets import QDialog, QColorDialog, QFileDialog
+from PySide6.QtCore import QRegularExpression, Slot
+from PySide6.QtGui import QIntValidator, QRegularExpressionValidator, QColor
 
 from .layouts import Ui_Settings
 from ..hotkeys import Hotkey
@@ -38,8 +38,8 @@ class SettingsDialog(QDialog):
         self.pool = ThreadPoolExecutor(max_workers=1)
 
     def setup_validators(self):
-        color_re = QRegExp(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})")
-        color_validator = QRegExpValidator(color_re, None)
+        color_re = QRegularExpression(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})")
+        color_validator = QRegularExpressionValidator(color_re, None)
         self.ui.port_edit.setValidator(QIntValidator(1024, 65535, None))
         # 255 splits seems like a lot
         self.ui.previous_edit.setValidator(QIntValidator(0, 255, None))
@@ -137,7 +137,9 @@ class SettingsDialog(QDialog):
         # First set the buttons dialog and disable the interface
         self.ui.nextsplitkey_button.setText("Listening...")
         self.setEnabled(False)
-        fn = lambda: self.hotkey_manager.select_input(self.return_increase_hotkey)
+        fn = lambda: self.hotkey_manager.select_input(
+            self.return_increase_hotkey
+        )
         self.pool.submit(fn)
 
     @Slot(str)
@@ -162,7 +164,9 @@ class SettingsDialog(QDialog):
             self.previoussplitkey = None
 
         # Disconnect the hotkey signal from this function
-        self.hotkey_manager.hotkey_signal.disconnect(self.return_increase_hotkey)
+        self.hotkey_manager.hotkey_signal.disconnect(
+            self.return_increase_hotkey
+        )
 
         self.setEnabled(True)
 
@@ -170,7 +174,9 @@ class SettingsDialog(QDialog):
         """Get a hotkey to use to decrease the split offset"""
         self.ui.previoussplitkey_button.setText("Listening...")
         self.setEnabled(False)
-        fn = lambda: self.hotkey_manager.select_input(self.return_decrease_hotkey)
+        fn = lambda: self.hotkey_manager.select_input(
+            self.return_decrease_hotkey
+        )
         self.pool.submit(fn)
 
     @Slot(str)
@@ -194,7 +200,9 @@ class SettingsDialog(QDialog):
             self.nextsplitkey = None
 
         # Disconnect the hotkey signal from this function
-        self.hotkey_manager.hotkey_signal.disconnect(self.return_decrease_hotkey)
+        self.hotkey_manager.hotkey_signal.disconnect(
+            self.return_decrease_hotkey
+        )
 
         self.setEnabled(True)
 

@@ -1,5 +1,5 @@
 import sys
-from PySide2.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 
 from splitguides.ui.main_window import MainWindow
 
@@ -8,4 +8,4 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

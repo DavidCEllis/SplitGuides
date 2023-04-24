@@ -2,14 +2,18 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 import pytest
-from PySide2 import QtWidgets, QtGui
-from PySide2.QtCore import Qt, QTimer
+from PySide6 import QtWidgets, QtGui
+from PySide6.QtCore import Qt, QTimer
 
-from splitguides.settings import Settings, settings_file
+from prefab_classes.funcs import as_dict
+
+from splitguides.settings import Settings
 from splitguides.settings import default_static_folder, default_template_folder
+
 from splitguides.ui.settings_ui import SettingsDialog
 
 test_settings = Path(__file__).parent / "settings.json"
+temp_settings = Path(__file__).parent / "temp_settings.json"
 
 
 # Default settings for each test
@@ -59,12 +63,8 @@ class TestSettings:
     # Test the Settings class
     def test_settings_with_file(self):
         """Check settings are read and updated from a settings file"""
-        assert not settings_file.exists()  # Check there is no settings file
-
-        settings_file.write_text(test_settings.read_text())
-
         with patch.object(Path, "exists", return_value=True):
-            s = Settings.load(settings_file)
+            s = Settings.load(test_settings)
 
         assert s.hostname == "fakehost"
         assert s.port == 12345
@@ -81,15 +81,9 @@ class TestSettings:
         assert s.height == 1100
         assert s.notes_folder == "fake/documents/folder"
 
-        settings_file.unlink()  # Delete our fake settings file
-
     def test_default_paths(self):
         """Test if the paths listed in the settings file do not exist that defaults are used"""
-        assert not settings_file.exists()  # Check there is no settings file
-
-        settings_file.write_text(test_settings.read_text())
-
-        s = Settings.load(settings_file)
+        s = Settings.load(test_settings)
 
         # Check they are not what is listed
         assert s.full_template_path != Path("fake/html/folder/fakehtml.html")
@@ -97,6 +91,20 @@ class TestSettings:
         # Check they are defaults
         assert s.full_template_path == default_template_folder / "desktop.html"
         assert s.full_css_path == default_static_folder / "desktop.css"
+
+    def test_save_load(self):
+        s = Settings.load(test_settings)
+
+        # Change the output file
+        s.output_file = temp_settings
+        s.save()
+
+        s2 = Settings.load(temp_settings)
+
+        for key in as_dict(s):
+            assert as_dict(s)[key] == as_dict(s2)[key], key
+
+        temp_settings.unlink()
 
 
 class TestSettingsUI:
@@ -106,7 +114,7 @@ class TestSettingsUI:
         button = settings_dialog.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Ok)
 
         QTimer.singleShot(0, button.clicked)
-        result = settings_dialog.exec_()
+        result = settings_dialog.exec()
 
         assert result == 1
 
@@ -124,7 +132,7 @@ class TestSettingsUI:
         button = settings_dialog.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel)
 
         QTimer.singleShot(0, button.clicked)
-        result = settings_dialog.exec_()
+        result = settings_dialog.exec()
 
         assert result == 0
 

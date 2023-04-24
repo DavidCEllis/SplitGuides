@@ -1,13 +1,16 @@
+# COMPILE_PREFABS
 """
 Handle livesplit
 """
 import re
 from datetime import timedelta
 
+from prefab_classes import prefab, attribute
 
+
+@prefab
 class LivesplitMessaging:
-    def __init__(self, connection):
-        self.connection = connection
+    connection = attribute()
 
     def connect(self):
         return self.connection.connect()

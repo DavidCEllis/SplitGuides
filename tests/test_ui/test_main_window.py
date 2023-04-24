@@ -3,7 +3,7 @@ from io import StringIO
 from pathlib import Path
 
 import pytest
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from splitguides.ui.main_window import MainWindow
 from splitguides.note_parser import Notes
@@ -239,7 +239,7 @@ def test_open_settings(qtbot, fake_link):
         fake_settings_dialog = MagicMock()
         fake_settings_dialog_cls.return_value = fake_settings_dialog
 
-        fake_settings_dialog.exec_.return_value = 1
+        fake_settings_dialog.exec.return_value = 1
 
         main_window = MainWindow()
         qtbot.add_widget(main_window)
@@ -259,7 +259,7 @@ def test_open_settings(qtbot, fake_link):
         main_window.open_settings()
 
         fake_settings_dialog.setWindowIcon.assert_called_once_with(main_window.icon)
-        fake_settings_dialog.exec_.assert_called_once()
+        fake_settings_dialog.exec.assert_called_once()
 
         fake_link_inst.close.assert_called_once()
         fake_link.assert_called_with(main_window.client, main_window)

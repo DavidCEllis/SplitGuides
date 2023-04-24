@@ -1,5 +1,7 @@
 """
 Special setup.py file for building the app
+
+`python setup.py build` in this folder to create the application.
 """
 
 import sys
@@ -40,7 +42,7 @@ executables = [
 
 setup(
     name="splitguides",
-    version="0.7.0",
+    version="0.8.0",
     description="Speedrun notes tool with HTML rendering",
     options=options,
     executables=executables,

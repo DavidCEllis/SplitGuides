@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 from flask import Flask, render_template, Response
-from PySide2.QtWidgets import QApplication, QFileDialog
+from PySide6.QtWidgets import QApplication, QFileDialog
 
 from ..settings import Settings
 from ..livesplit_client import get_client

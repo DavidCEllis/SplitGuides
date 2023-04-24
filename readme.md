@@ -1,11 +1,12 @@
 # SplitGuides #
 
-**Speedrun notes with markdown and html formatting**
+**Speedrun notes display for Livesplit with markdown and html formatting**
 
 SplitGuides is an application for displaying speedrun notes in sync with livesplit.
 Requires *livesplit server* to be running.
 
-There is now a server version included to allow reading from a browser on another device.
+Includes a server version for rendering notes in browsers on another device 
+(eg: tablet/phone).
 
 ## Install/Setup ##
 
@@ -91,11 +92,10 @@ The settings page offers some customisation and connection settings including:
   * HTML (Jinja2) template and CSS files to use for rendering
 
 ## Dependencies ##
-* pyside2 - QT Gui Bindings
+* pyside6 - QT Gui Bindings
 * jinja2 - Templating for the notes page
 * bleach - Cleaning HTML to help protect if someone decided to make notes with a malicious script
 * flask - Handling the server version
-* attrs - Made the settings classes a lot cleaner 
 * markdown - Converting markdown to html for rendering
 * keyboard - Global hotkeys to advance/reverse note offset to splits
 

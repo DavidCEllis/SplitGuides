@@ -1,8 +1,8 @@
 """
 Replace the standard QWebEnginePage with one that launches links in the user's default browser
 """
-from PySide2.QtWebEngineWidgets import QWebEnginePage
-from PySide2.QtGui import QDesktopServices
+from PySide6.QtWebEngineCore import QWebEnginePage
+from PySide6.QtGui import QDesktopServices
 
 
 class ExtLinkWebEnginePage(QWebEnginePage):

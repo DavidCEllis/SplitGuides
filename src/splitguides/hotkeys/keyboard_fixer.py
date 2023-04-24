@@ -1,3 +1,4 @@
+# COMPILE_PREFABS
 """
 The keyboard library does not handle numpad hotkeys correctly.
 
@@ -5,9 +6,8 @@ This is a rewrite of the relevant functions to handle this.
 """
 
 import queue as _queue
-import json
 
-import attr
+from prefab_classes import prefab, attribute
 import keyboard
 
 
@@ -15,15 +15,10 @@ KEY_DOWN = "down"
 KEY_UP = "up"
 
 
-# Hotkey = namedtuple("Hotkey", "scancodes, name")
-@attr.s
+@prefab
 class Hotkey:
-    scancodes = attr.ib(default=None)
-    name = attr.ib(default=None)
-
-    def to_json(self):
-        as_dict = attr.asdict(self)
-        return json.dumps(as_dict)
+    scancodes = attribute(default=None)
+    name = attribute(default=None)
 
 
 def hotkey_or_none(keydict):
