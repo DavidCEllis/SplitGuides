@@ -92,7 +92,7 @@ The settings page offers some customisation and connection settings including:
   * HTML (Jinja2) template and CSS files to use for rendering
 
 ## Dependencies ##
-* pyside2 - QT Gui Bindings
+* pyside6 - QT Gui Bindings
 * jinja2 - Templating for the notes page
 * bleach - Cleaning HTML to help protect if someone decided to make notes with a malicious script
 * flask - Handling the server version
