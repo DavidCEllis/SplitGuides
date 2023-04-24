@@ -1,11 +1,12 @@
 # SplitGuides #
 
-**Speedrun notes with markdown and html formatting**
+**Speedrun notes display for Livesplit with markdown and html formatting**
 
 SplitGuides is an application for displaying speedrun notes in sync with livesplit.
 Requires *livesplit server* to be running.
 
-There is now a server version included to allow reading from a browser on another device.
+Includes a server version for rendering notes in browsers on another device 
+(eg: tablet/phone).
 
 ## Install/Setup ##
 
