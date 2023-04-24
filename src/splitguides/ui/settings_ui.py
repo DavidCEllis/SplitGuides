@@ -4,7 +4,12 @@ import json
 
 from PySide6.QtWidgets import QDialog, QColorDialog, QFileDialog
 from PySide6.QtCore import QRegularExpression, Slot
-from PySide6.QtGui import QIntValidator, QRegularExpressionValidator, QColor
+from PySide6.QtGui import (
+    QIntValidator,
+    QDoubleValidator,
+    QRegularExpressionValidator,
+    QColor
+)
 
 from .layouts import Ui_Settings
 from ..hotkeys import Hotkey
@@ -45,7 +50,7 @@ class SettingsDialog(QDialog):
         self.ui.previous_edit.setValidator(QIntValidator(0, 255, None))
         self.ui.advance_edit.setValidator(QIntValidator(0, 255, None))
         # I don't know why you'd set a font size of 10k but sure why not
-        self.ui.fontsize_edit.setValidator(QIntValidator(0, 10000, None))
+        self.ui.fontsize_edit.setValidator(QDoubleValidator(0.0, 10000.0, 2, None))
         self.ui.textcolor_edit.setValidator(color_validator)
         self.ui.bgcolor_edit.setValidator(color_validator)
 
