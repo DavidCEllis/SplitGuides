@@ -57,9 +57,9 @@ class BaseSettings(metaclass=ABCMeta):
     background_color: str = "#f1f8ff"
 
     html_template_folder: Path = default_template_folder
-    html_template_file: str = "desktop.html"
     css_folder: Path = default_static_folder
-    css_file: str = "desktop.css"
+    html_template_file: None | str = None
+    css_file: None | str = None
 
     notes_folder: Path = user_path
 
@@ -164,6 +164,10 @@ class DesktopSettings(BaseSettings):
     SETTINGS_FILE: ClassVar[Path] = desktop_settings_file
     output_file: Path = desktop_settings_file
 
+    # Override Defaults
+    html_template_file: str = "desktop.html"
+    css_file: str = "desktop.css"
+
     # Window Settings
     on_top: bool = False
     width: int = 800
@@ -178,6 +182,10 @@ class ServerSettings(BaseSettings):
 
     SETTINGS_FILE: ClassVar[Path] = server_settings_file
     output_file: Path = server_settings_file
+
+    # Override defaults
+    html_template_file: str = "server.html"
+    css_file: str = "server.css"
 
     server_hostname: str = local_hostname
     server_port: int = 80
