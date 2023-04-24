@@ -76,7 +76,7 @@ class SettingsDialog(QDialog):
         self.settings.previous_splits = int(self.ui.previous_edit.text())
         self.settings.next_splits = int(self.ui.advance_edit.text())
         self.settings.split_separator = self.ui.separator_edit.text()
-        self.settings.font_size = int(self.ui.fontsize_edit.text())
+        self.settings.font_size = float(self.ui.fontsize_edit.text())
         self.settings.font_color = self.ui.textcolor_edit.text()
         self.settings.background_color = self.ui.bgcolor_edit.text()
 

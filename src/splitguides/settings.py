@@ -3,12 +3,13 @@ import socket
 import sys
 import json
 
+from abc import ABCMeta
 from pathlib import Path
 
 from prefab_classes import prefab, attribute
 from prefab_classes.funcs import to_json
 
-from .hotkeys import hotkey_or_none
+from .hotkeys import hotkey_or_none, Hotkey
 
 if getattr(sys, "frozen", False):  # pragma: nocover
     # Application is .exe, use visible files
@@ -18,6 +19,8 @@ else:
     base_path = Path(__file__).parent
 
 settings_file = Path(base_path / "settings.json")
+server_settings_file = Path(base_path / "server_settings.json")
+
 default_template_folder = Path(base_path / "templates")
 default_static_folder = Path(base_path / "static")
 user_path = str(Path(os.path.expanduser("~")) / "Documents")
@@ -33,66 +36,45 @@ except Exception:
 
 
 @prefab
-class Settings:
-    """
-    Global persistent settings handler
-    """
-    # What file to use
-    output_file = attribute(default=settings_file)
+class BaseSettings(metaclass=ABCMeta):
+    # Settings file to use
+    output_file: None | Path = None  # Settings save file
 
     # Networking Settings
-    hostname = attribute(default="localhost")
-    port = attribute(default=16834)
+    hostname: str = "localhost"
+    port: int = 16834
+
     # Parser Settings
-    split_separator = attribute(default="")
-    # User Preferences
-    previous_splits = attribute(default=0)
-    next_splits = attribute(default=2)
-    font_size = attribute(default=20)
-    font_color = attribute(default="#000000")
-    background_color = attribute(default="#f1f8ff")
-    # Templating
-    html_template_folder = attribute(default=default_template_folder)
-    html_template_file = attribute(default="desktop.html")
-    css_folder = attribute(default=default_static_folder)
-    css_file = attribute(default="desktop.css")
-    # Window Settings
-    on_top = attribute(default=False)
-    width = attribute(default=800)
-    height = attribute(default=800)
-    notes_folder = attribute(default=user_path)
+    split_separator: str = ""
+
+    # Display Settings
+    previous_splits: int = 0
+    next_splits: int = 2
+    font_size: int | float = 20.0
+    font_color: str = "#000000"
+    background_color: str = "#f1f8ff"
+
+    html_template_folder: Path = default_template_folder
+    html_template_file: str = "desktop.html"
+    css_folder: Path = default_static_folder
+    css_file: str = "desktop.css"
+
     # Hotkey Settings
-    hotkeys_enabled = attribute(default=False)
-
-    increase_offset_hotkey = attribute(default=None)
-    decrease_offset_hotkey = attribute(default=None)
-
-    # Server Settings
-    server_previous_splits = attribute(default=0)
-    server_next_splits = attribute(default=0)
-    server_hostname = attribute(default=local_hostname)
-    server_port = attribute(default=14250)
-
-    server_template_folder = attribute(default=default_template_folder)
-    server_html_template_file = attribute(default="server.html")
-    server_static_folder = attribute(default=default_static_folder)
-    server_css_file = attribute(default="server.css")
+    hotkeys_enabled: bool = False
+    increase_offset_hotkey: None | Hotkey = None
+    decrease_offset_hotkey: None | Hotkey = None
 
     def __prefab_post_init__(
-            self,
-            output_file,
-            html_template_folder,
-            css_folder,
-            increase_offset_hotkey,
-            decrease_offset_hotkey,
-            server_template_folder,
-            server_static_folder,
+        self,
+        output_file,
+        html_template_folder,
+        css_folder,
+        increase_offset_hotkey,
+        decrease_offset_hotkey,
     ):
         self.output_file = Path(output_file)
         self.html_template_folder = Path(html_template_folder)
         self.css_folder = Path(css_folder)
-        self.server_template_folder = Path(server_template_folder)
-        self.server_static_folder = Path(server_static_folder)
 
         self.increase_offset_hotkey = hotkey_or_none(increase_offset_hotkey)
         self.decrease_offset_hotkey = hotkey_or_none(decrease_offset_hotkey)
@@ -101,6 +83,7 @@ class Settings:
         """
         Save settings as JSON
         """
+
         def path_to_json(o):
             if isinstance(o, Path):
                 return str(o)
@@ -111,12 +94,13 @@ class Settings:
 
         json_str = to_json(
             self,
-            excludes=("output_file", ),
+            excludes=("output_file",),
             default=path_to_json,
             indent=2,
         )
         self.output_file.write_text(json_str)
 
+    # noinspection PyArgumentList
     @classmethod
     def load(cls, input_filename=settings_file):
         """
@@ -137,22 +121,19 @@ class Settings:
             # This will happen if the executable folder is moved
             # Absolute path ends up getting used because otherwise launching
             # from an external folder doesn't work
-            if not Path(loaded_settings.full_template_path).exists():
-                loaded_settings.html_template_folder = default_template_folder
-                loaded_settings.html_template_file = "desktop.html"
-            if not Path(loaded_settings.full_css_path).exists():
-                loaded_settings.css_folder = default_static_folder
-                loaded_settings.css_file = "desktop.css"
-            if not Path(loaded_settings.server_template_folder).exists():
-                loaded_settings.server_template_folder = default_template_folder
-                loaded_settings.server_html_template_file = "server.html"
-            if not Path(loaded_settings.server_static_folder).exists():
-                loaded_settings.server_static_folder = default_static_folder
-                loaded_settings.server_css_file = "server.css"
+            loaded_settings.fix_template_paths()
 
             return loaded_settings
         else:
-            return Settings(output_file=input_filename)
+            return cls(output_file=input_filename)
+
+    def fix_template_paths(self):
+        if not self.full_template_path.exists():
+            self.html_template_folder = default_template_folder
+            self.html_template_file = self.default_template_filename
+        if not self.full_css_path.exists():
+            self.css_folder = default_static_folder
+            self.css_file = self.default_css_filename
 
     @property
     def full_template_path(self):
@@ -161,3 +142,32 @@ class Settings:
     @property
     def full_css_path(self):
         return self.css_folder / self.css_file
+
+
+@prefab
+class Settings(BaseSettings):
+    """
+    Global persistent settings handler
+    """
+    # Class variables (untyped)
+    default_template_filename = "desktop.html"
+    default_css_filename = "desktop.css"
+
+    # What file to use
+    output_file: Path = attribute(default=settings_file)
+
+    # Window Settings
+    on_top: bool = attribute(default=False)
+    width: int = attribute(default=800)
+    height: int = attribute(default=800)
+    notes_folder: Path = attribute(default=user_path)
+
+
+@prefab
+class ServerSettings(BaseSettings):
+    # Class variables (untyped)
+    default_template_filename = "server.html"
+    default_css_filename = "server.css"
+
+    server_hostname: str = local_hostname
+    server_port: int = 80

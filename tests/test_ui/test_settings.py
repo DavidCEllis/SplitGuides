@@ -48,6 +48,7 @@ def settings_ui(qtbot):
     qtbot.keyClicks(settings_dialog.ui.separator_edit, "/split")
 
     qtbot.mouseDClick(settings_dialog.ui.fontsize_edit, Qt.LeftButton)
+    qtbot.mouseClick(settings_dialog.ui.fontsize_edit, Qt.LeftButton)
     qtbot.keyClicks(settings_dialog.ui.fontsize_edit, "25")
 
     qtbot.mouseDClick(settings_dialog.ui.textcolor_edit, Qt.LeftButton)
