@@ -9,7 +9,7 @@ from PySide6.QtGui import QCursor, QIcon
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu, QErrorMessage
 from .custom_elements import ExtLinkWebEnginePage
 
-from ..settings import Settings
+from ..settings import DesktopSettings
 from .settings_ui import SettingsDialog
 from .layouts import Ui_MainWindow
 from ..note_parser import Notes
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.ui.statusbar.showMessage("Not connected to server.")
 
         # Get settings
-        self.settings = Settings.load()
+        self.settings = DesktopSettings.load()
 
         # Window size
         self.resize(self.settings.width, self.settings.height)

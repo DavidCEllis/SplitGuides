@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt, QTimer
 
 from prefab_classes.funcs import as_dict
 
-from splitguides.settings import Settings
+from splitguides.settings import DesktopSettings
 from splitguides.settings import default_static_folder, default_template_folder
 
 from splitguides.ui.settings_ui import SettingsDialog
@@ -22,7 +22,7 @@ pytestmark = pytest.mark.usefixtures("clear_settings")
 
 @pytest.fixture
 def settings_ui(qtbot):
-    settings = Settings.load()
+    settings = DesktopSettings.load()
 
     fake_hotkey_manager = MagicMock()
 
@@ -65,7 +65,7 @@ class TestSettings:
     def test_settings_with_file(self):
         """Check settings are read and updated from a settings file"""
         with patch.object(Path, "exists", return_value=True):
-            s = Settings.load(test_settings)
+            s = DesktopSettings.load(test_settings)
 
         assert s.hostname == "fakehost"
         assert s.port == 12345
@@ -84,7 +84,7 @@ class TestSettings:
 
     def test_default_paths(self):
         """Test if the paths listed in the settings file do not exist that defaults are used"""
-        s = Settings.load(test_settings)
+        s = DesktopSettings.load(test_settings)
 
         # Check they are not what is listed
         assert s.full_template_path != Path("fake/html/folder/fakehtml.html")
@@ -94,13 +94,13 @@ class TestSettings:
         assert s.full_css_path == default_static_folder / "desktop.css"
 
     def test_save_load(self):
-        s = Settings.load(test_settings)
+        s = DesktopSettings.load(test_settings)
 
         # Change the output file
         s.output_file = temp_settings
         s.save()
 
-        s2 = Settings.load(temp_settings)
+        s2 = DesktopSettings.load(temp_settings)
 
         for key in as_dict(s):
             assert as_dict(s)[key] == as_dict(s2)[key], key
@@ -137,7 +137,7 @@ class TestSettingsUI:
 
         assert result == 0
 
-        default_settings = Settings()
+        default_settings = DesktopSettings()
 
         assert settings.hostname == default_settings.hostname
         assert settings.port == default_settings.port
@@ -152,7 +152,7 @@ class TestSettingsUI:
         """
         Test font color picker
         """
-        settings = Settings.load()
+        settings = DesktopSettings.load()
 
         settings_dialog = SettingsDialog(
             parent=None, settings=settings, hotkey_manager=MagicMock()
@@ -179,7 +179,7 @@ class TestSettingsUI:
         """
         Test BG color picker
         """
-        settings = Settings.load()
+        settings = DesktopSettings.load()
         settings_dialog = SettingsDialog(
             parent=None, settings=settings, hotkey_manager=MagicMock()
         )

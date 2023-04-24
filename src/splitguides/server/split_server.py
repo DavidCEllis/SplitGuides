@@ -7,25 +7,22 @@ from pathlib import Path
 from flask import Flask, render_template, Response
 from PySide6.QtWidgets import QApplication, QFileDialog
 
-from ..settings import Settings
+from ..settings import ServerSettings
 from ..livesplit_client import get_client
 from ..note_parser import Notes
 
 KEEP_ALIVE = 10
 
-settings = Settings.load()
-
-template_folder = str(Path(__file__).parent / "templates")
-static_folder = str(Path(__file__).parent / "static")
+settings = ServerSettings.load()
 
 app = Flask(
     "splitguides",
-    template_folder=settings.server_template_folder,
-    static_folder=settings.server_static_folder,
+    template_folder=settings.html_template_folder,
+    static_folder=settings.css_folder,
 )
 
-notefile = None
-notes = None
+notefile: None | Path = None
+notes: None | Notes = None
 
 app.secret_key = "".join(
     secrets.choice(string.printable) for _ in range(random.randint(30, 40))
@@ -40,7 +37,7 @@ def notes_page():
     :return:
     """
     global notefile
-    return render_template(settings.server_html_template_file, notefile=notefile.stem)
+    return render_template(settings.html_template_file, notefile=notefile.stem)
 
 
 @app.route("/splits")
@@ -82,8 +79,8 @@ def split():
                         last_update = now
                         current_note_index = new_index
                         split_text = notes.render_splits(
-                            new_index - settings.server_previous_splits,
-                            new_index + settings.server_next_splits + 1,
+                            new_index - settings.previous_splits,
+                            new_index + settings.next_splits + 1,
                         )
                         if len(split_text) > 0:
                             # Remove newlines from the notes as they break the send
@@ -110,6 +107,7 @@ def get_notes():
     global notes, notefile
     temp_app = QApplication()
 
+    # noinspection PyTypeChecker
     filepath, _ = QFileDialog.getOpenFileName(
         None,
         "Open Notes",

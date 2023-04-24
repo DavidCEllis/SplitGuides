@@ -5,8 +5,9 @@ import json
 
 from abc import ABCMeta
 from pathlib import Path
+from typing import ClassVar
 
-from prefab_classes import prefab, attribute
+from prefab_classes import prefab
 from prefab_classes.funcs import to_json
 
 from .hotkeys import hotkey_or_none, Hotkey
@@ -18,7 +19,7 @@ else:
     # Running as .py - use standard folder structure
     base_path = Path(__file__).parent
 
-settings_file = Path(base_path / "settings.json")
+desktop_settings_file = Path(base_path / "settings.json")
 server_settings_file = Path(base_path / "server_settings.json")
 
 default_template_folder = Path(base_path / "templates")
@@ -27,7 +28,7 @@ user_path = str(Path(os.path.expanduser("~")) / "Documents")
 
 try:
     local_hostname = socket.gethostname()
-except Exception:
+except OSError:
     local_hostname = "127.0.0.1"
     print(
         "Could not get local network hostname, using 127.0.0.1. "
@@ -38,6 +39,7 @@ except Exception:
 @prefab
 class BaseSettings(metaclass=ABCMeta):
     # Settings file to use
+    SETTINGS_FILE: ClassVar[None | Path] = None
     output_file: None | Path = None  # Settings save file
 
     # Networking Settings
@@ -58,6 +60,8 @@ class BaseSettings(metaclass=ABCMeta):
     html_template_file: str = "desktop.html"
     css_folder: Path = default_static_folder
     css_file: str = "desktop.css"
+
+    notes_folder: Path = user_path
 
     # Hotkey Settings
     hotkeys_enabled: bool = False
@@ -102,7 +106,7 @@ class BaseSettings(metaclass=ABCMeta):
 
     # noinspection PyArgumentList
     @classmethod
-    def load(cls, input_filename=settings_file):
+    def load(cls, input_filename: None | str | Path = None):
         """
         Load settings from a file, if the file does not exist
         just use defaults
@@ -110,6 +114,9 @@ class BaseSettings(metaclass=ABCMeta):
         :param input_filename: Saved settings file.
         :return:
         """
+        if input_filename is None:
+            input_filename = cls.SETTINGS_FILE
+
         input_path = Path(input_filename)
         if input_path.exists():
             new_settings = json.loads(input_path.read_text())
@@ -145,29 +152,32 @@ class BaseSettings(metaclass=ABCMeta):
 
 
 @prefab
-class Settings(BaseSettings):
+class DesktopSettings(BaseSettings):
     """
     Global persistent settings handler
     """
     # Class variables (untyped)
-    default_template_filename = "desktop.html"
-    default_css_filename = "desktop.css"
+    default_template_filename: ClassVar[str] = "desktop.html"
+    default_css_filename: ClassVar[str] = "desktop.css"
 
     # What file to use
-    output_file: Path = attribute(default=settings_file)
+    SETTINGS_FILE: ClassVar[Path] = desktop_settings_file
+    output_file: Path = desktop_settings_file
 
     # Window Settings
-    on_top: bool = attribute(default=False)
-    width: int = attribute(default=800)
-    height: int = attribute(default=800)
-    notes_folder: Path = attribute(default=user_path)
+    on_top: bool = False
+    width: int = 800
+    height: int = 800
 
 
 @prefab
 class ServerSettings(BaseSettings):
     # Class variables (untyped)
-    default_template_filename = "server.html"
-    default_css_filename = "server.css"
+    default_template_filename: ClassVar[str] = "server.html"
+    default_css_filename: ClassVar[str] = "server.css"
+
+    SETTINGS_FILE: ClassVar[Path] = server_settings_file
+    output_file: Path = server_settings_file
 
     server_hostname: str = local_hostname
     server_port: int = 80
