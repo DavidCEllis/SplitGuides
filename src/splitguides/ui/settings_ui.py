@@ -11,12 +11,19 @@ from PySide6.QtGui import (
     QColor
 )
 
+from ..settings import DesktopSettings
+from .hotkey_manager import HotkeyManager
 from .layouts import Ui_Settings
 from ..hotkeys import Hotkey
 
 
 class SettingsDialog(QDialog):
-    def __init__(self, parent, settings, hotkey_manager):
+    def __init__(
+            self,
+            parent,
+            settings: DesktopSettings,
+            hotkey_manager: HotkeyManager
+    ):
         super().__init__(parent=parent)
         self.ui = Ui_Settings()
         self.ui.setupUi(self)

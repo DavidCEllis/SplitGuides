@@ -3,9 +3,9 @@ import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, Template
 from PySide6 import QtCore
-from PySide6.QtGui import QCursor, QIcon
+from PySide6.QtGui import QCursor, QIcon, QAction
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu, QErrorMessage
 from .custom_elements import ExtLinkWebEnginePage
 
@@ -44,16 +44,17 @@ class MainWindow(QMainWindow):
         self.resize(self.settings.width, self.settings.height)
 
         # Always on Top
-        self.menu_on_top = None
+        self.menu_on_top: None | QAction = None
+        # noinspection PyUnresolvedReferences
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
 
         # Setup notes variables
-        self.notefile = None
-        self.notes = None
+        self.notefile: None | str = None
+        self.notes: None | Notes = None
 
         # Right Click Menu
-        self.rc_menu = None
-        self.hotkeys_toggle = None
+        self.rc_menu: None | QMenu = None
+        self.hotkeys_toggle: None | QAction = None
 
         self.build_menu()
         self.setup_actions()
@@ -63,7 +64,7 @@ class MainWindow(QMainWindow):
             autoescape=False,
         )
 
-        self.template = None
+        self.template: None | Template = None
         self.load_template()
 
         self.css = ""
@@ -96,6 +97,7 @@ class MainWindow(QMainWindow):
         """Toggle window always on top, update settings and window flag to match."""
         self.settings.on_top = not self.settings.on_top
         self.menu_on_top.setChecked(self.settings.on_top)
+        # noinspection PyUnresolvedReferences
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
         self.show()
 
@@ -173,6 +175,7 @@ class MainWindow(QMainWindow):
     def setup_actions(self):
         """Setup the browser element with custom options"""
         # Replace the context menu with the app context menu
+        # noinspection PyUnresolvedReferences
         self.ui.notes.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.ui.notes.customContextMenuRequested.connect(self.show_menu)
         # Allow links to open in an external browser
@@ -347,12 +350,14 @@ class LivesplitLink(QtCore.QObject):
 
     def ls_connect(self):
         self.update_status(
-            f"Trying to connect to Livesplit. | Split Offset: {self.main_window.split_offset}"
+            f"Trying to connect to Livesplit. | "
+            f"Split Offset: {self.main_window.split_offset}"
         )
         self.connected = self.client.connect()
         if self.connected:
             self.update_status(
-                f"Connected to Livesplit. | Split Offset: {self.main_window.split_offset}"
+                f"Connected to Livesplit. | "
+                f"Split Offset: {self.main_window.split_offset}"
             )
 
     def loop_update_split(self):
