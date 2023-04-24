@@ -84,7 +84,7 @@ def split():
                         )
                         if len(split_text) > 0:
                             # Remove newlines from the notes as they break the send
-                            data = split_text[0].replace("\n", "")
+                            data = "".join(split_text).replace("\n", "")
                             yield f"data: {data}\n\n"
                         else:
                             yield f"data: End of Notes.\n\n"
