@@ -109,7 +109,12 @@ class Settings:
                     f"Object of type {o.__class__} is not JSON Serializable"
                 )
 
-        json_str = to_json(self, excludes=("output_file", ), default=path_to_json)
+        json_str = to_json(
+            self,
+            excludes=("output_file", ),
+            default=path_to_json,
+            indent=2,
+        )
         self.output_file.write_text(json_str)
 
     @classmethod
