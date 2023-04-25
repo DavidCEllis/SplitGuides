@@ -188,4 +188,4 @@ class ServerSettings(BaseSettings):
     css_file: str = "server.css"
 
     server_hostname: str = local_hostname
-    server_port: int = 80
+    server_port: int = 8080
