@@ -25,11 +25,12 @@ setup(
     install_requires=[
         "pyside6",
         "jinja2",
-        "bleach[css]",
+        "bleach[css]==6.0",  # Each upgrade to bleach has broken something so pin it.
         "flask",
         "markdown",
         "keyboard",
         "prefab-classes",
+        # "waitress",
     ],
     tests_require=test_requirements,
     extras_require={
