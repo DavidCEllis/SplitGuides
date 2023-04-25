@@ -129,6 +129,7 @@ Via Splitnotes Server on Tablet:
 * flask - Handling the server version
 * markdown - Converting markdown to html for rendering
 * keyboard - Global hotkeys to advance/reverse note offset to splits
+* waitress - wsgi server for splitguides server
 
 --- 
 
