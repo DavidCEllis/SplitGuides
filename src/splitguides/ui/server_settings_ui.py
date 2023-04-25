@@ -56,14 +56,20 @@ class ServerSettingsDialog(QDialog):
         self.ui.htmltemplate_button.clicked.connect(self.html_template_dialog)
         self.ui.css_button.clicked.connect(self.css_dialog)
 
+        # Next and previous split keys are currently non-functioning
         # self.ui.nextsplitkey_button.clicked.connect(self.get_increase_hotkey)
         # self.ui.previoussplitkey_button.clicked.connect(self.get_decrease_hotkey)
-
         # self.pool = ThreadPoolExecutor(max_workers=1)
-
-        # Next and Previous Splits Not Yet Implemented
         self.ui.nextsplitkey_button.setDisabled(True)
         self.ui.previoussplitkey_button.setDisabled(True)
+        self.ui.nextsplitkey_label.hide()
+        self.ui.nextsplitkey_edit.hide()
+        self.ui.nextsplitkey_button.hide()
+        self.ui.previoussplitkey_label.hide()
+        self.ui.previoussplitkey_edit.hide()
+        self.ui.previoussplitkey_button.hide()
+        self.ui.divider_4.hide()
+        self.adjustSize()
 
         self.ui.confirm_cancel_box.accepted.connect(self.accept)
         self.ui.confirm_cancel_box.rejected.connect(self.reject)
