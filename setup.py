@@ -30,7 +30,7 @@ setup(
         "markdown",
         "keyboard",
         "prefab-classes",
-        # "waitress",
+        "waitress",
     ],
     tests_require=test_requirements,
     extras_require={

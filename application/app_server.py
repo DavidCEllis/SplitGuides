@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QApplication, QMainWindow
-# import waitress
+import waitress
 
 from flask import cli
 
@@ -49,17 +49,17 @@ def launch():
     print("Press ctrl+c to close the server.")
 
     try:
-        app.run(
-            threaded=True,
-            host=settings.server_hostname,
-            port=settings.server_port
-        )
-
-        # waitress.serve(
-        #     app,
+        # app.run(
+        #     threaded=True,
         #     host=settings.server_hostname,
         #     port=settings.server_port
         # )
+
+        waitress.serve(
+            app,
+            host=settings.server_hostname,
+            port=settings.server_port
+        )
     except KeyboardInterrupt:
         print("Interrupt received, closing application.")
     finally:
