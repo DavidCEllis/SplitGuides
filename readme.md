@@ -66,13 +66,13 @@ Configuration Options:
 * Font Size
 * Text and Background Colour
 * Alternative template HTML and CSS files 
-   - Jinja2 templating is used for the HTML, use the included file as a guide
-   - Allows for further customising of the appearance if desired
+   * Jinja2 templating is used for the HTML, use the included file as a guide
+   * Allows for further customising of the appearance if desired
 * Hotkeys to offset the notes from the splits (not available in splitnotes server)
-   - This allows for some adjustment if the notes have ended up in the wrong place
+   * This allows for some adjustment if the notes have ended up in the wrong place
      relative to the splits.
 * Server hostname and port (server only)
-   - This should be your local machine name on the network and an open port to
+   * This should be your local machine name on the network and an open port to
      connect to from the device you wish to use to display the notes.
 
 ## Example Notes ##
@@ -95,10 +95,10 @@ Configuration Options:
 * Grab the 200 soul
 * Ladder glitch
 * Buy 
-    - Max wooden arrows
-	- 4 blooming moss
-	- 2 throwing knifes
-	- Max (25) homeward bones
+   * Max wooden arrows
+   * 4 blooming moss
+   * 2 throwing knifes
+   * Max (25) homeward bones
 * Free Laurentius
 * Darksign
 
