@@ -1,9 +1,10 @@
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
-import json
+import sys
 
+from pathlib import Path
+
+from PySide6 import QtCore
 from PySide6.QtWidgets import QDialog, QColorDialog, QFileDialog
-from PySide6.QtCore import QRegularExpression, Slot
+from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import (
     QIntValidator,
     QDoubleValidator,
@@ -11,25 +12,39 @@ from PySide6.QtGui import (
     QColor,
 )
 
-from ..settings import DesktopSettings
-from .hotkey_manager import HotkeyManager
-from .layouts import Ui_Settings
-from ..hotkeys import Hotkey
+from ..settings import ServerSettings
+from .layouts import Ui_ServerSettings
 
 
-class SettingsDialog(QDialog):
+# Get correct paths
+if getattr(sys, "frozen", False):  # pragma: nocover
+    base_path = Path(sys.executable).parent
+    icon_file = str(base_path / "logo_alpha.png")
+else:
+    base_path = Path(__file__).parent
+    icon_file = str(base_path.parents[2] / "resources" / "logo_alpha.png")
+
+
+class ServerSettingsDialog(QDialog):
     def __init__(
-        self, parent, settings: DesktopSettings, hotkey_manager: HotkeyManager
+        self,
+        parent,
+        settings: ServerSettings,
     ):
         super().__init__(parent=parent)
-        self.ui = Ui_Settings()
+
+        self.ui = Ui_ServerSettings()
         self.ui.setupUi(self)
 
-        self.hotkey_manager = hotkey_manager
+        self.settings = settings
+
+        # noinspection PyUnresolvedReferences
+        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
+
+        # self.hotkey_manager = hotkey_manager
         self.nextsplitkey = None
         self.previoussplitkey = None
 
-        self.settings = settings
         self.temp_html_path = self.settings.full_template_path
         self.temp_css_path = self.settings.full_css_path
 
@@ -41,10 +56,23 @@ class SettingsDialog(QDialog):
         self.ui.htmltemplate_button.clicked.connect(self.html_template_dialog)
         self.ui.css_button.clicked.connect(self.css_dialog)
 
-        self.ui.nextsplitkey_button.clicked.connect(self.get_increase_hotkey)
-        self.ui.previoussplitkey_button.clicked.connect(self.get_decrease_hotkey)
+        # Next and previous split keys are currently non-functioning
+        # self.ui.nextsplitkey_button.clicked.connect(self.get_increase_hotkey)
+        # self.ui.previoussplitkey_button.clicked.connect(self.get_decrease_hotkey)
+        # self.pool = ThreadPoolExecutor(max_workers=1)
+        self.ui.nextsplitkey_button.setDisabled(True)
+        self.ui.previoussplitkey_button.setDisabled(True)
+        self.ui.nextsplitkey_label.hide()
+        self.ui.nextsplitkey_edit.hide()
+        self.ui.nextsplitkey_button.hide()
+        self.ui.previoussplitkey_label.hide()
+        self.ui.previoussplitkey_edit.hide()
+        self.ui.previoussplitkey_button.hide()
+        self.ui.divider_4.hide()
+        self.adjustSize()
 
-        self.pool = ThreadPoolExecutor(max_workers=1)
+        self.ui.confirm_cancel_box.accepted.connect(self.accept)
+        self.ui.confirm_cancel_box.rejected.connect(self.reject)
 
     def setup_validators(self):
         color_re = QRegularExpression(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})")
@@ -79,6 +107,9 @@ class SettingsDialog(QDialog):
         self.nextsplitkey = self.settings.increase_offset_hotkey
         self.previoussplitkey = self.settings.decrease_offset_hotkey
 
+        self.ui.noteserverhost_edit.setText(self.settings.server_hostname)
+        self.ui.noteserverport_edit.setText(str(self.settings.server_port))
+
     def store_settings(self):
         self.settings.hostname = self.ui.hostname_edit.text()
         self.settings.port = int(self.ui.port_edit.text())
@@ -98,6 +129,9 @@ class SettingsDialog(QDialog):
 
         self.settings.css_folder = Path(self.temp_css_path).parent
         self.settings.css_file = Path(self.temp_css_path).name
+
+        self.settings.server_hostname = self.ui.noteserverhost_edit.text()
+        self.settings.server_port = int(self.ui.noteserverport_edit.text())
 
     def font_color_dialog(self):
         """
@@ -140,72 +174,6 @@ class SettingsDialog(QDialog):
         if cssfile:
             self.temp_css_path = cssfile
             self.ui.css_edit.setText(Path(cssfile).name)
-
-    def get_increase_hotkey(self):
-        """Get a hotkey to use to increase the split offset"""
-        # First set the buttons dialog and disable the interface
-        self.ui.nextsplitkey_button.setText("Listening...")
-        self.setEnabled(False)
-        fn = lambda: self.hotkey_manager.select_input(self.return_increase_hotkey)
-        self.pool.submit(fn)
-
-    @Slot(str)
-    def return_increase_hotkey(self, hotkey=None):
-        """
-        Get the returned hotkey or cancel if no hotkey is returned
-        :param hotkey:
-        """
-        if hotkey:
-            hotkey = Hotkey(**json.loads(hotkey))
-            self.ui.nextsplitkey_edit.setText(hotkey.name)
-            self.nextsplitkey = hotkey
-        else:
-            self.ui.nextsplitkey_edit.setText("")
-            self.nextsplitkey = None
-
-        self.ui.nextsplitkey_button.setText("Select")
-
-        # Unbind next split key if both are equal
-        if hotkey and self.ui.previoussplitkey_edit.text() == hotkey.name:
-            self.ui.previoussplitkey_edit.setText("")
-            self.previoussplitkey = None
-
-        # Disconnect the hotkey signal from this function
-        self.hotkey_manager.hotkey_signal.disconnect(self.return_increase_hotkey)
-
-        self.setEnabled(True)
-
-    def get_decrease_hotkey(self):
-        """Get a hotkey to use to decrease the split offset"""
-        self.ui.previoussplitkey_button.setText("Listening...")
-        self.setEnabled(False)
-        fn = lambda: self.hotkey_manager.select_input(self.return_decrease_hotkey)
-        self.pool.submit(fn)
-
-    @Slot(str)
-    def return_decrease_hotkey(self, hotkey=None):
-        """
-        Get the returned hotkey or cancel if no hotkey is returned
-        :param hotkey:
-        """
-        if hotkey:
-            hotkey = Hotkey(**json.loads(hotkey))
-            self.ui.previoussplitkey_edit.setText(hotkey.name)
-            self.previoussplitkey = hotkey
-        else:
-            self.ui.previoussplitkey_edit.setText("")
-            self.previoussplitkey = None
-        self.ui.previoussplitkey_button.setText("Select")
-
-        # Unbind next split key if both are equal
-        if hotkey and self.ui.nextsplitkey_edit.text() == hotkey.name:
-            self.ui.nextsplitkey_edit.setText("")
-            self.nextsplitkey = None
-
-        # Disconnect the hotkey signal from this function
-        self.hotkey_manager.hotkey_signal.disconnect(self.return_decrease_hotkey)
-
-        self.setEnabled(True)
 
     def accept(self):
         """If the dialog is accepted save the settings"""

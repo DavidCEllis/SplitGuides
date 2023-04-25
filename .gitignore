@@ -188,3 +188,4 @@ $RECYCLE.BIN/
 
 # Project settings file
 src/**/settings.json
+src/**/server_settings.json

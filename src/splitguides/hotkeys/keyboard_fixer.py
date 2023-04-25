@@ -29,7 +29,7 @@ def read_hotkey(suppress=True):
     """
     Modified read_hotkey function to correctly support numpad keys.
 
-    The original function returns just the names, this returns a ([scancodes], name) tuple.
+    The original function returns just the names, this returns a Hotkey object.
     The scancodes can then be stored while the name can be displayed.
     """
 
