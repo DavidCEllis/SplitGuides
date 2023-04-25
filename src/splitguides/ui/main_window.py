@@ -84,9 +84,7 @@ class MainWindow(QMainWindow):
             try:
                 self.enable_hotkeys()
             except AttributeError:
-                QErrorMessage(parent=self).showMessage(
-                    "Could not enable hotkeys."
-                )
+                QErrorMessage(parent=self).showMessage("Could not enable hotkeys.")
                 self.disable_hotkeys()
                 self.settings.hotkeys_enabled = False
                 self.hotkeys_toggle.setChecked(False)
@@ -112,9 +110,7 @@ class MainWindow(QMainWindow):
                 self.settings.hotkeys_enabled = True
                 self.hotkeys_toggle.setChecked(True)
         except AttributeError:
-            QErrorMessage(parent=self).showMessage(
-                "Could not enable hotkeys."
-            )
+            QErrorMessage(parent=self).showMessage("Could not enable hotkeys.")
             self.settings.hotkeys_enabled = False
             self.hotkeys_toggle.setChecked(False)
 
@@ -263,7 +259,6 @@ class MainWindow(QMainWindow):
         idx = max(idx, 0)
 
         if self.notes and (idx != self.split_index or refresh):
-
             start = idx - self.settings.previous_splits
             end = idx + self.settings.next_splits + 1
 

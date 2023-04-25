@@ -123,4 +123,3 @@ def get_notes(parent):
         return True
     else:
         return False
-

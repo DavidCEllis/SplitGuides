@@ -1,12 +1,10 @@
 import sys
-import json
 
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
 
 from PySide6 import QtCore
 from PySide6.QtWidgets import QDialog, QColorDialog, QFileDialog
-from PySide6.QtCore import QRegularExpression, Slot
+from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import (
     QIntValidator,
     QDoubleValidator,
@@ -15,9 +13,8 @@ from PySide6.QtGui import (
 )
 
 from ..settings import ServerSettings
-# from .hotkey_manager import HotkeyManager
 from .layouts import Ui_ServerSettings
-# from ..hotkeys import Hotkey
+
 
 # Get correct paths
 if getattr(sys, "frozen", False):  # pragma: nocover
@@ -30,9 +27,9 @@ else:
 
 class ServerSettingsDialog(QDialog):
     def __init__(
-            self,
-            parent,
-            settings: ServerSettings,
+        self,
+        parent,
+        settings: ServerSettings,
     ):
         super().__init__(parent=parent)
 

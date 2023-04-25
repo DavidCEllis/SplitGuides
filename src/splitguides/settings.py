@@ -156,6 +156,7 @@ class DesktopSettings(BaseSettings):
     """
     Global persistent settings handler
     """
+
     # Class variables (untyped)
     default_template_filename: ClassVar[str] = "desktop.html"
     default_css_filename: ClassVar[str] = "desktop.css"
