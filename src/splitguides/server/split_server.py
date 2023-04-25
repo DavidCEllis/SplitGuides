@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 from flask import Flask, render_template, Response
-from PySide6.QtWidgets import QApplication, QFileDialog
+from PySide6.QtWidgets import QFileDialog
 
 from ..settings import ServerSettings
 from ..livesplit_client import get_client
@@ -103,22 +103,24 @@ def split():
     return Response(event_stream(), mimetype="text/event-stream")
 
 
-def get_notes():
+def get_notes(parent):
     global notes, notefile
-    # temp_app = QApplication()
 
     # noinspection PyTypeChecker
     filepath, _ = QFileDialog.getOpenFileName(
-        None,
+        parent,
         "Open Notes",
         settings.notes_folder,
         "Note Files (*.txt *.md);;All Files (*.*)",
     )
 
-    # temp_app.quit()
+    if filepath:
+        notefile = Path(filepath)
+        notes = Notes.from_file(notefile, settings.split_separator)
 
-    notefile = Path(filepath)
-    notes = Notes.from_file(notefile, settings.split_separator)
+        settings.notes_folder = str(notefile.parent)
+        settings.save()
+        return True
+    else:
+        return False
 
-    settings.notes_folder = str(notefile.parent)
-    settings.save()
