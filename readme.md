@@ -11,15 +11,20 @@ Includes a server version for rendering notes in browsers on another device
 ## Install/Setup ##
 
 1. Under the Livesplit layout editor add 'LiveSplit Server' (listed under 'control')
+   * Take note of the port number here, this is the value needed for 
+     'Livesplit Server Port' in settings.
+   * Livesplit Server Hostname can be the local ip given. If SplitGuides is running
+     on the same machine as Livesplit 'localhost' (the default) should also work.
 2. Download SplitGuides from the [**releases page**](https://github.com/DavidCEllis/SplitGuides/releases)
 3. Extract anywhere and run *splitguides.exe*
 
 ## Usage ##
 
 1. Connect with livesplit by starting the livesplit server component selecting 
-   'Control' and 'Start Server'
+   'Control' and 'Start Server' in livesplit.
 2. Right click in the splitguides window and select 'Open Notes' and find the text file
    containing the notes you wish to use.
+3. Some configuration is available from the settings dialog.
    
 Plain text formatting works the same way as SplitNotes. 
 Notes made for that should function fine in SplitGuides. 
@@ -31,65 +36,91 @@ inserted in between lines.
 
 1. Comment lines still use square brackets.
 2. By default splits will break on newlines, multiple newlines are ignored in this case.
-3. The rendering is done as HTML so HTML formatting can be used.
+  * If a split separator is given, newlines are left as in the input to the 
+    markdown/html processors.
    
-## splitguides_server.exe ##
+## SplitGuides Server ##
 
-Now included is a server version which launches a (local) webhost so you can view the notes
-on another device on your local network. Launch splitguides_server.exe to start the service.
+Included is a separate server version which launches a (local) webhost so you can view 
+the notes on another device on your local network.
 
-If the hostname and port defaults aren't usable you can set them by editing server_hostname 
-and server_port in settings.json. There is no dialog for editing these settings yet.
+Launch **splitguides_server.exe** to start the service. A settings dialog will appear
+so you can customise this version separately from the desktop version. After asking
+for the notes file the server will launch serving those notes and will update
+automatically as you split.
+
+If the hostname and port defaults aren't usable you can edit them 
+in the settings dialog.
+
+This version is intended for people doing runs on a single monitor so the notes can be
+displayed on another device (a tablet or phone for example). Just connect to the host
+and port given in a web browser.
    
-### Example Notes ###
-
-#### Source ####
-
-```markdown
-## High Hedge ##
-### Friendly Arm Inn ###
-* *East*
-* *Pick up the ring*
-* **Peldvale**
-
-### Peldvale ###
-* *South*
-* **High Hedge**
-
-### High Hedge ###
-* Rest and Spin
-* *South to Shop*
-* Thalantyr (1, 1)
-* Shop:
-    * Sell the wand
-    * Identify the ring
-    * Sell the ring
-    * 3x Potion of Explosions
-    * Potion of Magic Blocking
-    * Protection from Magic
-    * Identify
-    * Shield
-    * Mirror Image
-    * 3x Invisibility
-* *South*
-* Go to Wilderness Map
-/split
-```
-
-#### Result ####
-
-![Image of splitguides rendering](resources/demo_notes_md.png)
-
 ## Configuration ##
 
-The settings page offers some customisation and connection settings including:
+Configuration Options:
 
-  * Server hostname and port
-  * Show previous/next N splits
-  * Custom split separator
-  * Base font size
-  * Default text and background colour
-  * HTML (Jinja2) template and CSS files to use for rendering
+* Livesplit server hostname and port
+* Display previous/next splits
+* Split separator (leave blank for empty line separator)
+* Font Size
+* Text and Background Colour
+* Alternative template HTML and CSS files 
+   - Jinja2 templating is used for the HTML, use the included file as a guide
+   - Allows for further customising of the appearance if desired
+* Hotkeys to offset the notes from the splits (not available in splitnotes server)
+   - This allows for some adjustment if the notes have ended up in the wrong place
+     relative to the splits.
+* Server hostname and port (server only)
+   - This should be your local machine name on the network and an open port to
+     connect to from the device you wish to use to display the notes.
+
+## Example Notes ##
+
+### Source ###
+
+```markdown
+# Dark Souls Remastered - SL1 NWW #
+## Asylum ##
+* Start Pyro + MK
+* Keep Hilt
+* Get Axe/Estus/Flame
+* Asylum Skip
+* Pick up a 200 soul
+* Dupe the soul 99x
+* Leave
+
+## Laurentius ##
+* Pick up the firebombs
+* Grab the 200 soul
+* Ladder glitch
+* Buy 
+    - Max wooden arrows
+	- 4 blooming moss
+	- 2 throwing knifes
+	- Max (25) homeward bones
+* Free Laurentius
+* Darksign
+
+## GCS ##
+* Dupe souls with the arrows
+* Ascend flame to +15
+* Buy flash sweat, combustion, fire orb
+* Valley Run
+* Get DCS/RTSR
+* Upwarp
+* Get GCS
+```
+
+### Result ###
+
+On Desktop:
+
+![Image of splitguides rendering](resources/splits_example.png)
+
+Via Splitnotes Server on Tablet:
+
+![Image of splitguides server - yes this is an old iPad](resources/splitguides_server_example.jpg)
 
 ## Dependencies ##
 * pyside6 - QT Gui Bindings
@@ -101,4 +132,5 @@ The settings page offers some customisation and connection settings including:
 
 --- 
 
-Inspired by (but otherwise unassociated with) the original splitnotes: https://github.com/joeloskarsson/SplitNotes
+Inspired by (but otherwise unassociated with) the original splitnotes: 
+https://github.com/joeloskarsson/SplitNotes
