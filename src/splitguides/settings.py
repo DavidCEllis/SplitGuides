@@ -7,8 +7,7 @@ from abc import ABCMeta
 from pathlib import Path
 from typing import ClassVar
 
-from prefab_classes import prefab
-from prefab_classes.funcs import to_json
+from ducktools.classbuilder.prefab import prefab, attribute, as_dict, is_prefab_instance
 
 from .hotkeys import hotkey_or_none, Hotkey
 
@@ -38,9 +37,14 @@ except OSError:
 
 @prefab
 class BaseSettings(metaclass=ABCMeta):
-    # Settings file to use
-    SETTINGS_FILE: ClassVar[None | Path] = None
-    output_file: None | Path = None  # Settings save file
+    # Settings files to use - Default to desktop versions
+    SETTINGS_FILE: ClassVar[None | Path] = desktop_settings_file
+
+    default_template_filename: ClassVar[str] = "desktop.html"
+    default_css_filename: ClassVar[str] = "desktop.css"
+
+    # Settings save file
+    output_file: None | Path = attribute(default=None, in_dict=False)
 
     # Networking Settings
     hostname: str = "localhost"
@@ -88,18 +92,19 @@ class BaseSettings(metaclass=ABCMeta):
         Save settings as JSON
         """
 
-        def path_to_json(o):
-            if isinstance(o, Path):
+        def json_default(o):
+            if is_prefab_instance(o):
+                return as_dict(o)
+            elif isinstance(o, Path):
                 return str(o)
             else:
                 raise TypeError(
                     f"Object of type {o.__class__} is not JSON Serializable"
                 )
 
-        json_str = to_json(
+        json_str = json.dumps(
             self,
-            excludes=("output_file",),
-            default=path_to_json,
+            default=json_default,
             indent=2,
         )
         self.output_file.write_text(json_str)
@@ -157,13 +162,13 @@ class DesktopSettings(BaseSettings):
     Global persistent settings handler
     """
 
-    # Class variables (untyped)
+    # Class variables
+    SETTINGS_FILE: ClassVar[Path] = desktop_settings_file
     default_template_filename: ClassVar[str] = "desktop.html"
     default_css_filename: ClassVar[str] = "desktop.css"
 
     # What file to use
-    SETTINGS_FILE: ClassVar[Path] = desktop_settings_file
-    output_file: Path = desktop_settings_file
+    output_file: Path = attribute(default=desktop_settings_file, in_dict=False)
 
     # Override Defaults
     html_template_file: str = "desktop.html"
@@ -177,12 +182,12 @@ class DesktopSettings(BaseSettings):
 
 @prefab
 class ServerSettings(BaseSettings):
-    # Class variables (untyped)
+    # Class variables
+    SETTINGS_FILE: ClassVar[Path] = server_settings_file
     default_template_filename: ClassVar[str] = "server.html"
     default_css_filename: ClassVar[str] = "server.css"
 
-    SETTINGS_FILE: ClassVar[Path] = server_settings_file
-    output_file: Path = server_settings_file
+    output_file: Path = attribute(default=server_settings_file, in_dict=False)
 
     # Override defaults
     html_template_file: str = "server.html"

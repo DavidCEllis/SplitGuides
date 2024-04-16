@@ -8,11 +8,13 @@ but it's currently better than the alternative of writing a keyboard hook
 library myself for this one small task.
 """
 import time
+import json
+from collections.abc import Callable
 
 import keyboard
 from PySide6 import QtCore
 
-from prefab_classes.funcs import to_json
+from ducktools.classbuilder.prefab import as_dict
 
 from ..hotkeys import read_hotkey
 
@@ -22,15 +24,17 @@ class HotkeyManager(QtCore.QObject):
     increase_signal = QtCore.Signal()
     decrease_signal = QtCore.Signal()
 
+    enabled: bool
+    increase_key: Callable[[], None] | None
+    decrease_key: Callable[[], None] | None
+
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
         self.enabled = False
 
         # Connect to the increase_offset and decrease_offset functions
-        # noinspection PyUnresolvedReferences
         self.increase_signal.connect(self.parent.increase_offset)
-        # noinspection PyUnresolvedReferences
         self.decrease_signal.connect(self.parent.decrease_offset)
 
         # The keys for unbinding
@@ -39,12 +43,10 @@ class HotkeyManager(QtCore.QObject):
 
     def enable_hotkeys(self, increase_key, decrease_key):
         if increase_key:
-            # noinspection PyUnresolvedReferences
             self.increase_key = keyboard.add_hotkey(
                 tuple(increase_key), self.increase_signal.emit
             )
         if decrease_key:
-            # noinspection PyUnresolvedReferences
             self.decrease_key = keyboard.add_hotkey(
                 tuple(decrease_key), self.decrease_signal.emit
             )
@@ -67,7 +69,6 @@ class HotkeyManager(QtCore.QObject):
         Choose a hotkey to be used.
         :param return_object: the function to call back with the hotkey value
         """
-        # noinspection PyUnresolvedReferences
         self.hotkey_signal.connect(return_object)
 
         # Sleep 100ms to allow inputs used to trigger
@@ -78,5 +79,5 @@ class HotkeyManager(QtCore.QObject):
         # Esc, Backspace or Delete can be used to clear the input
         if hotkey.name in ["esc", "backspace", "delete"]:
             hotkey = None  # Blank will be converted to None
-        # noinspection PyUnresolvedReferences
-        self.hotkey_signal.emit(to_json(hotkey))  # Needs to be a string
+
+        self.hotkey_signal.emit(json.dumps(as_dict(hotkey)))  # Needs to be a string
