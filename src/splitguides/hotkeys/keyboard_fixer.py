@@ -1,4 +1,3 @@
-# COMPILE_PREFABS
 """
 The keyboard library does not handle numpad hotkeys correctly.
 

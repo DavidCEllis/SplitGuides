@@ -1,4 +1,3 @@
-# COMPILE_PREFABS
 """
 Socket based connection model
 """
