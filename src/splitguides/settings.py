@@ -10,25 +10,48 @@ from typing import ClassVar
 from ducktools.classbuilder.prefab import prefab, attribute, as_dict, is_prefab_instance
 
 from .hotkeys import hotkey_or_none, Hotkey
+from .exceptions import UnsupportedPlatformError
+
+PROJECT_NAME = "splitguides"
+
+match sys.platform:
+    case "win32":
+        if _local_app_folder := os.environ.get("LOCALAPPDATA"):
+            if not os.path.isdir(_local_app_folder):
+                raise FileNotFoundError(
+                    f"Could not find local app data folder {_local_app_folder}"
+                )
+        else:
+            raise EnvironmentError("Environment variable %LOCALAPPDATA% not found")
+        SETTINGS_FOLDER = Path(_local_app_folder) / PROJECT_NAME
+    case "linux":
+        SETTINGS_FOLDER = Path(os.path.expanduser(os.path.join("~", f".{PROJECT_NAME}")))
+    case other:
+        raise UnsupportedPlatformError(
+            f"Platform {other!r} is not currently supported."
+        )
+
+SETTINGS_FOLDER.mkdir(exist_ok=True)
 
 if getattr(sys, "frozen", False):  # pragma: nocover
     # Application is .exe, use visible files
-    base_path = Path(sys.executable).parent
+    APPLICATION_FOLDER = Path(sys.executable).parent
 else:
     # Running as .py - use standard folder structure
-    base_path = Path(__file__).parent
+    APPLICATION_FOLDER = Path(__file__).parent
 
-desktop_settings_file = Path(base_path / "settings.json")
-server_settings_file = Path(base_path / "server_settings.json")
+DESKTOP_SETTINGS_FILE = SETTINGS_FOLDER / "settings.json"
+SERVER_SETTINGS_FILE = SETTINGS_FOLDER / "server_settings.json"
 
-default_template_folder = Path(base_path / "templates")
-default_static_folder = Path(base_path / "static")
-user_path = str(Path(os.path.expanduser("~")) / "Documents")
+DEFAULT_TEMPLATE_FOLDER = Path(APPLICATION_FOLDER / "templates")
+DEFAULT_STATIC_FOLDER = Path(APPLICATION_FOLDER / "static")
+
+USER_PATH = str(Path(os.path.expanduser("~")) / "Documents")
 
 try:
-    local_hostname = socket.gethostname()
+    LOCAL_HOSTNAME = socket.gethostname()
 except OSError:
-    local_hostname = "127.0.0.1"
+    LOCAL_HOSTNAME = "127.0.0.1"
     print(
         "Could not get local network hostname, using 127.0.0.1. "
         "The server will only be accessible from this machine."
@@ -38,7 +61,7 @@ except OSError:
 @prefab
 class BaseSettings(metaclass=ABCMeta):
     # Settings files to use - Default to desktop versions
-    SETTINGS_FILE: ClassVar[None | Path] = desktop_settings_file
+    SETTINGS_FILE: ClassVar[None | Path] = DESKTOP_SETTINGS_FILE
 
     default_template_filename: ClassVar[str] = "desktop.html"
     default_css_filename: ClassVar[str] = "desktop.css"
@@ -60,12 +83,12 @@ class BaseSettings(metaclass=ABCMeta):
     font_color: str = "#000000"
     background_color: str = "#f1f8ff"
 
-    html_template_folder: Path = default_template_folder
-    css_folder: Path = default_static_folder
+    html_template_folder: Path = DEFAULT_TEMPLATE_FOLDER
+    css_folder: Path = DEFAULT_STATIC_FOLDER
     html_template_file: None | str = None
     css_file: None | str = None
 
-    notes_folder: Path = user_path
+    notes_folder: Path = USER_PATH
 
     # Hotkey Settings
     hotkeys_enabled: bool = False
@@ -141,10 +164,10 @@ class BaseSettings(metaclass=ABCMeta):
 
     def fix_template_paths(self):
         if not self.full_template_path.exists():
-            self.html_template_folder = default_template_folder
+            self.html_template_folder = DEFAULT_TEMPLATE_FOLDER
             self.html_template_file = self.default_template_filename
         if not self.full_css_path.exists():
-            self.css_folder = default_static_folder
+            self.css_folder = DEFAULT_STATIC_FOLDER
             self.css_file = self.default_css_filename
 
     @property
@@ -163,12 +186,12 @@ class DesktopSettings(BaseSettings):
     """
 
     # Class variables
-    SETTINGS_FILE: ClassVar[Path] = desktop_settings_file
+    SETTINGS_FILE: ClassVar[Path] = DESKTOP_SETTINGS_FILE
     default_template_filename: ClassVar[str] = "desktop.html"
     default_css_filename: ClassVar[str] = "desktop.css"
 
     # What file to use
-    output_file: Path = attribute(default=desktop_settings_file, in_dict=False)
+    output_file: Path = attribute(default=DESKTOP_SETTINGS_FILE, in_dict=False)
 
     # Override Defaults
     html_template_file: str = "desktop.html"
@@ -183,15 +206,15 @@ class DesktopSettings(BaseSettings):
 @prefab
 class ServerSettings(BaseSettings):
     # Class variables
-    SETTINGS_FILE: ClassVar[Path] = server_settings_file
+    SETTINGS_FILE: ClassVar[Path] = SERVER_SETTINGS_FILE
     default_template_filename: ClassVar[str] = "server.html"
     default_css_filename: ClassVar[str] = "server.css"
 
-    output_file: Path = attribute(default=server_settings_file, in_dict=False)
+    output_file: Path = attribute(default=SERVER_SETTINGS_FILE, in_dict=False)
 
     # Override defaults
     html_template_file: str = "server.html"
     css_file: str = "server.css"
 
-    server_hostname: str = local_hostname
+    server_hostname: str = LOCAL_HOSTNAME
     server_port: int = 8000

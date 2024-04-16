@@ -49,12 +49,6 @@ def launch():
     print("Press ctrl+c to close the server.")
 
     try:
-        # app.run(
-        #     threaded=True,
-        #     host=settings.server_hostname,
-        #     port=settings.server_port
-        # )
-
         waitress.serve(
             app,
             host=settings.server_hostname,

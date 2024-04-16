@@ -6,7 +6,6 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name="splitguides"
-version="v0.9.0"
 description="Speedrun notes tool for advancing notes automatically with Livesplit."
 authors = [
   { name="David C Ellis" },
@@ -29,12 +28,15 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.11",
 ]
-
+dynamic = ['version']
 license = {file = "COPYING"}
 
 [project.optional-dependencies]
 testing = ["pytest", "pytest-cov", "pytest-qt"]
 build = ["cx-freeze", "pywin32"]
+
+[tool.setuptools.dynamic]
+version = { attr = "splitguides.__version__" }
 
 [tool.pytest.ini_options]
 addopts= "--cov=src/ --cov-report=term-missing"
