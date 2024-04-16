@@ -1,21 +1,43 @@
-[tool.black]
-line-length = 88
-target_version = ['py311']
-include = '\.pyi?$'
-exclude = '''
+[build-system]
+requires = [
+    "setuptools>=61.0",
+]
+build-backend = "setuptools.build_meta"
 
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-)
-'''
+[project]
+name="splitguides"
+version="v0.9.0"
+description="Speedrun notes tool for advancing notes automatically with Livesplit."
+authors = [
+  { name="David C Ellis" },
+]
+readme="README.md"
+requires-python = "~=3.11" # As an application this is more specific
+dependencies = [
+    "pyside6",
+    "jinja2",
+    "bleach[css]==6.0",  # Each upgrade to bleach has broken something so pin it.
+    "flask",
+    "markdown",
+    "keyboard",
+    "prefab-classes",
+    "waitress",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11",
+]
+
+license = {file = "COPYING"}
+
+[project.optional-dependencies]
+testing = ["pytest", "pytest-cov", "pytest-qt"]
+build = ["cx-freeze", "pywin32"]
+
+[tool.pytest.ini_options]
+addopts= "--cov=src/ --cov-report=term-missing"
+testpaths = [
+    "tests",
+]
