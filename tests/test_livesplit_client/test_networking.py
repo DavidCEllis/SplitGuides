@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from splitguides.livesplit_client.networking import LivesplitConnection, BUFFER_SIZE
+from splitguides.livesplit_client import LivesplitConnection, BUFFER_SIZE
 
 
 def test_init():

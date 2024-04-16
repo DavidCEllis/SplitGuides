@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from splitguides.livesplit_client.messaging import LivesplitMessaging, parse_time
+from splitguides.livesplit_client import LivesplitMessaging, parse_time
 
 times = [
     ("15:32.34", timedelta(minutes=15, seconds=32, milliseconds=340)),
