@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt, QTimer
 from ducktools.classbuilder.prefab import as_dict
 
 from splitguides.settings import DesktopSettings
-from splitguides.settings import default_static_folder, default_template_folder
+from splitguides.settings import DEFAULT_STATIC_FOLDER, DEFAULT_TEMPLATE_FOLDER
 
 from splitguides.ui.settings_ui import SettingsDialog
 
@@ -90,8 +90,8 @@ class TestSettings:
         assert s.full_template_path != Path("fake/html/folder/fakehtml.html")
         assert s.full_css_path != Path("fake/css/folder/fakecss.css")
         # Check they are defaults
-        assert s.full_template_path == default_template_folder / "desktop.html"
-        assert s.full_css_path == default_static_folder / "desktop.css"
+        assert s.full_template_path == DEFAULT_TEMPLATE_FOLDER / "desktop.html"
+        assert s.full_css_path == DEFAULT_STATIC_FOLDER / "desktop.css"
 
     def test_save_load(self):
         s = DesktopSettings.load(test_settings)
