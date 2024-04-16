@@ -7,7 +7,7 @@ This is a rewrite of the relevant functions to handle this.
 
 import queue as _queue
 
-from prefab_classes import prefab, attribute
+from ducktools.classbuilder.prefab import prefab, attribute, SlotFields
 import keyboard
 
 
@@ -15,17 +15,18 @@ KEY_DOWN = "down"
 KEY_UP = "up"
 
 
-@prefab
+@prefab(dict_method=True)
 class Hotkey:
-    scancodes = attribute(default=None)
-    name = attribute(default=None)
+    __slots__ = SlotFields(scancodes=attribute(), name=attribute())
+    scancodes: list[int]
+    name: str
 
 
 def hotkey_or_none(keydict):
     return Hotkey(**keydict) if keydict else None
 
 
-def read_hotkey(suppress=True):
+def read_hotkey(suppress: bool = True) -> Hotkey:
     """
     Modified read_hotkey function to correctly support numpad keys.
 

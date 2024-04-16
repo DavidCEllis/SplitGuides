@@ -1,16 +1,17 @@
-# COMPILE_PREFABS
 """
 Handle livesplit
 """
 import re
 from datetime import timedelta
 
-from prefab_classes import prefab, attribute
+from ducktools.classbuilder.prefab import prefab
+
+from .networking import LivesplitConnection  # Type hinting
 
 
 @prefab
 class LivesplitMessaging:
-    connection = attribute()
+    connection: LivesplitConnection
 
     def connect(self):
         return self.connection.connect()

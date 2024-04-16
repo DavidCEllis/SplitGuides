@@ -4,17 +4,17 @@ Socket based connection model
 """
 import socket
 
-from prefab_classes import prefab, attribute
+from ducktools.classbuilder.prefab import prefab, attribute
 
 BUFFER_SIZE = 4096
 
 
 @prefab
 class LivesplitConnection:
-    server = attribute(default="localhost")
-    port = attribute(default=16834)
-    timeout = attribute(default=1)
-    sock = attribute(default=None, init=False, repr=False)
+    server: str = attribute(default="localhost")
+    port: int = attribute(default=16834)
+    timeout: int = attribute(default=1)
+    sock: socket.socket | None = attribute(default=None, init=False, repr=False)
 
     def connect(self):
         """

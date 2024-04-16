@@ -20,7 +20,7 @@ dependencies = [
     "flask",
     "markdown",
     "keyboard",
-    "prefab-classes",
+    "ducktools-classbuilder",
     "waitress",
 ]
 classifiers = [
