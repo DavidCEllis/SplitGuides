@@ -11,16 +11,16 @@ authors = [
   { name="David C Ellis" },
 ]
 readme="README.md"
-requires-python = "~=3.11" # As an application this is more specific
+requires-python = ">=3.11"  # 3.12 should function, but may not build
 dependencies = [
-    "pyside6",
-    "jinja2",
+    "pyside6~=6.7",
+    "jinja2~=3.1",
     "bleach[css]==6.0",  # Each upgrade to bleach has broken something so pin it.
-    "flask",
-    "markdown",
-    "keyboard",
+    "flask~=3.0",
+    "markdown~=3.6",
+    "keyboard~=0.13.5",
     "ducktools-classbuilder>=0.2.1",  # renamed in_dict to serialize
-    "waitress",
+    "waitress~=3.0",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
