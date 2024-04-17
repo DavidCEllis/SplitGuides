@@ -67,7 +67,7 @@ class BaseSettings(metaclass=ABCMeta):
     default_css_filename: ClassVar[str] = "desktop.css"
 
     # Settings save file
-    output_file: None | Path = attribute(default=None, in_dict=False)
+    output_file: None | Path = attribute(default=None, serialize=False)
 
     # Networking Settings
     hostname: str = "localhost"
@@ -191,7 +191,7 @@ class DesktopSettings(BaseSettings):
     default_css_filename: ClassVar[str] = "desktop.css"
 
     # What file to use
-    output_file: Path = attribute(default=DESKTOP_SETTINGS_FILE, in_dict=False)
+    output_file: Path = attribute(default=DESKTOP_SETTINGS_FILE, serialize=False)
 
     # Override Defaults
     html_template_file: str = "desktop.html"
@@ -210,7 +210,7 @@ class ServerSettings(BaseSettings):
     default_template_filename: ClassVar[str] = "server.html"
     default_css_filename: ClassVar[str] = "server.css"
 
-    output_file: Path = attribute(default=SERVER_SETTINGS_FILE, in_dict=False)
+    output_file: Path = attribute(default=SERVER_SETTINGS_FILE, serialize=False)
 
     # Override defaults
     html_template_file: str = "server.html"

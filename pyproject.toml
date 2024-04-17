@@ -19,7 +19,7 @@ dependencies = [
     "flask",
     "markdown",
     "keyboard",
-    "ducktools-classbuilder",
+    "ducktools-classbuilder>=0.2.1",  # renamed in_dict to serialize
     "waitress",
 ]
 classifiers = [
