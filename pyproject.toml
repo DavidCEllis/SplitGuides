@@ -20,6 +20,7 @@ dependencies = [
     "markdown~=3.6",
     "keyboard~=0.13.5",
     "ducktools-classbuilder>=0.2.1",  # renamed in_dict to serialize
+    "ducktools-env>=0.1.2",  # Used for script runner implementation
     "waitress~=3.0",
 ]
 classifiers = [
