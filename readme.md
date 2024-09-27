@@ -15,9 +15,9 @@ Includes a server version for rendering notes in browsers on another device
      'Livesplit Server Port' in settings.
    * Livesplit Server Hostname can be the local ip given. If SplitGuides is running
      on the same machine as Livesplit 'localhost' (the default) should also work.
-2. Download SplitGuides_v<VERSION>.zip from the 
+2. Download `SplitGuides_v<VERSION>.zip` from the 
    [**releases page**](https://github.com/DavidCEllis/SplitGuides/releases)
-   Where <VERSION> is the version number of the release.
+   Where `<VERSION>` is the version number of the release.
 3. Extract anywhere and run *splitguides.exe*
 
 ### Alternative installs ###
