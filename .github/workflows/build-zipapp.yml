@@ -27,7 +27,7 @@ jobs:
     - name: Store the built zipapp
       uses: actions/upload-artifact@v4
       with:
-        name: ducktools-zipapp
+        name: splitguides-zipapp
         path: zipapp/dist
 
 #  add-to-github-release:
