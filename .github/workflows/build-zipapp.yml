@@ -24,7 +24,7 @@ jobs:
     - name: Build the zipapp
       run: |
         python zipapp/build_zipapps.py
-    - name: Store the built zipapp
+    - name: Store the built zipapps
       uses: actions/upload-artifact@v4
       with:
         name: splitguides-zipapp

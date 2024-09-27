@@ -28,4 +28,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: splitguides-app
-        path: build/SplitGuides_v*/
+        path: build/SplitGuides_v*.zip

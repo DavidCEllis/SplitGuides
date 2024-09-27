@@ -7,6 +7,7 @@ Special setup.py file for building the app
 import itertools
 import sys
 import shutil
+import subprocess
 from pathlib import Path
 
 from cx_Freeze import setup, Executable
@@ -63,6 +64,10 @@ if __name__ == "__main__":
                 print(f"Removing: {f}")
                 shutil.rmtree(f)
 
+        for f in build_path.glob("*.zip"):
+            print(f"Removing: {f}")
+            f.unlink()
+
     setup(
         name="splitguides",
         version=splitguides.__version__,
@@ -74,3 +79,15 @@ if __name__ == "__main__":
     app_path = list(build_path.glob("exe.*"))[0]
     output_folder = app_path.with_name(f"SplitGuides_v{splitguides.__version__}")
     app_path.rename(output_folder)
+
+    zip_path = f"{output_folder}.zip"
+
+    print(f"Building zip archive at {zip_path}")
+    subprocess.run([
+        sys.executable,
+        "-m",
+        "zipfile",
+        "-c",
+        str(zip_path),
+        str(output_folder),
+    ])
