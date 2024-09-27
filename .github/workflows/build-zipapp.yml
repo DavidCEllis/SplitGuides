@@ -1,0 +1,66 @@
+name: Build zipapp
+
+#on:
+#  release:
+#    types: [published]
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    name: Build zipapp
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install the module
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install .
+    - name: Build the zipapp
+      run: |
+        python zipapp/build_zipapps.py
+    - name: Store the built zipapp
+      uses: actions/upload-artifact@v4
+      with:
+        name: ducktools-zipapp
+        path: zipapp/dist
+
+#  add-to-github-release:
+#    name: >-
+#      Sign the zipapp with Sigstore
+#      and upload it to GitHub Release
+#    needs:
+#    - build
+#    runs-on: windows-latest
+#
+#    permissions:
+#      contents: write  # IMPORTANT: mandatory for making GitHub Releases
+#      id-token: write  # IMPORTANT: mandatory for sigstore
+#
+#    steps:
+#    - name: Download the zipapp
+#      uses: actions/download-artifact@v4
+#      with:
+#        name: ducktools-zipapp
+#        path: zipapp/dist/
+#    - name: Sign the zipapp with Sigstore
+#      uses: sigstore/gh-action-sigstore-python@v3.0.0
+#      with:
+#        release-signing-artifacts: false
+#        inputs: >-
+#          ./zipapp/dist/*.pyz
+#    - name: Upload artifact signature to GitHub Release
+#      env:
+#        GITHUB_TOKEN: ${{ github.token }}
+#      # Upload to GitHub Release using the `gh` CLI.
+#      # `dist/` contains the built packages, and the
+#      # sigstore-produced signatures and certificates.
+#      run: >-
+#        gh release upload
+#        '${{ github.ref_name }}' zipapp/dist/**
+#        --repo '${{ github.repository }}'
