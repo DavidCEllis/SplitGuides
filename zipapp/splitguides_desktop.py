@@ -25,7 +25,7 @@
 #     "keyboard~=0.13.5",
 #     "ducktools-classbuilder>=0.7.2",
 #     "waitress~=3.0",
-#     "ducktools-env>=0.1.3",
+#     "ducktools-env>=0.1.4",
 # ]
 #
 # [tool.ducktools.env.app]
