@@ -32,6 +32,9 @@ else:
     icon_file = str(base_path.parents[2] / "resources" / "logo_alpha.png")
 
 
+IS_WINDOWS = sys.platform == "win32"
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -85,18 +88,23 @@ class MainWindow(QMainWindow):
         self.split_index = 0
 
         self.split_offset = 0  # Offset for advancing/reversing split
-        # Set up hotkey manager
-        self.hotkey_manager = HotkeyManager(self)
-        if self.settings.hotkeys_enabled:
-            try:
-                self.enable_hotkeys()
-            except AttributeError:
-                QErrorMessage(parent=self).showMessage("Could not enable hotkeys.")
-                self.disable_hotkeys()
-                self.settings.hotkeys_enabled = False
-                self.hotkeys_toggle.setChecked(False)
 
-        self.start_loops()
+        # Set up hotkey manager
+        if IS_WINDOWS:
+            self.hotkey_manager = HotkeyManager(self)
+
+            if self.settings.hotkeys_enabled:
+                try:
+                    self.enable_hotkeys()
+                except AttributeError:
+                    QErrorMessage(parent=self).showMessage("Could not enable hotkeys.")
+                    self.disable_hotkeys()
+                    self.settings.hotkeys_enabled = False
+                    self.hotkeys_toggle.setChecked(False)
+        else:
+            self.hotkey_manager = None
+
+        self.start_loops()  # Start livesplit checking loops
 
     def toggle_on_top(self):
         """Toggle window always on top, update settings and window flag to match."""
@@ -107,30 +115,33 @@ class MainWindow(QMainWindow):
         self.show()
 
     def toggle_hotkey_enable(self):
-        try:
-            if self.settings.hotkeys_enabled:
-                self.disable_hotkeys()
+        if IS_WINDOWS:
+            try:
+                if self.settings.hotkeys_enabled:
+                    self.disable_hotkeys()
+                    self.settings.hotkeys_enabled = False
+                    self.hotkeys_toggle.setChecked(False)
+                else:
+                    self.enable_hotkeys()
+                    self.settings.hotkeys_enabled = True
+                    self.hotkeys_toggle.setChecked(True)
+            except AttributeError:
+                QErrorMessage(parent=self).showMessage("Could not enable hotkeys.")
                 self.settings.hotkeys_enabled = False
                 self.hotkeys_toggle.setChecked(False)
-            else:
-                self.enable_hotkeys()
-                self.settings.hotkeys_enabled = True
-                self.hotkeys_toggle.setChecked(True)
-        except AttributeError:
-            QErrorMessage(parent=self).showMessage("Could not enable hotkeys.")
-            self.settings.hotkeys_enabled = False
-            self.hotkeys_toggle.setChecked(False)
 
     def enable_hotkeys(self):
-        increase_key = self.settings.increase_offset_hotkey.scancodes
-        decrease_key = self.settings.decrease_offset_hotkey.scancodes
-        self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
+        if IS_WINDOWS:
+            increase_key = self.settings.increase_offset_hotkey.scancodes
+            decrease_key = self.settings.decrease_offset_hotkey.scancodes
+            self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
 
     def disable_hotkeys(self):
-        self.hotkey_manager.disable_hotkeys()
-        self.split_offset = 0  # Reset the offset as you can no longer change it
-        if not self.ls.connected:
-            self.update_notes(0)
+        if IS_WINDOWS:
+            self.hotkey_manager.disable_hotkeys()
+            self.split_offset = 0  # Reset the offset as you can no longer change it
+            if not self.ls.connected:
+                self.update_notes(0)
 
     def increase_offset(self):
         self.split_offset += 1
@@ -165,7 +176,8 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         """On close save settings and close the livesplit connection."""
         self.settings.save()
-        self.hotkey_manager.disable_all()  # Kill any hotkeys
+        if IS_WINDOWS:
+            self.hotkey_manager.disable_all()  # Kill any hotkeys
         self.ls.close()
         event.accept()
 
@@ -198,10 +210,11 @@ class MainWindow(QMainWindow):
         self.menu_on_top.setChecked(self.settings.on_top)
         self.menu_on_top.triggered.connect(self.toggle_on_top)
 
-        self.hotkeys_toggle = self.rc_menu.addAction("Enable Hotkeys")
-        self.hotkeys_toggle.setCheckable(True)
-        self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
-        self.hotkeys_toggle.triggered.connect(self.toggle_hotkey_enable)
+        if IS_WINDOWS:
+            self.hotkeys_toggle = self.rc_menu.addAction("Enable Hotkeys")
+            self.hotkeys_toggle.setCheckable(True)
+            self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
+            self.hotkeys_toggle.triggered.connect(self.toggle_hotkey_enable)
 
     def show_menu(self):
         """Display the context menu at the cursor position."""
@@ -283,7 +296,7 @@ class MainWindow(QMainWindow):
     def open_settings(self):
         """Open the settings dialog, refresh everything if the settings have changed."""
         # Block hotkeys while in the settings menu
-        if self.hotkey_manager.enabled:
+        if IS_WINDOWS and self.hotkey_manager.enabled:
             self.disable_hotkeys()
 
         settings_dialog = SettingsDialog(
@@ -312,7 +325,7 @@ class MainWindow(QMainWindow):
                 self.update_notes(self.split_index, refresh=True)
 
         # Re-enable hotkeys if enabled
-        if self.settings.hotkeys_enabled:
+        if IS_WINDOWS and self.settings.hotkeys_enabled:
             self.enable_hotkeys()
 
 

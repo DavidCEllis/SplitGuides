@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 import json
@@ -41,8 +42,12 @@ class SettingsDialog(QDialog):
         self.ui.htmltemplate_button.clicked.connect(self.html_template_dialog)
         self.ui.css_button.clicked.connect(self.css_dialog)
 
-        self.ui.nextsplitkey_button.clicked.connect(self.get_increase_hotkey)
-        self.ui.previoussplitkey_button.clicked.connect(self.get_decrease_hotkey)
+        if sys.platform == "win32":
+            self.ui.nextsplitkey_button.clicked.connect(self.get_increase_hotkey)
+            self.ui.previoussplitkey_button.clicked.connect(self.get_decrease_hotkey)
+        else:
+            self.ui.nextsplitkey_button.setDisabled(True)
+            self.ui.previoussplitkey_button.setDisabled(True)
 
         self.pool = ThreadPoolExecutor(max_workers=1)
 

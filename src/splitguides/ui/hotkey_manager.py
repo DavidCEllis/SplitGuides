@@ -7,6 +7,8 @@ I really don't like the design
 but it's currently better than the alternative of writing a keyboard hook
 library myself for this one small task.
 """
+import sys
+
 import time
 import json
 from collections.abc import Callable
@@ -17,6 +19,9 @@ from PySide6 import QtCore
 from ducktools.classbuilder.prefab import as_dict
 
 from ..hotkeys import read_hotkey
+
+
+IS_WINDOWS = sys.platform == "win32"
 
 
 class HotkeyManager(QtCore.QObject):
@@ -42,42 +47,46 @@ class HotkeyManager(QtCore.QObject):
         self.decrease_key = None
 
     def enable_hotkeys(self, increase_key, decrease_key):
-        if increase_key:
-            self.increase_key = keyboard.add_hotkey(
-                tuple(increase_key), self.increase_signal.emit
-            )
-        if decrease_key:
-            self.decrease_key = keyboard.add_hotkey(
-                tuple(decrease_key), self.decrease_signal.emit
-            )
-        self.enabled = True
+        if IS_WINDOWS:
+            if increase_key:
+                self.increase_key = keyboard.add_hotkey(
+                    tuple(increase_key), self.increase_signal.emit
+                )
+            if decrease_key:
+                self.decrease_key = keyboard.add_hotkey(
+                    tuple(decrease_key), self.decrease_signal.emit
+                )
+            self.enabled = True
 
     def disable_hotkeys(self):
-        if self.increase_key:
-            keyboard.remove_hotkey(self.increase_key)
-        if self.decrease_key:
-            keyboard.remove_hotkey(self.decrease_key)
-        self.enabled = False
+        if IS_WINDOWS:
+            if self.increase_key:
+                keyboard.remove_hotkey(self.increase_key)
+            if self.decrease_key:
+                keyboard.remove_hotkey(self.decrease_key)
+            self.enabled = False
 
     @staticmethod
     def disable_all():
         """Backup method to just disable everything, used at close"""
-        keyboard.unhook_all()
+        if IS_WINDOWS:
+            keyboard.unhook_all()
 
     def select_input(self, return_object):
         """
         Choose a hotkey to be used.
         :param return_object: the function to call back with the hotkey value
         """
-        self.hotkey_signal.connect(return_object)
+        if IS_WINDOWS:
+            self.hotkey_signal.connect(return_object)
 
-        # Sleep 100ms to allow inputs used to trigger
-        # The detection to clear first
-        time.sleep(0.1)
-        hotkey = read_hotkey(False)
+            # Sleep 100ms to allow inputs used to trigger
+            # The detection to clear first
+            time.sleep(0.1)
+            hotkey = read_hotkey(False)
 
-        # Esc, Backspace or Delete can be used to clear the input
-        if hotkey.name in ["esc", "backspace", "delete"]:
-            hotkey = None  # Blank will be converted to None
+            # Esc, Backspace or Delete can be used to clear the input
+            if hotkey.name in ["esc", "backspace", "delete"]:
+                hotkey = None  # Blank will be converted to None
 
-        self.hotkey_signal.emit(json.dumps(as_dict(hotkey)))  # Needs to be a string
+            self.hotkey_signal.emit(json.dumps(as_dict(hotkey)))  # Needs to be a string

@@ -32,6 +32,7 @@ def read_hotkey(suppress: bool = True) -> Hotkey:
     The original function returns just the names, this returns a Hotkey object.
     The scancodes can then be stored while the name can be displayed.
     """
+    # This function is only ever called in windows
 
     queue = _queue.Queue()
 
