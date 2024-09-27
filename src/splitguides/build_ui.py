@@ -1,3 +1,7 @@
+"""
+Build the .ui files into .py script files.
+"""
+
 # In v5.14 they removed pyside2uic so this invokes uic directly
 from subprocess import run
 from pathlib import Path
@@ -20,12 +24,14 @@ def uic(infile, outfile):
     return run(cmd, capture_output=True)
 
 
-def build_ui():
+def build_ui(replace=True):
     """
     Compile any .ui files in this folder to the build folder as .py files
+
+    :param replace: replace existing UI files
     """
     # Scan this folder for .ui files
-    root = Path(__file__).parent
+    root = Path(__file__).parent / "ui" / "layouts"
     ui_files = root.glob("*.ui")
 
     # Make the build and __init__ files if they do not exist
@@ -36,13 +42,17 @@ def build_ui():
 
     for infile in ui_files:
         outfile = root / "build" / infile.with_suffix(".py").name
-        result = uic(infile, outfile)
 
-        if result.returncode == 0:
-            print(f"Read: {infile}\nBuilt: {outfile}\n")
+        if replace or not outfile.exists:
+            result = uic(infile, outfile)
+
+            if result.returncode == 0:
+                print(f"Read: {infile}\nBuilt: {outfile}\n")
+            else:
+                print(f"Failed to convert: code{result.returncode}\n{result.stderr}")
         else:
-            print(f"Failed to convert: code{result.returncode}\n{result.stderr}")
+            print(f"Output file {outfile} already exists")
 
 
 if __name__ == "__main__":
-    build_ui()
+    build_ui(replace=True)

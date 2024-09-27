@@ -1,6 +1,7 @@
 [build-system]
 requires = [
     "setuptools>=61.0",
+    "pyside6-essentials~=6.7",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -11,7 +12,7 @@ authors = [
   { name="David C Ellis" },
 ]
 readme="README.md"
-requires-python = ">=3.11"  # 3.12 should function, but may not build
+requires-python = ">=3.12"  # 3.12 should function and build now
 dependencies = [
     "pyside6~=6.7",
     "jinja2~=3.1",
@@ -20,13 +21,15 @@ dependencies = [
     "markdown~=3.6",
     "keyboard~=0.13.5",
     "ducktools-classbuilder>=0.2.1",  # renamed in_dict to serialize
+    "ducktools-env>=0.1.5",  # Used for script runner implementation
     "waitress~=3.0",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dynamic = ['version']
 license = {file = "COPYING"}
