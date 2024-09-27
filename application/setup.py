@@ -4,7 +4,9 @@ Special setup.py file for building the app
 `python setup.py build` in this folder to create the application.
 """
 
+import itertools
 import sys
+import shutil
 from pathlib import Path
 
 from cx_Freeze import setup, Executable
@@ -20,6 +22,8 @@ templates = str(base_path / "src" / "splitguides" / "templates")
 static_folder = str(base_path / "src" / "splitguides" / "static")
 icon_file = str(base_path / "resources" / "logo_alpha.ico")
 icon_png = str(base_path / "resources" / "logo_alpha.png")
+readme = str(base_path / "readme.md")
+license_file = str(base_path / "COPYING")
 
 
 base = None
@@ -38,7 +42,7 @@ options = {
             "markdown.extensions.sane_lists",
             "markdown.extensions.tables",
         ],
-        "include_files": [templates, static_folder, icon_png],
+        "include_files": [templates, static_folder, icon_png, readme, license_file],
     }
 }
 
@@ -47,10 +51,26 @@ executables = [
     Executable(script=server_app, target_name="splitguides_server", icon=icon_file),
 ]
 
-setup(
-    name="splitguides",
-    version=splitguides.__version__,
-    description="Speedrun notes tool with HTML rendering",
-    options=options,
-    executables=executables,
-)
+if __name__ == "__main__":
+    build_path = Path.cwd() / "build"
+    if build_path.exists:
+        print("Cleaning up build path")
+        for f in itertools.chain(
+            build_path.glob("exe.*"),
+            build_path.glob("SplitGuides_v*"),
+        ):
+            if f.is_dir():
+                print(f"Removing: {f}")
+                shutil.rmtree(f)
+
+    setup(
+        name="splitguides",
+        version=splitguides.__version__,
+        description="Speedrun notes tool with HTML rendering",
+        options=options,
+        executables=executables,
+    )
+
+    app_path = list(build_path.glob("exe.*"))[0]
+    output_folder = app_path.with_name(f"SplitGuides_v{splitguides.__version__}")
+    app_path.rename(output_folder)
