@@ -25,13 +25,13 @@
 #     "keyboard~=0.13.5",
 #     "ducktools-classbuilder>=0.7.2",
 #     "waitress~=3.0",
-#     "ducktools-env>=0.1.5",
+#     "ducktools-env>=0.1.6",
 # ]
 #
 # [tool.ducktools.env.app]
 # name = "splitguides"
 # owner = "davidcellis"
-# version = "0.9.2"
+# version = "0.9.3"
 #
 # [tool.ducktools.env.include]
 # data = ["../src/splitguides", "../resources"]
