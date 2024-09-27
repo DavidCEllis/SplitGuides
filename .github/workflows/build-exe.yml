@@ -34,7 +34,7 @@ jobs:
       and upload it to GitHub Release
     needs:
     - build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: write  # IMPORTANT: mandatory for making GitHub Releases
       id-token: write  # IMPORTANT: mandatory for sigstore
