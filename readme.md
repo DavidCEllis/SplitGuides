@@ -15,8 +15,29 @@ Includes a server version for rendering notes in browsers on another device
      'Livesplit Server Port' in settings.
    * Livesplit Server Hostname can be the local ip given. If SplitGuides is running
      on the same machine as Livesplit 'localhost' (the default) should also work.
-2. Download SplitGuides from the [**releases page**](https://github.com/DavidCEllis/SplitGuides/releases)
+2. Download SplitGuides_v<VERSION>.zip from the 
+   [**releases page**](https://github.com/DavidCEllis/SplitGuides/releases)
+   Where <VERSION> is the version number of the release.
 3. Extract anywhere and run *splitguides.exe*
+
+### Alternative installs ###
+
+#### Zipapp ####
+
+There is now an experimental Python 'zipapp' build available for both the desktop and
+server versions of SplitGuides. If you have Python 3.10 or later (preferably 3.12)
+installed you can try downloading and running `SplitGuides_v<VERSION>.pyz` from the
+same releases page.
+
+This will download and install the dependencies into a cache folder when first run
+which will be reused on subsequent launches. If dependencies don't change between
+releases of SplitGuides they won't be re-downloaded on update which should make
+updates smaller.
+
+#### Python Wheel ####
+
+There is also a Python Wheel provided of the application which can be installed into
+a virtual environment for those familiar with Python virtual environments.
 
 ## Usage ##
 
