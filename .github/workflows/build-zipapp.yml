@@ -1,10 +1,8 @@
 name: Build zipapp
 
-#on:
-#  release:
-#    types: [published]
-
-on: workflow_dispatch
+on:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -30,37 +28,37 @@ jobs:
         name: splitguides-zipapp
         path: zipapp/dist/*.pyz
 
-#  add-to-github-release:
-#    name: >-
-#      Sign the zipapp with Sigstore
-#      and upload it to GitHub Release
-#    needs:
-#    - build
-#    runs-on: windows-latest
-#
-#    permissions:
-#      contents: write  # IMPORTANT: mandatory for making GitHub Releases
-#      id-token: write  # IMPORTANT: mandatory for sigstore
-#
-#    steps:
-#    - name: Download the zipapp
-#      uses: actions/download-artifact@v4
-#      with:
-#        name: ducktools-zipapp
-#        path: zipapp/dist/
-#    - name: Sign the zipapp with Sigstore
-#      uses: sigstore/gh-action-sigstore-python@v3.0.0
-#      with:
-#        release-signing-artifacts: false
-#        inputs: >-
-#          ./zipapp/dist/*.pyz
-#    - name: Upload artifact signature to GitHub Release
-#      env:
-#        GITHUB_TOKEN: ${{ github.token }}
-#      # Upload to GitHub Release using the `gh` CLI.
-#      # `dist/` contains the built packages, and the
-#      # sigstore-produced signatures and certificates.
-#      run: >-
-#        gh release upload
-#        '${{ github.ref_name }}' zipapp/dist/**
-#        --repo '${{ github.repository }}'
+  add-to-github-release:
+    name: >-
+      Sign the zipapp with Sigstore
+      and upload it to GitHub Release
+    needs:
+    - build
+    runs-on: windows-latest
+
+    permissions:
+      contents: write  # IMPORTANT: mandatory for making GitHub Releases
+      id-token: write  # IMPORTANT: mandatory for sigstore
+
+    steps:
+    - name: Download the zipapp
+      uses: actions/download-artifact@v4
+      with:
+        name: splitguides-zipapp
+        path: zipapp/dist/
+    - name: Sign the zipapp with Sigstore
+      uses: sigstore/gh-action-sigstore-python@v3.0.0
+      with:
+        release-signing-artifacts: false
+        inputs: >-
+          ./zipapp/dist/*.pyz
+    - name: Upload artifact signature to GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      # Upload to GitHub Release using the `gh` CLI.
+      # `dist/` contains the built packages, and the
+      # sigstore-produced signatures and certificates.
+      run: >-
+        gh release upload
+        '${{ github.ref_name }}' zipapp/dist/**
+        --repo '${{ github.repository }}'
