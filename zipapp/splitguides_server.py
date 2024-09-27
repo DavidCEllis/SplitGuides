@@ -31,7 +31,7 @@
 # [tool.ducktools.env.app]
 # name = "splitguides"
 # owner = "davidcellis"
-# version = "0.9.1"
+# version = "0.9.2"
 #
 # [tool.ducktools.env.include]
 # data = ["../src/splitguides", "../resources"]
