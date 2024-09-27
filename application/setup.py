@@ -21,6 +21,7 @@ static_folder = str(base_path / "src" / "splitguides" / "static")
 icon_file = str(base_path / "resources" / "logo_alpha.ico")
 icon_png = str(base_path / "resources" / "logo_alpha.png")
 
+
 base = None
 if sys.platform == "win32":
     base = "Win32GUI"
