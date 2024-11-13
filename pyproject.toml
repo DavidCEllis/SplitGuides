@@ -20,8 +20,8 @@ dependencies = [
     "flask~=3.0",
     "markdown~=3.6",
     "keyboard~=0.13.5",
-    "ducktools-classbuilder>=0.2.1",  # renamed in_dict to serialize
-    "ducktools-env>=0.1.6",  # Used for script runner implementation
+    "ducktools-classbuilder>=0.7.4",
+    "ducktools-env>=0.2.6",  # Used for script runner implementation
     "waitress~=3.0",
 ]
 classifiers = [
