@@ -10,43 +10,19 @@ Includes a server version for rendering notes in browsers on another device
 
 ## Install/Setup ##
 
-1. Under the Livesplit layout editor add 'LiveSplit Server' (listed under 'control')
-   * Take note of the port number here, this is the value needed for 
-     'Livesplit Server Port' in settings.
-   * Livesplit Server Hostname can be the local ip given. If SplitGuides is running
-     on the same machine as Livesplit 'localhost' (the default) should also work.
-2. Download `SplitGuides_v<VERSION>.zip` from the 
+1. Download `SplitGuides_v<VERSION>.zip` from the 
    [**releases page**](https://github.com/DavidCEllis/SplitGuides/releases)
    Where `<VERSION>` is the version number of the release.
-3. Extract anywhere and run *splitguides.exe*
-
-### Alternative installs ###
-
-#### Zipapp ####
-
-There is now an experimental Python 'zipapp' build available for both the desktop and
-server versions of SplitGuides. If you have Python 3.10 or later (preferably 3.12)
-installed you can try downloading and running `SplitGuides_v<VERSION>.pyz` from the
-same releases page.
-
-This will download and install the dependencies into a cache folder when first run
-which will be reused on subsequent launches. If dependencies don't change between
-releases of SplitGuides they won't be re-downloaded on update which should make
-updates smaller.
-
-#### Python Wheel ####
-
-There is also a Python Wheel provided of the application which can be installed into
-a virtual environment for those familiar with Python virtual environments.
+2. Extract anywhere and run *splitguides.exe*
 
 ## Usage ##
 
 1. Connect with livesplit by starting the livesplit server component selecting 
-   'Control' and 'Start Server' in livesplit.
+   'Control' and 'Start TCP Server' in livesplit.
 2. Right click in the splitguides window and select 'Open Notes' and find the text file
    containing the notes you wish to use.
 3. Some configuration is available from the settings dialog.
-   
+
 Plain text formatting works the same way as SplitNotes. 
 Notes made for that should function fine in SplitGuides. 
 
@@ -59,7 +35,36 @@ inserted in between lines.
 2. By default splits will break on newlines, multiple newlines are ignored in this case.
   * If a split separator is given, newlines are left as in the input to the 
     markdown/html processors.
-   
+
+### If the notes are not advancing ###
+
+If the text at the bottom says "Trying to connect to Livesplit." make sure that the TCP server
+is running.
+
+If that doesn't work, check in the Splitguides settings (from the right click menu)
+* "Livesplit Server Hostname" should be `localhost`
+* "Livesplit Server Port" should match the value for "Server Port" in Livesplit's own settings
+  * This is `16834` by default
+
+## Alternative installs ##
+
+### Zipapp ###
+
+There is now an experimental Python 'zipapp' build available for both the desktop and
+server versions of SplitGuides. If you have Python 3.10 or later (preferably 3.12)
+installed you can try downloading and running `SplitGuides_v<VERSION>.pyz` from the
+same releases page.
+
+This will download and install the dependencies into a cache folder when first run
+which will be reused on subsequent launches. If dependencies don't change between
+releases of SplitGuides they won't be re-downloaded on update which should make
+updates smaller.
+
+### Python Wheel (not recommended) ###
+
+There is also a Python Wheel provided of the application which can be installed into
+a virtual environment for those familiar with Python virtual environments.
+
 ## SplitGuides Server ##
 
 Included is a separate server version which launches a (local) webhost so you can view 
