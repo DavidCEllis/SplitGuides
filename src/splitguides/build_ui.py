@@ -1,6 +1,8 @@
 """
 Build the .ui files into .py script files.
 """
+import os
+import sys
 
 # In v5.14 they removed pyside2uic so this invokes uic directly
 from subprocess import run
@@ -19,8 +21,8 @@ def uic(infile, outfile):
     :param outfile: Output path
     :return: the CompletedProcess object from running the uic .exe
     """
-    exe = pyside_folder / "uic.exe"
-    cmd = [exe, "-g", "python", "--o", str(outfile), str(infile)]
+    exe = os.fspath(Path(sys.executable).parent / "pyside6-uic")
+    cmd = [exe, "--o", str(outfile), str(infile)]
     return run(cmd, capture_output=True)
 
 
