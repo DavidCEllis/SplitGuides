@@ -144,7 +144,7 @@ class ServerSettingsDialog(QDialog):
         Pop up a color dialog for the text color.
         """
         color = QColorDialog.getColor(
-            rgba_to_qcolor(self.settings.font_color),
+            rgba_to_qcolor(self.ui.textcolor_edit.text()),
             parent=self,
             title="Text Color",
             options=QColorDialog.ColorDialogOptions() | QColorDialog.ColorDialogOption.ShowAlphaChannel,
@@ -157,7 +157,7 @@ class ServerSettingsDialog(QDialog):
         Pop up a color dialog for the background color.
         """
         color = QColorDialog.getColor(
-            rgba_to_qcolor(self.settings.background_color),
+            rgba_to_qcolor(self.ui.bgcolor_edit.text()),
             parent=self,
             title="Background Color",
             options=QColorDialog.ColorDialogOptions() | QColorDialog.ColorDialogOption.ShowAlphaChannel,
