@@ -113,7 +113,7 @@ class SettingsDialog(QDialog):
             rgba_to_qcolor(self.ui.textcolor_edit.text()),
             parent=self,
             title="Text Color",
-            options=QColorDialog.ColorDialogOptions() | QColorDialog.ColorDialogOption.ShowAlphaChannel,
+            options=QColorDialog.ColorDialogOption.ShowAlphaChannel,
         )
         if color.isValid():
             self.ui.textcolor_edit.setText(qcolor_to_rgba(color))
@@ -126,7 +126,7 @@ class SettingsDialog(QDialog):
             rgba_to_qcolor(self.ui.bgcolor_edit.text()),
             parent=self,
             title="Background Color",
-            options=QColorDialog.ColorDialogOptions() | QColorDialog.ColorDialogOption.ShowAlphaChannel,
+            options=QColorDialog.ColorDialogOption.ShowAlphaChannel,
         )
         if color.isValid():
             self.ui.bgcolor_edit.setText(qcolor_to_rgba(color))
