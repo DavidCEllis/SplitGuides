@@ -58,6 +58,15 @@ class MainWindow(QMainWindow):
         # noinspection PyUnresolvedReferences
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
 
+        # Transparency
+        #  The widget needs to have the Qt::FramelessWindowHint window flag set for the translucency to work.
+        self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+        #  To enable this feature in a top-level widget,
+        #  set its Qt::WA_TranslucentBackground attribute with setAttribute()
+        #  and ensure that its background is painted with non-opaque colors
+        #  in the regions you want to be partially transparent.
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
+
         # Setup notes variables
         self.notefile: None | str = None
         self.notes: None | Notes = None
