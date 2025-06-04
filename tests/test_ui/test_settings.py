@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 import pytest
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtWidgets
 from PySide6.QtCore import Qt, QTimer
 
 from ducktools.classbuilder.prefab import as_dict
@@ -10,6 +10,7 @@ from ducktools.classbuilder.prefab import as_dict
 from splitguides.settings import DesktopSettings
 from splitguides.settings import DEFAULT_STATIC_FOLDER, DEFAULT_TEMPLATE_FOLDER
 
+from splitguides.ui.color import rgba_to_qcolor
 from splitguides.ui.settings_ui import SettingsDialog
 
 test_settings = Path(__file__).parent / "settings.json"
@@ -170,7 +171,7 @@ class TestSettingsUI:
             qtbot.mouseClick(settings_dialog.ui.textcolor_button, Qt.LeftButton)
 
             mock.assert_called_with(
-                QtGui.QColor(settings.font_color), parent=settings_dialog
+                rgba_to_qcolor(settings.font_color), parent=settings_dialog
             )
 
         assert settings_dialog.ui.textcolor_edit.text() == "#012345"
@@ -195,7 +196,7 @@ class TestSettingsUI:
             qtbot.mouseClick(settings_dialog.ui.bgcolor_button, Qt.LeftButton)
 
             mock.assert_called_with(
-                QtGui.QColor(settings.background_color), parent=settings_dialog
+                rgba_to_qcolor(settings.background_color), parent=settings_dialog
             )
 
         assert settings_dialog.ui.bgcolor_edit.text() == "#456789"
