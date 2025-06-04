@@ -59,8 +59,9 @@ class MainWindow(QMainWindow):
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
 
         # Transparency
+        self.menu_transparency: None | QAction = None
         #  The widget needs to have the Qt::FramelessWindowHint window flag set for the translucency to work.
-        self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+        self.setWindowFlag(QtCore.Qt.FramelessWindowHint, self.settings.transparency)
         #  To enable this feature in a top-level widget,
         #  set its Qt::WA_TranslucentBackground attribute with setAttribute()
         #  and ensure that its background is painted with non-opaque colors
@@ -121,6 +122,13 @@ class MainWindow(QMainWindow):
         self.menu_on_top.setChecked(self.settings.on_top)
         # noinspection PyUnresolvedReferences
         self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
+        self.show()
+
+    def toggle_transparency(self):
+        """Toggle window transparency, update settings and window flag to match."""
+        self.settings.transparency = not self.settings.transparency
+        self.menu_transparency.setChecked(self.settings.transparency)
+        self.setWindowFlag(QtCore.Qt.FramelessWindowHint, self.settings.transparency)
         self.show()
 
     def toggle_hotkey_enable(self):
@@ -219,6 +227,11 @@ class MainWindow(QMainWindow):
         self.menu_on_top.setCheckable(True)
         self.menu_on_top.setChecked(self.settings.on_top)
         self.menu_on_top.triggered.connect(self.toggle_on_top)
+
+        self.menu_transparency = self.rc_menu.addAction("Enable Transparency")
+        self.menu_transparency.setCheckable(True)
+        self.menu_transparency.setChecked(self.settings.transparency)
+        self.menu_transparency.triggered.connect(self.toggle_transparency)
 
         if IS_WINDOWS:
             self.hotkeys_toggle = self.rc_menu.addAction("Enable Hotkeys")

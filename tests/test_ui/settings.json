@@ -12,6 +12,7 @@
   "css_folder": "fake/css/folder",
   "css_file": "fakecss.css",
   "on_top": true,
+  "transparency": false,
   "width": 1000,
   "height": 1100,
   "notes_folder": "fake/documents/folder"

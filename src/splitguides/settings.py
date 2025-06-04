@@ -200,6 +200,7 @@ class DesktopSettings(BaseSettings):
 
     # Window Settings
     on_top: bool = False
+    transparency: bool = False
     width: int = 800
     height: int = 800
 
