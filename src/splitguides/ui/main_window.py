@@ -226,6 +226,9 @@ class MainWindow(QMainWindow):
             self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
             self.hotkeys_toggle.triggered.connect(self.toggle_hotkey_enable)
 
+        exit_action = self.rc_menu.addAction("Exit")
+        exit_action.triggered.connect(self.close)
+
     def show_menu(self):
         """Display the context menu at the cursor position."""
         if not self.rc_menu:
