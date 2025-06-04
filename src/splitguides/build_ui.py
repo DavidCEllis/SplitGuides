@@ -10,8 +10,6 @@ from pathlib import Path
 
 import PySide6
 
-pyside_folder = Path(PySide6.__file__).parent
-
 
 def uic(infile, outfile):
     """
@@ -21,8 +19,18 @@ def uic(infile, outfile):
     :param outfile: Output path
     :return: the CompletedProcess object from running the uic .exe
     """
-    exe = os.fspath(Path(sys.executable).parent / "pyside6-uic")
-    cmd = [exe, "--o", str(outfile), str(infile)]
+    # This logic is largely from PySide6.scripts.pyside_tool
+    # The problem with calling the pyside6-uic script directly is discovery
+    # while inside the isolated venv
+    pyside_dir = Path(PySide6.__file__).resolve().parent
+
+    if sys.platform != "win32":
+        exe = pyside_dir / "Qt" / "libexec" / "uic"
+    else:
+        exe = pyside_dir / "uic.exe"
+
+    cmd = [os.fspath(exe), "-g", "python", "--o", str(outfile), str(infile)]
+
     return run(cmd, capture_output=True)
 
 
@@ -34,7 +42,7 @@ def build_ui(replace=True):
     """
     # Scan this folder for .ui files
     root = Path(__file__).parent / "ui" / "layouts"
-    ui_files = root.glob("*.ui")
+    ui_files = list(root.glob("*.ui"))
 
     # Make the build and __init__ files if they do not exist
     Path(root / "build").mkdir(exist_ok=True)
@@ -51,7 +59,10 @@ def build_ui(replace=True):
             if result.returncode == 0:
                 print(f"Read: {infile}\nBuilt: {outfile}\n")
             else:
-                print(f"Failed to convert: code{result.returncode}\n{result.stderr}")
+                raise RuntimeError(
+                    "Failed to convert .uic layout file to .py: "
+                    f"code{result.returncode}\n{result.stderr}"
+                )
         else:
             print(f"Output file {outfile} already exists")
 
