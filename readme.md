@@ -5,35 +5,35 @@
 SplitGuides is an application for displaying speedrun notes in sync with livesplit.
 Requires *livesplit server* to be running.
 
-Includes a server version for rendering notes in browsers on another device 
+Includes a server version for rendering notes in browsers on another device
 (eg: tablet/phone).
 
 ## Install/Setup ##
 
-1. Download `SplitGuides_v<VERSION>.zip` from the 
+1. Download `SplitGuides_v<VERSION>.zip` from the
    [**releases page**](https://github.com/DavidCEllis/SplitGuides/releases)
    Where `<VERSION>` is the version number of the release.
 2. Extract anywhere and run *splitguides.exe*
 
 ## Usage ##
 
-1. Connect with livesplit by starting the livesplit server component selecting 
+1. Connect with livesplit by starting the livesplit server component selecting
    'Control' and 'Start TCP Server' in livesplit.
 2. Right click in the splitguides window and select 'Open Notes' and find the text file
    containing the notes you wish to use.
 3. Some configuration is available from the settings dialog.
 
-Plain text formatting works the same way as SplitNotes. 
-Notes made for that should function fine in SplitGuides. 
+Plain text formatting works the same way as SplitNotes.
+Notes made for that should function fine in SplitGuides.
 
 Additionally Markdown and HTML formatted notes are supported.
 These will be interpreted based on file extension (.md, .txt or .html).
-Markdown and plain text formatted notes will automatically have line breaks 
+Markdown and plain text formatted notes will automatically have line breaks
 inserted in between lines.
 
 1. Comment lines still use square brackets.
 2. By default splits will break on newlines, multiple newlines are ignored in this case.
-  * If a split separator is given, newlines are left as in the input to the 
+  * If a split separator is given, newlines are left as in the input to the
     markdown/html processors.
 
 ### If the notes are not advancing ###
@@ -46,28 +46,9 @@ If that doesn't work, check in the Splitguides settings (from the right click me
 * "Livesplit Server Port" should match the value for "Server Port" in Livesplit's own settings
   * This is `16834` by default
 
-## Alternative installs ##
-
-### Zipapp ###
-
-There is now an experimental Python 'zipapp' build available for both the desktop and
-server versions of SplitGuides. If you have Python 3.10 or later (preferably 3.12)
-installed you can try downloading and running `SplitGuides_v<VERSION>.pyz` from the
-same releases page.
-
-This will download and install the dependencies into a cache folder when first run
-which will be reused on subsequent launches. If dependencies don't change between
-releases of SplitGuides they won't be re-downloaded on update which should make
-updates smaller.
-
-### Python Wheel (not recommended) ###
-
-There is also a Python Wheel provided of the application which can be installed into
-a virtual environment for those familiar with Python virtual environments.
-
 ## SplitGuides Server ##
 
-Included is a separate server version which launches a (local) webhost so you can view 
+Included is a separate server version which launches a (local) webhost so you can view
 the notes on another device on your local network.
 
 Launch **splitguides_server.exe** to start the service. A settings dialog will appear
@@ -75,13 +56,13 @@ so you can customise this version separately from the desktop version. After ask
 for the notes file the server will launch serving those notes and will update
 automatically as you split.
 
-If the hostname and port defaults aren't usable you can edit them 
+If the hostname and port defaults aren't usable you can edit them
 in the settings dialog.
 
 This version is intended for people doing runs on a single monitor so the notes can be
 displayed on another device (a tablet or phone for example). Just connect to the host
 and port given in a web browser.
-   
+
 ## Configuration ##
 
 Configuration Options:
@@ -91,7 +72,7 @@ Configuration Options:
 * Split separator (leave blank for empty line separator)
 * Font Size
 * Text and Background Colour
-* Alternative template HTML and CSS files 
+* Alternative template HTML and CSS files
    * Jinja2 templating is used for the HTML, use the included file as a guide
    * Allows for further customising of the appearance if desired
 * Hotkeys to offset the notes from the splits (not available in splitnotes server)
@@ -120,7 +101,7 @@ Configuration Options:
 * Pick up the firebombs
 * Grab the 200 soul
 * Ladder glitch
-* Buy 
+* Buy
    * Max wooden arrows
    * 4 blooming moss
    * 2 throwing knifes
@@ -148,6 +129,31 @@ Via Splitnotes Server on Tablet:
 
 ![Image of splitguides server - yes this is an old iPad](resources/splitguides_server_example.jpg)
 
+## Development ##
+
+### Building the project environment ###
+
+Once you have forked and cloned the repository the simplest way to setup the environment is to use
+`uv`.
+
+```
+uv sync --extra testing
+uv run pytest
+uv run splitguides
+```
+
+Without `uv` you will need to jump through a few extra hoops.
+
+On Windows with the `py` command included with python.org installs:
+
+```cmd
+py -3.13 -m venv .venv
+.venv\Scripts\activate
+python -m pip install -e .[testing]
+pytest
+splitguides
+```
+
 ## Dependencies ##
 * pyside6 - QT Gui Bindings
 * jinja2 - Templating for the notes page
@@ -157,7 +163,7 @@ Via Splitnotes Server on Tablet:
 * keyboard - Global hotkeys to advance/reverse note offset to splits
 * waitress - wsgi server for splitguides server
 
---- 
+---
 
-Inspired by (but otherwise unassociated with) the original splitnotes: 
+Inspired by (but otherwise unassociated with) the original splitnotes:
 https://github.com/joeloskarsson/SplitNotes
