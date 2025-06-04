@@ -13,6 +13,7 @@ from PySide6.QtGui import (
 )
 
 from ..settings import DesktopSettings
+from .color import colorFromHexRgba, colorToHexRgba
 from .hotkey_manager import HotkeyManager
 from .layouts import Ui_Settings
 from ..hotkeys import Hotkey
@@ -108,19 +109,27 @@ class SettingsDialog(QDialog):
         """
         Pop up a color dialog for the text color.
         """
-        color = QColorDialog.getColor(QColor(self.settings.font_color), parent=self)
+        color = QColorDialog.getColor(
+            colorFromHexRgba(self.settings.font_color),
+            parent=self,
+            title="Text Color",
+            options=QColorDialog.ColorDialogOptions() | QColorDialog.ColorDialogOption.ShowAlphaChannel,
+        )
         if color.isValid():
-            self.ui.textcolor_edit.setText(color.name())
+            self.ui.textcolor_edit.setText(colorToHexRgba(color))
 
     def bg_color_dialog(self):
         """
         Pop up a color dialog for the background color.
         """
         color = QColorDialog.getColor(
-            QColor(self.settings.background_color), parent=self
+            colorFromHexRgba(self.settings.background_color),
+            parent=self,
+            title="Background Color",
+            options=QColorDialog.ColorDialogOptions() | QColorDialog.ColorDialogOption.ShowAlphaChannel,
         )
         if color.isValid():
-            self.ui.bgcolor_edit.setText(color.name())
+            self.ui.bgcolor_edit.setText(colorToHexRgba(color))
 
     def html_template_dialog(self):
         htmlfile, _ = QFileDialog.getOpenFileName(

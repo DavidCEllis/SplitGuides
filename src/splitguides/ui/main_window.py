@@ -204,6 +204,7 @@ class MainWindow(QMainWindow):
         self.ui.notes.customContextMenuRequested.connect(self.show_menu)
         # Allow links to open in an external browser
         self.ui.notes.setPage(ExtLinkWebEnginePage(self))
+        self.ui.notes.page().setBackgroundColor(QtCore.Qt.transparent)
 
     def build_menu(self):
         """Create the custom context menu."""
