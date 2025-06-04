@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-    "setuptools>=61.0",
-    "pyside6-essentials~=6.7",
+    "setuptools>=77.0",
+    "pyside6-essentials~=6.9",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -9,12 +9,12 @@ build-backend = "setuptools.build_meta"
 name="splitguides"
 description="Speedrun notes tool for advancing notes automatically with Livesplit."
 authors = [
-  { name="David C Ellis" },
+  { name = "David C Ellis" },
 ]
 readme="README.md"
 requires-python = ">=3.12"  # 3.12 should function and build now
 dependencies = [
-    "pyside6~=6.7",
+    "pyside6~=6.9",
     "jinja2~=3.1",
     "bleach[css]==6.0",  # Each upgrade to bleach has broken something so pin it.
     "flask~=3.0",
@@ -27,16 +27,22 @@ dependencies = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",  # Should also work on Linux, even if livesplit doesn't
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dynamic = ['version']
-license = {file = "COPYING"}
+license = "GPL-3.0-or-later"
 
 [project.optional-dependencies]
 testing = ["pytest", "pytest-cov", "pytest-qt"]
 build = ["cx-freeze", "pywin32"]
+
+[project.scripts]
+splitguides-server = "splitguides.server.__main__:launch"
+
+[project.gui-scripts]
+splitguides = "splitguides.__main__:main"
 
 [tool.setuptools.dynamic]
 version = { attr = "splitguides.__version__" }
@@ -45,4 +51,11 @@ version = { attr = "splitguides.__version__" }
 addopts= "--cov=src/ --cov-report=term-missing"
 testpaths = [
     "tests",
+]
+
+[tool.uv]
+# Only x86_64 / AMD64 is supported
+environments = [
+    "platform_system == 'Windows' and platform_machine == 'AMD64' and implementation_name == 'cpython'",
+    "platform_system == 'Linux' and platform_machine == 'x86_64' and implementation_name == 'cpython'",
 ]
