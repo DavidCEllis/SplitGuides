@@ -1,5 +1,4 @@
 from PySide6.QtGui import QColor
-import re
 
 def rgba_to_qcolor(s: str):
     if len(s) == 9 and s[0] == "#":
