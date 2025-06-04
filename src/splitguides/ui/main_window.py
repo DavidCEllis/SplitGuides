@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from jinja2 import Environment, FileSystemLoader, Template
 from PySide6 import QtCore
-from PySide6.QtGui import QCursor, QIcon, QAction
+from PySide6.QtGui import QColorConstants, QCursor, QIcon, QAction
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu, QErrorMessage
 from .custom_elements import ExtLinkWebEnginePage
 
@@ -56,12 +56,12 @@ class MainWindow(QMainWindow):
         # Always on Top
         self.menu_on_top: None | QAction = None
         # noinspection PyUnresolvedReferences
-        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.settings.on_top)
 
         # Transparency
         self.menu_transparency: None | QAction = None
         #  The widget needs to have the Qt::FramelessWindowHint window flag set for the translucency to work.
-        self.setWindowFlag(QtCore.Qt.FramelessWindowHint, self.settings.transparency)
+        self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint, self.settings.transparency)
         #  To enable this feature in a top-level widget,
         #  set its Qt::WA_TranslucentBackground attribute with setAttribute()
         #  and ensure that its background is painted with non-opaque colors
@@ -121,14 +121,14 @@ class MainWindow(QMainWindow):
         self.settings.on_top = not self.settings.on_top
         self.menu_on_top.setChecked(self.settings.on_top)
         # noinspection PyUnresolvedReferences
-        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.settings.on_top)
         self.show()
 
     def toggle_transparency(self):
         """Toggle window transparency, update settings and window flag to match."""
         self.settings.transparency = not self.settings.transparency
         self.menu_transparency.setChecked(self.settings.transparency)
-        self.setWindowFlag(QtCore.Qt.FramelessWindowHint, self.settings.transparency)
+        self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint, self.settings.transparency)
         self.show()
 
     def toggle_hotkey_enable(self):
@@ -208,10 +208,10 @@ class MainWindow(QMainWindow):
         """Setup the browser element with custom options"""
         # Replace the context menu with the app context menu
         # noinspection PyUnresolvedReferences
-        self.ui.notes.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.ui.notes.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.ui.notes.customContextMenuRequested.connect(self.show_menu)
         # Allow links to open in an external browser
-        page = ExtLinkWebEnginePage(self, backgroundColor=QtCore.Qt.transparent)
+        page = ExtLinkWebEnginePage(self, backgroundColor=QColorConstants.Transparent)
         self.ui.notes.setPage(page)
 
     def build_menu(self):
