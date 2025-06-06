@@ -11,3 +11,8 @@ def qcolor_to_rgba(color: QColor):
     argb = color.name(QColor.HexArgb)
     a, rgb = argb[1:3], argb[3:9]
     return f"#{rgb}{a}"
+
+def rgba_to_qss(s: str):
+    c = rgba_to_qcolor(s)
+    r, g, b, a = c.red(), c.green(), c.blue(), c.alpha()
+    return f"rgba({r}, {g}, {b}, {a})"

@@ -6,11 +6,12 @@ from concurrent.futures import ThreadPoolExecutor
 
 from jinja2 import Environment, FileSystemLoader, Template
 from PySide6 import QtCore
-from PySide6.QtGui import QColorConstants, QCursor, QIcon, QAction
+from PySide6.QtGui import QColorConstants, QCursor, QIcon, QMouseEvent, QAction
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu, QErrorMessage
 from .custom_elements import ExtLinkWebEnginePage
 
 from ..settings import DesktopSettings
+from .color import rgba_to_qss
 from .settings_ui import SettingsDialog
 from .layouts import Ui_MainWindow
 from ..note_parser import Notes
@@ -62,6 +63,8 @@ class MainWindow(QMainWindow):
         self.menu_transparency: None | QAction = None
         #  The widget needs to have the Qt::FramelessWindowHint window flag set for the translucency to work.
         self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint, self.settings.transparency)
+        if self.settings.transparency:
+            self.ui.statusbar.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
         #  To enable this feature in a top-level widget,
         #  set its Qt::WA_TranslucentBackground attribute with setAttribute()
         #  and ensure that its background is painted with non-opaque colors
@@ -129,6 +132,10 @@ class MainWindow(QMainWindow):
         self.settings.transparency = not self.settings.transparency
         self.menu_transparency.setChecked(self.settings.transparency)
         self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint, self.settings.transparency)
+        if self.settings.transparency:
+            self.ui.statusbar.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
+        else:
+            self.ui.statusbar.setStyleSheet("")
         self.show()
 
     def toggle_hotkey_enable(self):
@@ -189,6 +196,12 @@ class MainWindow(QMainWindow):
     def start_loops(self):
         """Start the livesplit server connection thread."""
         self.ls.start_loops()
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
+            window = self.windowHandle()
+            window.startSystemMove()
+        return super().mousePressEvent(event)
 
     def closeEvent(self, event):
         """On close save settings and close the livesplit connection."""
