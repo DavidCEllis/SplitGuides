@@ -219,7 +219,7 @@ def test_update_notes(qtbot, fake_link, idx):
     fake_template.render.assert_called_once_with(
         font_size=main_window.settings.font_size,
         font_color=main_window.settings.font_color,
-        bg_color=main_window.settings.background_color,
+        bg_color="transparent",
         css=main_window.css,
         notes="Fake Splits",
     )
