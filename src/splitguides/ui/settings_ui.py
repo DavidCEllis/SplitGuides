@@ -53,7 +53,7 @@ class SettingsDialog(QDialog):
         self.pool = ThreadPoolExecutor(max_workers=1)
 
     def setup_validators(self):
-        color_re = QRegularExpression(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})")
+        color_re = QRegularExpression(r"#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})")
         color_validator = QRegularExpressionValidator(color_re, None)
         self.ui.port_edit.setValidator(QIntValidator(1024, 65535, None))
         # 255 splits seems like a lot
