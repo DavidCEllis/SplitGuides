@@ -63,6 +63,7 @@ class MainWindow(QMainWindow):
         self.menu_transparency: None | QAction = None
         #  The widget needs to have the Qt::FramelessWindowHint window flag set for the translucency to work.
         self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint, self.settings.transparency)
+        self.ui.centralWidget.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
         if self.settings.transparency:
             self.ui.statusbar.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
         #  To enable this feature in a top-level widget,
@@ -70,6 +71,7 @@ class MainWindow(QMainWindow):
         #  and ensure that its background is painted with non-opaque colors
         #  in the regions you want to be partially transparent.
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground, self.settings.transparency)
 
         # Setup notes variables
         self.notefile: None | str = None
@@ -136,6 +138,7 @@ class MainWindow(QMainWindow):
             self.ui.statusbar.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
         else:
             self.ui.statusbar.setStyleSheet("")
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground, self.settings.transparency)
         self.show()
 
     def toggle_hotkey_enable(self):
@@ -298,7 +301,7 @@ class MainWindow(QMainWindow):
         html = self.template.render(
             font_size=self.settings.font_size,
             font_color=self.settings.font_color,
-            bg_color=self.settings.background_color,
+            bg_color="transparent",
             css=self.css,
             notes=["<h1>Right Click to Load Notes</h1>"],
         )
@@ -324,7 +327,7 @@ class MainWindow(QMainWindow):
             html = self.template.render(
                 font_size=self.settings.font_size,
                 font_color=self.settings.font_color,
-                bg_color=self.settings.background_color,
+                bg_color="transparent",
                 css=self.css,
                 notes=self.notes.render_splits(start, end),
             )
