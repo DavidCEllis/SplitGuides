@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "setuptools>=77.0",
-    "pyside6-essentials~=6.9",
+    "pyside6-essentials~=6.9",  # Needed to build uic files
 ]
 build-backend = "setuptools.build_meta"
 
