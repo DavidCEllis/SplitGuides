@@ -22,10 +22,12 @@ Includes a server version for rendering notes in browsers on another device
 #### UV ####
 
 If you have [uv](https://docs.astral.sh/uv/) installed you can install and run splitguides
-directly from the Python Package Index (PyPI).
+directly from the Python Package Index (PyPI). This is the recommended method for non-windows
+platforms.
 
 * Install and run the latest release with `uvx splitguides`
-
+* Install and run the current main branch from GitHub with
+  `uvx --from git+https://github.com/DavidCEllis/SplitGuides splitguides`
 
 ## Usage ##
 
