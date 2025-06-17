@@ -137,7 +137,7 @@ Once you have forked and cloned the repository the simplest way to setup the env
 `uv`.
 
 ```
-uv sync --extra testing
+uv sync
 uv run pytest
 uv run splitguides
 ```
@@ -149,7 +149,7 @@ On Windows with the `py` command included with python.org installs:
 ```cmd
 py -3.13 -m venv .venv
 .venv\Scripts\activate
-python -m pip install -e .[testing]
+python -m pip install -e . --group dev
 pytest
 splitguides
 ```

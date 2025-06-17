@@ -25,10 +25,6 @@ if getattr(sys, "frozen", False):  # pragma: nocover
     # PyInstaller .exe
     base_path = Path(sys.executable).parent
     icon_file = str(base_path / "logo_alpha.png")
-elif os.environ.get("DUCKTOOLS_ENV_LAUNCH_TYPE"):
-    # Ducktools-env zipapp
-    base_path = Path(__file__).parent
-    icon_file = str(base_path.parents[1] / "resources" / "logo_alpha.png")
 else:
     # Running locally
     base_path = Path(__file__).parent
