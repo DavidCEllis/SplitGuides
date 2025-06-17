@@ -157,7 +157,7 @@ splitguides
 
 ## Contributions ##
 
-* Transparent background support added by @AlexKnauth
+* Transparent background support added by [@AlexKnauth](https://github.com/AlexKnauth)
 
 ## Dependencies ##
 * pyside6 - QT Gui Bindings
