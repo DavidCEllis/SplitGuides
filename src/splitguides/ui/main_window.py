@@ -32,7 +32,7 @@ if getattr(sys, "frozen", False):  # pragma: nocover
 else:
     # Running locally
     base_path = Path(__file__).parent
-    icon_file = str(base_path.parents[2] / "resources" / "logo_alpha.png")
+    icon_file = str(base_path.parent / "resources" / "logo_alpha.png")
 
 
 class MainWindow(QMainWindow):
