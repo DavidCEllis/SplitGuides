@@ -1,5 +1,9 @@
+"""
+Define the main windows for the desktop application
+"""
+from __future__ import annotations
+
 import sys
-import os
 import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
@@ -15,7 +19,7 @@ from .hotkey_manager import HotkeyManager
 from .layouts import Ui_MainWindow
 from .settings_ui import SettingsDialog
 
-from ..livesplit_client import get_client
+from ..livesplit_client import get_client, LivesplitMessaging
 from ..note_parser import Notes
 from ..settings import DesktopSettings
 
@@ -35,6 +39,38 @@ IS_WINDOWS = sys.platform == "win32"
 
 
 class MainWindow(QMainWindow):
+    ui: Ui_MainWindow
+    icon: QIcon
+
+    settings: DesktopSettings
+    
+    # Right click menu and options
+    rc_menu: QMenu
+    menu_on_top: QAction
+    menu_transparency: QAction
+    
+    # Hotkeys
+    if sys.platform == "win32":
+        hotkeys_toggle: QAction
+        hotkey_manager: HotkeyManager
+    else:
+        hotkeys_toggle: None
+        hotkey_manager: None
+
+    notefile: None | str
+    notes: None | Notes
+
+    j2_environment: Environment
+
+    template: Template
+    css: str
+
+    client: LivesplitMessaging
+    ls: LivesplitLink
+
+    split_index: int
+    split_offset: int
+
     def __init__(self):
         super().__init__()
         # Setup the UI and get an icon
@@ -52,13 +88,8 @@ class MainWindow(QMainWindow):
         # Window size
         self.resize(self.settings.width, self.settings.height)
 
-        # Always on Top
-        self.menu_on_top: None | QAction = None
         # noinspection PyUnresolvedReferences
         self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.settings.on_top)
-
-        # Transparency
-        self.menu_transparency: None | QAction = None
         
         # WA_TranslucentBackground attribute required to enable transparency
         # QT Docs state "Toggling this attribute after the widget has been shown is not uniformly supported"
@@ -67,38 +98,16 @@ class MainWindow(QMainWindow):
         self.refresh_transparency()
 
         # Setup notes variables
-        self.notefile: None | str = None
-        self.notes: None | Notes = None
+        self.notefile = None
+        self.notes = None
 
-        # Right Click Menu
-        self.rc_menu: None | QMenu = None
-        self.hotkeys_toggle: None | QAction = None
-
+        # Build the right click menu
+        # Creates rc_menu, menu_on_top, menu_transparency, hotkeys_toggle
         self.build_menu()
         self.setup_actions()
 
-        self.j2_environment = Environment(
-            loader=FileSystemLoader(self.settings.html_template_folder),
-            autoescape=False,
-        )
-
-        self.template: None | Template = None
-        self.load_template()
-
-        self.css = ""
-        self.load_css()
-
-        self.render_blank()
-
-        self.client = get_client(self.settings.hostname, self.settings.port)
-
-        self.ls = LivesplitLink(self.client, self)
-        self.split_index = 0
-
-        self.split_offset = 0  # Offset for advancing/reversing split
-
-        # Set up hotkey manager
-        if IS_WINDOWS:
+        # Set up hotkey manager - windows only
+        if sys.platform == "win32":
             self.hotkey_manager = HotkeyManager(self)
 
             if self.settings.hotkeys_enabled:
@@ -111,6 +120,23 @@ class MainWindow(QMainWindow):
                     self.hotkeys_toggle.setChecked(False)
         else:
             self.hotkey_manager = None
+
+        self.j2_environment = Environment(
+            loader=FileSystemLoader(self.settings.html_template_folder),
+            autoescape=False,
+        )
+
+        self.load_template()  # sets self.template
+        self.load_css()  # sets self.css
+
+        self.render_blank()
+
+        self.client = get_client(self.settings.hostname, self.settings.port)
+
+        self.ls = LivesplitLink(self.client, self)
+        self.split_index = 0
+
+        self.split_offset = 0  # Offset for advancing/reversing split
 
         self.start_loops()  # Start livesplit checking loops
 
@@ -158,7 +184,7 @@ class MainWindow(QMainWindow):
         self.show()
 
     def toggle_hotkey_enable(self):
-        if IS_WINDOWS:
+        if sys.platform == "win32":
             try:
                 if self.settings.hotkeys_enabled:
                     self.disable_hotkeys()
@@ -174,14 +200,15 @@ class MainWindow(QMainWindow):
                 self.hotkeys_toggle.setChecked(False)
 
     def enable_hotkeys(self):
-        if IS_WINDOWS:
+        if sys.platform == "win32":
             increase_key = self.settings.increase_offset_hotkey.scancodes
             decrease_key = self.settings.decrease_offset_hotkey.scancodes
             self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
 
-    def disable_hotkeys(self):
-        if IS_WINDOWS:
+    def disable_hotkeys(self):  # type: ignore
+        if sys.platform == "win32":
             self.hotkey_manager.disable_hotkeys()
+    
             self.split_offset = 0  # Reset the offset as you can no longer change it
             if not self.ls.connected:
                 self.update_notes(0)
@@ -226,6 +253,7 @@ class MainWindow(QMainWindow):
         """On close save settings and close the livesplit connection."""
         self.settings.save()
         if IS_WINDOWS:
+            assert self.hotkey_manager is not None
             self.hotkey_manager.disable_all()  # Kill any hotkeys
         self.ls.close()
         event.accept()
@@ -265,11 +293,13 @@ class MainWindow(QMainWindow):
         self.menu_transparency.setChecked(self.settings.transparency)
         self.menu_transparency.triggered.connect(self.toggle_transparency)
 
-        if IS_WINDOWS:
+        if sys.platform == "win32":
             self.hotkeys_toggle = self.rc_menu.addAction("Enable Hotkeys")
             self.hotkeys_toggle.setCheckable(True)
             self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
             self.hotkeys_toggle.triggered.connect(self.toggle_hotkey_enable)
+        else:
+            self.hotkeys_toggle = None
 
         exit_action = self.rc_menu.addAction("Exit")
         exit_action.triggered.connect(self.close)
@@ -336,7 +366,7 @@ class MainWindow(QMainWindow):
         idx = max(idx, 0) + self.split_offset
         idx = max(idx, 0)
 
-        if self.notes and (idx != self.split_index or refresh):
+        if self.notefile and self.notes and (idx != self.split_index or refresh):
             start = idx - self.settings.previous_splits
             end = idx + self.settings.next_splits + 1
 
@@ -354,7 +384,7 @@ class MainWindow(QMainWindow):
     def open_settings(self):
         """Open the settings dialog, refresh everything if the settings have changed."""
         # Block hotkeys while in the settings menu
-        if IS_WINDOWS and self.hotkey_manager.enabled:
+        if sys.platform == "win32" and self.hotkey_manager.enabled:
             self.disable_hotkeys()
 
         settings_dialog = SettingsDialog(
@@ -417,7 +447,8 @@ class LivesplitLink(QtCore.QObject):
 
     def stop_loops(self):
         self.break_loop = True
-        self.pool.shutdown(wait=False)
+        if self.pool:
+            self.pool.shutdown(wait=False)
 
     def close(self):
         self.stop_loops()
