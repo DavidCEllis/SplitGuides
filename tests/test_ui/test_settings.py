@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 import pytest
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtWidgets
 from PySide6.QtCore import Qt, QTimer
 
 from ducktools.classbuilder.prefab import as_dict
@@ -10,6 +10,7 @@ from ducktools.classbuilder.prefab import as_dict
 from splitguides.settings import DesktopSettings
 from splitguides.settings import DEFAULT_STATIC_FOLDER, DEFAULT_TEMPLATE_FOLDER
 
+from splitguides.ui.color import rgba_to_qcolor
 from splitguides.ui.settings_ui import SettingsDialog
 
 test_settings = Path(__file__).parent / "settings.json"
@@ -52,10 +53,10 @@ def settings_ui(qtbot):
     qtbot.keyClicks(settings_dialog.ui.fontsize_edit, "25")
 
     qtbot.mouseDClick(settings_dialog.ui.textcolor_edit, Qt.LeftButton)
-    qtbot.keyClicks(settings_dialog.ui.textcolor_edit, "#BBBBBB")
+    qtbot.keyClicks(settings_dialog.ui.textcolor_edit, "#BBBBBBEE")
 
     qtbot.mouseDClick(settings_dialog.ui.bgcolor_edit, Qt.LeftButton)
-    qtbot.keyClicks(settings_dialog.ui.bgcolor_edit, "#AAAAAA")
+    qtbot.keyClicks(settings_dialog.ui.bgcolor_edit, "#AAAAAA88")
 
     return settings, settings_dialog, fake_hotkey_manager
 
@@ -73,8 +74,8 @@ class TestSettings:
         assert s.previous_splits == 1
         assert s.next_splits == 3
         assert s.font_size == 22
-        assert s.font_color == "#000001"
-        assert s.background_color == "#f1f8f1"
+        assert s.font_color == "#000001ff"
+        assert s.background_color == "#f1f8f1ff"
         assert s.full_template_path == Path("fake/html/folder/fakehtml.html")
         assert s.full_css_path == Path("fake/css/folder/fakecss.css")
         assert s.on_top
@@ -125,8 +126,8 @@ class TestSettingsUI:
         assert settings.next_splits == 3
         assert settings.split_separator == "/split"
         assert settings.font_size == 25
-        assert settings.font_color == "#BBBBBB"
-        assert settings.background_color == "#AAAAAA"
+        assert settings.font_color == "#BBBBBBEE"
+        assert settings.background_color == "#AAAAAA88"
 
     def test_settings_ui_cancel(self, qtbot, settings_ui):
         settings, settings_dialog, hotkey_mock = settings_ui
@@ -163,17 +164,20 @@ class TestSettingsUI:
         with patch.object(QtWidgets.QColorDialog, "getColor") as mock:
             fake_color = MagicMock()
             fake_color.isValid.return_value = True
-            fake_color.name.return_value = "#012345"
+            fake_color.name.return_value = "#EE012345"
 
             mock.return_value = fake_color
 
             qtbot.mouseClick(settings_dialog.ui.textcolor_button, Qt.LeftButton)
 
             mock.assert_called_with(
-                QtGui.QColor(settings.font_color), parent=settings_dialog
+                rgba_to_qcolor(settings.font_color),
+                parent=settings_dialog,
+                title="Text Color",
+                options=QtWidgets.QColorDialog.ColorDialogOption.ShowAlphaChannel,
             )
 
-        assert settings_dialog.ui.textcolor_edit.text() == "#012345"
+        assert settings_dialog.ui.textcolor_edit.text() == "#012345EE"
 
     def test_settings_ui_colorpicker_bg(self, qtbot):
         """
@@ -188,14 +192,17 @@ class TestSettingsUI:
         with patch.object(QtWidgets.QColorDialog, "getColor") as mock:
             fake_color = MagicMock()
             fake_color.isValid.return_value = True
-            fake_color.name.return_value = "#456789"
+            fake_color.name.return_value = "#AA456789"
 
             mock.return_value = fake_color
 
             qtbot.mouseClick(settings_dialog.ui.bgcolor_button, Qt.LeftButton)
 
             mock.assert_called_with(
-                QtGui.QColor(settings.background_color), parent=settings_dialog
+                rgba_to_qcolor(settings.background_color),
+                parent=settings_dialog,
+                title="Background Color",
+                options=QtWidgets.QColorDialog.ColorDialogOption.ShowAlphaChannel,
             )
 
-        assert settings_dialog.ui.bgcolor_edit.text() == "#456789"
+        assert settings_dialog.ui.bgcolor_edit.text() == "#456789AA"

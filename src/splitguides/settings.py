@@ -80,8 +80,9 @@ class BaseSettings(metaclass=ABCMeta):
     previous_splits: int = 0
     next_splits: int = 2
     font_size: int | float = 20.0
-    font_color: str = "#000000"
-    background_color: str = "#f1f8ff"
+    # Color format: Hex Rgba, NOT argb
+    font_color: str = "#000000ff"
+    background_color: str = "#f1f8ffff"
 
     html_template_folder: Path = DEFAULT_TEMPLATE_FOLDER
     css_folder: Path = DEFAULT_STATIC_FOLDER
@@ -199,6 +200,7 @@ class DesktopSettings(BaseSettings):
 
     # Window Settings
     on_top: bool = False
+    transparency: bool = False
     width: int = 800
     height: int = 800
 

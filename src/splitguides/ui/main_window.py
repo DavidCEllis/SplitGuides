@@ -6,11 +6,12 @@ from concurrent.futures import ThreadPoolExecutor
 
 from jinja2 import Environment, FileSystemLoader, Template
 from PySide6 import QtCore
-from PySide6.QtGui import QCursor, QIcon, QAction
+from PySide6.QtGui import QColorConstants, QCursor, QIcon, QMouseEvent, QAction
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu, QErrorMessage
 from .custom_elements import ExtLinkWebEnginePage
 
 from ..settings import DesktopSettings
+from .color import rgba_to_qss
 from .settings_ui import SettingsDialog
 from .layouts import Ui_MainWindow
 from ..note_parser import Notes
@@ -56,7 +57,21 @@ class MainWindow(QMainWindow):
         # Always on Top
         self.menu_on_top: None | QAction = None
         # noinspection PyUnresolvedReferences
-        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.settings.on_top)
+
+        # Transparency
+        self.menu_transparency: None | QAction = None
+        #  The widget needs to have the Qt::FramelessWindowHint window flag set for the translucency to work.
+        self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint, self.settings.transparency)
+        self.ui.centralWidget.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
+        if self.settings.transparency:
+            self.ui.statusbar.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
+        #  To enable this feature in a top-level widget,
+        #  set its Qt::WA_TranslucentBackground attribute with setAttribute()
+        #  and ensure that its background is painted with non-opaque colors
+        #  in the regions you want to be partially transparent.
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground, self.settings.transparency)
 
         # Setup notes variables
         self.notefile: None | str = None
@@ -111,7 +126,19 @@ class MainWindow(QMainWindow):
         self.settings.on_top = not self.settings.on_top
         self.menu_on_top.setChecked(self.settings.on_top)
         # noinspection PyUnresolvedReferences
-        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.settings.on_top)
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.settings.on_top)
+        self.show()
+
+    def toggle_transparency(self):
+        """Toggle window transparency, update settings and window flag to match."""
+        self.settings.transparency = not self.settings.transparency
+        self.menu_transparency.setChecked(self.settings.transparency)
+        self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint, self.settings.transparency)
+        if self.settings.transparency:
+            self.ui.statusbar.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
+        else:
+            self.ui.statusbar.setStyleSheet("")
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground, self.settings.transparency)
         self.show()
 
     def toggle_hotkey_enable(self):
@@ -173,6 +200,12 @@ class MainWindow(QMainWindow):
         """Start the livesplit server connection thread."""
         self.ls.start_loops()
 
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
+            window = self.windowHandle()
+            window.startSystemMove()
+        return super().mousePressEvent(event)
+
     def closeEvent(self, event):
         """On close save settings and close the livesplit connection."""
         self.settings.save()
@@ -191,10 +224,11 @@ class MainWindow(QMainWindow):
         """Setup the browser element with custom options"""
         # Replace the context menu with the app context menu
         # noinspection PyUnresolvedReferences
-        self.ui.notes.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.ui.notes.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.ui.notes.customContextMenuRequested.connect(self.show_menu)
         # Allow links to open in an external browser
-        self.ui.notes.setPage(ExtLinkWebEnginePage(self))
+        page = ExtLinkWebEnginePage(self, backgroundColor=QColorConstants.Transparent)
+        self.ui.notes.setPage(page)
 
     def build_menu(self):
         """Create the custom context menu."""
@@ -210,11 +244,19 @@ class MainWindow(QMainWindow):
         self.menu_on_top.setChecked(self.settings.on_top)
         self.menu_on_top.triggered.connect(self.toggle_on_top)
 
+        self.menu_transparency = self.rc_menu.addAction("Enable Transparency")
+        self.menu_transparency.setCheckable(True)
+        self.menu_transparency.setChecked(self.settings.transparency)
+        self.menu_transparency.triggered.connect(self.toggle_transparency)
+
         if IS_WINDOWS:
             self.hotkeys_toggle = self.rc_menu.addAction("Enable Hotkeys")
             self.hotkeys_toggle.setCheckable(True)
             self.hotkeys_toggle.setChecked(self.settings.hotkeys_enabled)
             self.hotkeys_toggle.triggered.connect(self.toggle_hotkey_enable)
+
+        exit_action = self.rc_menu.addAction("Exit")
+        exit_action.triggered.connect(self.close)
 
     def show_menu(self):
         """Display the context menu at the cursor position."""
@@ -259,7 +301,7 @@ class MainWindow(QMainWindow):
         html = self.template.render(
             font_size=self.settings.font_size,
             font_color=self.settings.font_color,
-            bg_color=self.settings.background_color,
+            bg_color="transparent",
             css=self.css,
             notes=["<h1>Right Click to Load Notes</h1>"],
         )
@@ -285,7 +327,7 @@ class MainWindow(QMainWindow):
             html = self.template.render(
                 font_size=self.settings.font_size,
                 font_color=self.settings.font_color,
-                bg_color=self.settings.background_color,
+                bg_color="transparent",
                 css=self.css,
                 notes=self.notes.render_splits(start, end),
             )

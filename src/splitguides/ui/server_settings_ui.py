@@ -14,6 +14,7 @@ from PySide6.QtGui import (
 )
 
 from ..settings import ServerSettings
+from .color import rgba_to_qcolor, qcolor_to_rgba
 from .layouts import Ui_ServerSettings
 
 
@@ -80,7 +81,7 @@ class ServerSettingsDialog(QDialog):
         self.ui.confirm_cancel_box.rejected.connect(self.reject)
 
     def setup_validators(self):
-        color_re = QRegularExpression(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})")
+        color_re = QRegularExpression(r"#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})")
         color_validator = QRegularExpressionValidator(color_re, None)
         self.ui.port_edit.setValidator(QIntValidator(1024, 65535, None))
         # 255 splits seems like a lot
@@ -142,19 +143,27 @@ class ServerSettingsDialog(QDialog):
         """
         Pop up a color dialog for the text color.
         """
-        color = QColorDialog.getColor(QColor(self.settings.font_color), parent=self)
+        color = QColorDialog.getColor(
+            rgba_to_qcolor(self.ui.textcolor_edit.text()),
+            parent=self,
+            title="Text Color",
+            options=QColorDialog.ColorDialogOption.ShowAlphaChannel,
+        )
         if color.isValid():
-            self.ui.textcolor_edit.setText(color.name())
+            self.ui.textcolor_edit.setText(qcolor_to_rgba(color))
 
     def bg_color_dialog(self):
         """
         Pop up a color dialog for the background color.
         """
         color = QColorDialog.getColor(
-            QColor(self.settings.background_color), parent=self
+            rgba_to_qcolor(self.ui.bgcolor_edit.text()),
+            parent=self,
+            title="Background Color",
+            options=QColorDialog.ColorDialogOption.ShowAlphaChannel,
         )
         if color.isValid():
-            self.ui.bgcolor_edit.setText(color.name())
+            self.ui.bgcolor_edit.setText(qcolor_to_rgba(color))
 
     def html_template_dialog(self):
         htmlfile, _ = QFileDialog.getOpenFileName(
