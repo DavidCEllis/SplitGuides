@@ -8,9 +8,9 @@ on:
 
 
 jobs:
-  zipapp-build:
+  exe-build:
     name: Test exe Build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
