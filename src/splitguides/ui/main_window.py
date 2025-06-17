@@ -35,20 +35,17 @@ else:
     icon_file = str(base_path.parents[2] / "resources" / "logo_alpha.png")
 
 
-IS_WINDOWS = sys.platform == "win32"
-
-
 class MainWindow(QMainWindow):
     ui: Ui_MainWindow
     icon: QIcon
 
     settings: DesktopSettings
-    
+
     # Right click menu and options
     rc_menu: QMenu
     menu_on_top: QAction
     menu_transparency: QAction
-    
+
     # Hotkeys
     if sys.platform == "win32":
         hotkeys_toggle: QAction
@@ -90,7 +87,7 @@ class MainWindow(QMainWindow):
 
         # noinspection PyUnresolvedReferences
         self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.settings.on_top)
-        
+
         # WA_TranslucentBackground attribute required to enable transparency
         # QT Docs state "Toggling this attribute after the widget has been shown is not uniformly supported"
         # So this is only set once to True in __init__ unlike the other transparency settings
@@ -161,11 +158,11 @@ class MainWindow(QMainWindow):
         # Flags and attributes
         # Needs the FramelessWindowHint flag set for the translucency to work.
         self.setWindowFlag(
-            QtCore.Qt.WindowType.FramelessWindowHint, 
+            QtCore.Qt.WindowType.FramelessWindowHint,
             self.settings.transparency
         )
         self.setAttribute(
-            QtCore.Qt.WidgetAttribute.WA_NoSystemBackground, 
+            QtCore.Qt.WidgetAttribute.WA_NoSystemBackground,
             self.settings.transparency
         )
 
@@ -201,14 +198,18 @@ class MainWindow(QMainWindow):
 
     def enable_hotkeys(self):
         if sys.platform == "win32":
-            increase_key = self.settings.increase_offset_hotkey.scancodes
-            decrease_key = self.settings.decrease_offset_hotkey.scancodes
-            self.hotkey_manager.enable_hotkeys(increase_key, decrease_key)
+            if (
+                (increase_key := self.settings.increase_offset_hotkey)
+                and (decrease_key := self.settings.decrease_offset_hotkey)
+            ):
+                self.hotkey_manager.enable_hotkeys(increase_key.scancodes, decrease_key.scancodes)
+            else:
+                raise AttributeError("Hotkeys not set")
 
     def disable_hotkeys(self):  # type: ignore
         if sys.platform == "win32":
             self.hotkey_manager.disable_hotkeys()
-    
+
             self.split_offset = 0  # Reset the offset as you can no longer change it
             if not self.ls.connected:
                 self.update_notes(0)
@@ -252,8 +253,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         """On close save settings and close the livesplit connection."""
         self.settings.save()
-        if IS_WINDOWS:
-            assert self.hotkey_manager is not None
+        if sys.platform == "win32":
             self.hotkey_manager.disable_all()  # Kill any hotkeys
         self.ls.close()
         event.accept()
@@ -418,8 +418,13 @@ class MainWindow(QMainWindow):
                 self.render_blank()
 
         # Re-enable hotkeys if enabled
-        if IS_WINDOWS and self.settings.hotkeys_enabled:
-            self.enable_hotkeys()
+        if sys.platform == "win32" and self.settings.hotkeys_enabled:
+            try:
+                self.enable_hotkeys()
+            except AttributeError:
+                # Disable hotkeys if the attributes are unset
+                self.settings.hotkeys_enabled = False
+                self.hotkeys_toggle.setChecked(False)
 
 
 class LivesplitLink(QtCore.QObject):
