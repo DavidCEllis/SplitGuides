@@ -1,13 +1,14 @@
 [build-system]
 requires = [
     "setuptools>=77.0",
+    "setuptools-scm>=8",
     "pyside6-essentials~=6.9",  # Needed to build uic files
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name="splitguides"
-description="Speedrun notes tool for advancing notes automatically with Livesplit."
+description="A tool for speedrunners to display notes that advance automatically with their splits in Livesplit."
 authors = [
   { name = "David C Ellis" },
 ]
@@ -27,8 +28,9 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",  # Should also work on Linux, even if livesplit doesn't
-    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Topic :: Games/Entertainment",
 ]
 dynamic = ['version']
 license = "GPL-3.0-or-later"
@@ -49,8 +51,12 @@ build = [
     "pywin32>=308; sys_platform == 'win32'",
 ]
 
-[tool.setuptools.dynamic]
-version = { attr = "splitguides.__version__" }
+[tool.setuptools_scm]
+version_file = "src/splitguides/_version.py"
+version_file_template = """
+__version__ = "{version}"
+__version_tuple__ = {version_tuple}
+"""
 
 [tool.pytest.ini_options]
 addopts= "--cov=src/ --cov-report=term-missing"
