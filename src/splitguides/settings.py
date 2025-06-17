@@ -61,13 +61,13 @@ except OSError:
 @prefab
 class BaseSettings(metaclass=ABCMeta):
     # Settings files to use - Default to desktop versions
-    SETTINGS_FILE: ClassVar[None | Path] = DESKTOP_SETTINGS_FILE
+    SETTINGS_FILE: ClassVar[Path] = DESKTOP_SETTINGS_FILE
 
     default_template_filename: ClassVar[str] = "desktop.html"
     default_css_filename: ClassVar[str] = "desktop.css"
 
     # Settings save file
-    output_file: None | Path = attribute(default=None, serialize=False)
+    output_file: Path = attribute(serialize=False)
 
     # Networking Settings
     hostname: str = "localhost"
@@ -86,10 +86,12 @@ class BaseSettings(metaclass=ABCMeta):
 
     html_template_folder: Path = DEFAULT_TEMPLATE_FOLDER
     css_folder: Path = DEFAULT_STATIC_FOLDER
-    html_template_file: None | str = None
-    css_file: None | str = None
+    
+    # Default to desktop versions
+    html_template_file: str = "desktop.html"
+    css_file: str = "desktop.css"
 
-    notes_folder: Path = USER_PATH
+    notes_folder: str = USER_PATH
 
     # Hotkey Settings
     hotkeys_enabled: bool = False
@@ -145,13 +147,12 @@ class BaseSettings(metaclass=ABCMeta):
         """
         if input_filename is None:
             input_filename = cls.SETTINGS_FILE
-
         input_path = Path(input_filename)
+        
         if input_path.exists():
             new_settings = json.loads(input_path.read_text())
 
-            # noinspection PyArgumentList
-            loaded_settings = cls(output_file=input_filename, **new_settings)
+            loaded_settings = cls(output_file=input_path, **new_settings)
 
             # Check that the templates exist, reset otherwise
             # This will happen if the executable folder is moved
@@ -161,7 +162,7 @@ class BaseSettings(metaclass=ABCMeta):
 
             return loaded_settings
         else:
-            return cls(output_file=input_filename)
+            return cls(output_file=input_path)
 
     def fix_template_paths(self):
         if not self.full_template_path.exists():
