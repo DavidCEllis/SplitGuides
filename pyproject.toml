@@ -45,8 +45,8 @@ dev = [
     "pytest-qt>=4.4",
 ]
 build = [
-    "cx-freeze",
-    "pywin32",
+    "cx-freeze>=8.3",
+    "pywin32>=308; sys_platform == 'win32'",
 ]
 
 [tool.setuptools.dynamic]
