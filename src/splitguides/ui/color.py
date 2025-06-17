@@ -31,7 +31,7 @@ def qcolor_to_rgba(color: QColor) -> str:
     :param color: QColor object
     :return: Colour as #rrggbbaa string
     """
-    argb = color.name(QColor.HexArgb)
+    argb = color.name(QColor.NameFormat.HexArgb)
     a, rgb = argb[1:3], argb[3:9]
     return f"#{rgb}{a}"
 
