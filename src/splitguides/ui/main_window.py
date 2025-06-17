@@ -8,15 +8,17 @@ from jinja2 import Environment, FileSystemLoader, Template
 from PySide6 import QtCore
 from PySide6.QtGui import QColorConstants, QCursor, QIcon, QMouseEvent, QAction
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu, QErrorMessage
-from .custom_elements import ExtLinkWebEnginePage
 
-from ..settings import DesktopSettings
 from .color import rgba_to_qss
-from .settings_ui import SettingsDialog
-from .layouts import Ui_MainWindow
-from ..note_parser import Notes
-from ..livesplit_client import get_client
+from .custom_elements import ExtLinkWebEnginePage
 from .hotkey_manager import HotkeyManager
+from .layouts import Ui_MainWindow
+from .settings_ui import SettingsDialog
+
+from ..livesplit_client import get_client
+from ..note_parser import Notes
+from ..settings import DesktopSettings
+
 
 # Get correct paths
 if getattr(sys, "frozen", False):  # pragma: nocover
@@ -61,17 +63,12 @@ class MainWindow(QMainWindow):
 
         # Transparency
         self.menu_transparency: None | QAction = None
-        #  The widget needs to have the Qt::FramelessWindowHint window flag set for the translucency to work.
-        self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint, self.settings.transparency)
-        self.ui.centralWidget.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
-        if self.settings.transparency:
-            self.ui.statusbar.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
-        #  To enable this feature in a top-level widget,
-        #  set its Qt::WA_TranslucentBackground attribute with setAttribute()
-        #  and ensure that its background is painted with non-opaque colors
-        #  in the regions you want to be partially transparent.
+        
+        # WA_TranslucentBackground attribute required to enable transparency
+        # QT Docs state "Toggling this attribute after the widget has been shown is not uniformly supported"
+        # So this is only set once to True in __init__ unlike the other transparency settings
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground, self.settings.transparency)
+        self.refresh_transparency()
 
         # Setup notes variables
         self.notefile: None | str = None
@@ -129,16 +126,39 @@ class MainWindow(QMainWindow):
         self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.settings.on_top)
         self.show()
 
+    def refresh_transparency(self):
+        """
+        Redo all of the transparency display configuration
+        """
+        qss_bg_color = rgba_to_qss(self.settings.background_color)
+        qss_font_color = rgba_to_qss(self.settings.font_color)
+        qss_style = (
+            f"background-color: {qss_bg_color}; color: {qss_font_color}"
+        )
+
+        # Flags and attributes
+        # Needs the FramelessWindowHint flag set for the translucency to work.
+        self.setWindowFlag(
+            QtCore.Qt.WindowType.FramelessWindowHint, 
+            self.settings.transparency
+        )
+        self.setAttribute(
+            QtCore.Qt.WidgetAttribute.WA_NoSystemBackground, 
+            self.settings.transparency
+        )
+
+        # Central widget always matches CSS style, statusbar only when transparent
+        self.ui.centralWidget.setStyleSheet(qss_style)
+        if self.settings.transparency:
+            self.ui.statusbar.setStyleSheet(qss_style)
+        else:
+            self.ui.statusbar.setStyleSheet("")
+
     def toggle_transparency(self):
         """Toggle window transparency, update settings and window flag to match."""
         self.settings.transparency = not self.settings.transparency
         self.menu_transparency.setChecked(self.settings.transparency)
-        self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint, self.settings.transparency)
-        if self.settings.transparency:
-            self.ui.statusbar.setStyleSheet("background-color: " + rgba_to_qss(self.settings.background_color) + "; color: " + rgba_to_qss(self.settings.font_color))
-        else:
-            self.ui.statusbar.setStyleSheet("")
-        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_NoSystemBackground, self.settings.transparency)
+        self.refresh_transparency()
         self.show()
 
     def toggle_hotkey_enable(self):
@@ -357,6 +377,9 @@ class MainWindow(QMainWindow):
                 self.ls = LivesplitLink(self.client, self)
                 self.ls.start_loops()
 
+            # Redraw transparency settings (colours may have changed)
+            self.refresh_transparency()
+
             # Reread notes with separator
             if self.notefile:
                 self.notes = Notes.from_file(
@@ -365,6 +388,8 @@ class MainWindow(QMainWindow):
                 # Reset the offset
                 self.split_offset = 0
                 self.update_notes(self.split_index, refresh=True)
+            else:
+                self.render_blank()
 
         # Re-enable hotkeys if enabled
         if IS_WINDOWS and self.settings.hotkeys_enabled:
