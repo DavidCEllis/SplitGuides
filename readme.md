@@ -154,6 +154,10 @@ pytest
 splitguides
 ```
 
+## Contributions ##
+
+Transparent background support added by @AlexKnauth
+
 ## Dependencies ##
 * pyside6 - QT Gui Bindings
 * jinja2 - Templating for the notes page
