@@ -30,7 +30,7 @@ jobs:
       with:
         name: splitguides-app-dev
         path: build/SplitGuides_v*.zip
-        retention-days: 14
+        retention-days: 1
 
   wheel-build:
     name: Test Wheel Build
