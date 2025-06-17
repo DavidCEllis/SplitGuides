@@ -1,0 +1,58 @@
+name: Test Builds
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+
+jobs:
+  exe-build:
+    name: Test exe Build
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"  # build with oldest supported python
+    - name: Install the module
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install . --group build
+    - name: Build the application
+      run: >-
+        python application/setup.py build
+    - name: Store the built app
+      uses: actions/upload-artifact@v4
+      with:
+        name: splitguides-app-dev
+        path: build/SplitGuides_v*.zip
+        retention-days: 1
+
+  wheel-build:
+    name: Test Wheel Build
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pypa/build
+        run: >-
+          python3 -m
+          pip install
+          build
+          --user
+      - name: Build a binary wheel and a source tarball
+        run: python3 -m build
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+          retention-days: 1

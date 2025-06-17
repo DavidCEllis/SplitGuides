@@ -1,14 +1,8 @@
 from PySide6.QtWidgets import QApplication, QMainWindow
 import waitress
 
-from flask import cli
-
 from splitguides.server import app, get_notes, settings
 from splitguides.ui.server_settings_ui import ServerSettingsDialog
-
-
-# Suppress some of flask's messages
-cli.show_server_banner = lambda *x: None
 
 
 def launch():

@@ -1,7 +1,9 @@
-import sys
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
+from __future__ import annotations
+
 import json
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from PySide6.QtWidgets import QDialog, QColorDialog, QFileDialog
 from PySide6.QtCore import QRegularExpression, Slot
@@ -9,7 +11,6 @@ from PySide6.QtGui import (
     QIntValidator,
     QDoubleValidator,
     QRegularExpressionValidator,
-    QColor,
 )
 
 from ..settings import DesktopSettings
@@ -21,7 +22,10 @@ from ..hotkeys import Hotkey
 
 class SettingsDialog(QDialog):
     def __init__(
-        self, parent, settings: DesktopSettings, hotkey_manager: HotkeyManager
+        self, 
+        parent, 
+        settings: DesktopSettings, 
+        hotkey_manager: HotkeyManager | None,
     ):
         super().__init__(parent=parent)
         self.ui = Ui_Settings()
@@ -157,11 +161,14 @@ class SettingsDialog(QDialog):
 
     def get_increase_hotkey(self):
         """Get a hotkey to use to increase the split offset"""
-        # First set the buttons dialog and disable the interface
-        self.ui.nextsplitkey_button.setText("Listening...")
-        self.setEnabled(False)
-        fn = lambda: self.hotkey_manager.select_input(self.return_increase_hotkey)
-        self.pool.submit(fn)
+        if self.hotkey_manager is not None:
+            # First set the buttons dialog and disable the interface
+            self.ui.nextsplitkey_button.setText("Listening...")
+            self.setEnabled(False)
+            
+            hotkey_manager = self.hotkey_manager
+            fn = lambda: hotkey_manager.select_input(self.return_increase_hotkey)
+            self.pool.submit(fn)
 
     @Slot(str)
     def return_increase_hotkey(self, hotkey=None):
@@ -169,32 +176,36 @@ class SettingsDialog(QDialog):
         Get the returned hotkey or cancel if no hotkey is returned
         :param hotkey:
         """
-        if hotkey:
-            hotkey = Hotkey(**json.loads(hotkey))
-            self.ui.nextsplitkey_edit.setText(hotkey.name)
-            self.nextsplitkey = hotkey
-        else:
-            self.ui.nextsplitkey_edit.setText("")
-            self.nextsplitkey = None
+        if self.hotkey_manager is not None:
+            if hotkey:
+                hotkey = Hotkey(**json.loads(hotkey))
+                self.ui.nextsplitkey_edit.setText(hotkey.name)
+                self.nextsplitkey = hotkey
+            else:
+                self.ui.nextsplitkey_edit.setText("")
+                self.nextsplitkey = None
 
-        self.ui.nextsplitkey_button.setText("Select")
+            self.ui.nextsplitkey_button.setText("Select")
 
-        # Unbind next split key if both are equal
-        if hotkey and self.ui.previoussplitkey_edit.text() == hotkey.name:
-            self.ui.previoussplitkey_edit.setText("")
-            self.previoussplitkey = None
+            # Unbind next split key if both are equal
+            if hotkey and self.ui.previoussplitkey_edit.text() == hotkey.name:
+                self.ui.previoussplitkey_edit.setText("")
+                self.previoussplitkey = None
 
-        # Disconnect the hotkey signal from this function
-        self.hotkey_manager.hotkey_signal.disconnect(self.return_increase_hotkey)
+            # Disconnect the hotkey signal from this function
+            self.hotkey_manager.hotkey_signal.disconnect(self.return_increase_hotkey)
 
-        self.setEnabled(True)
+            self.setEnabled(True)
 
     def get_decrease_hotkey(self):
         """Get a hotkey to use to decrease the split offset"""
-        self.ui.previoussplitkey_button.setText("Listening...")
-        self.setEnabled(False)
-        fn = lambda: self.hotkey_manager.select_input(self.return_decrease_hotkey)
-        self.pool.submit(fn)
+        if self.hotkey_manager is not None:
+            self.ui.previoussplitkey_button.setText("Listening...")
+            self.setEnabled(False)
+
+            hotkey_manager = self.hotkey_manager
+            fn = lambda: hotkey_manager.select_input(self.return_decrease_hotkey)
+            self.pool.submit(fn)
 
     @Slot(str)
     def return_decrease_hotkey(self, hotkey=None):
@@ -202,24 +213,25 @@ class SettingsDialog(QDialog):
         Get the returned hotkey or cancel if no hotkey is returned
         :param hotkey:
         """
-        if hotkey:
-            hotkey = Hotkey(**json.loads(hotkey))
-            self.ui.previoussplitkey_edit.setText(hotkey.name)
-            self.previoussplitkey = hotkey
-        else:
-            self.ui.previoussplitkey_edit.setText("")
-            self.previoussplitkey = None
-        self.ui.previoussplitkey_button.setText("Select")
+        if self.hotkey_manager is not None:
+            if hotkey:
+                hotkey = Hotkey(**json.loads(hotkey))
+                self.ui.previoussplitkey_edit.setText(hotkey.name)
+                self.previoussplitkey = hotkey
+            else:
+                self.ui.previoussplitkey_edit.setText("")
+                self.previoussplitkey = None
+            self.ui.previoussplitkey_button.setText("Select")
 
-        # Unbind next split key if both are equal
-        if hotkey and self.ui.nextsplitkey_edit.text() == hotkey.name:
-            self.ui.nextsplitkey_edit.setText("")
-            self.nextsplitkey = None
+            # Unbind next split key if both are equal
+            if hotkey and self.ui.nextsplitkey_edit.text() == hotkey.name:
+                self.ui.nextsplitkey_edit.setText("")
+                self.nextsplitkey = None
 
-        # Disconnect the hotkey signal from this function
-        self.hotkey_manager.hotkey_signal.disconnect(self.return_decrease_hotkey)
+            # Disconnect the hotkey signal from this function
+            self.hotkey_manager.hotkey_signal.disconnect(self.return_decrease_hotkey)
 
-        self.setEnabled(True)
+            self.setEnabled(True)
 
     def accept(self):
         """If the dialog is accepted save the settings"""

@@ -136,23 +136,28 @@ Via Splitnotes Server on Tablet:
 Once you have forked and cloned the repository the simplest way to setup the environment is to use
 `uv`.
 
-```
-uv sync --extra testing
+With the source folder as your current working directory:
+
+```cmd
 uv run pytest
 uv run splitguides
 ```
 
-Without `uv` you will need to jump through a few extra hoops.
+Without `uv` you will need to manually set up and activate the python environment.
 
 On Windows with the `py` command included with python.org installs:
 
 ```cmd
 py -3.13 -m venv .venv
 .venv\Scripts\activate
-python -m pip install -e .[testing]
+python -m pip install -e . --group dev
 pytest
 splitguides
 ```
+
+## Contributions ##
+
+* Transparent background support added by [@AlexKnauth](https://github.com/AlexKnauth)
 
 ## Dependencies ##
 * pyside6 - QT Gui Bindings

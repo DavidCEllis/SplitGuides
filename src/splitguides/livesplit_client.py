@@ -3,7 +3,7 @@ import socket
 from datetime import timedelta
 import typing
 
-from ducktools.classbuilder.prefab import prefab, attribute, SlotFields
+from ducktools.classbuilder.prefab import Prefab, attribute
 
 BUFFER_SIZE = 4096
 
@@ -21,6 +21,9 @@ def parse_time(time_str: str) -> timedelta:
     :return:
     """
     match = pattern.match(time_str)
+    if match is None:
+        raise RuntimeError("String time from livesplit did not match expected pattern")
+
     hours = int(match["hours"]) if match["hours"] else 0
     minutes = int(match["minutes"])
     seconds = int(match["seconds"])
@@ -33,21 +36,14 @@ def parse_time(time_str: str) -> timedelta:
     return result
 
 
-@prefab
-class LivesplitConnection:
+class LivesplitConnection(Prefab):
     """
     Socket based livesplit connection model
     """
-    __slots__ = SlotFields(
-        server=attribute(default="localhost"),
-        port=attribute(default=16834),
-        timeout=attribute(default=1),
-        sock=attribute(default=None, init=False, repr=False),
-    )
-    server: str
-    port: int
-    timeout: int
-    sock: socket.socket | None
+    server: str = "localhost"
+    port: int = 16834
+    timeout: int = 1
+    sock: socket.socket | None = attribute(default=None, init=False, repr=False)
 
     def connect(self) -> bool:
         """
@@ -86,12 +82,14 @@ class LivesplitConnection:
         """
         if not self.sock:
             self.connect()
-        try:
-            self.sock.send(msg)
-        except ConnectionAbortedError:
-            self.sock.close()
-            self.sock = None
-            raise ConnectionAbortedError("The connection has been closed by the host")
+        
+        if self.sock:  # Check again in case connection failed
+            try:
+                self.sock.send(msg)
+            except ConnectionAbortedError:
+                self.sock.close()
+                self.sock = None
+                raise ConnectionAbortedError("The connection has been closed by the host")
 
     def receive(self) -> bytes:
         """
@@ -102,32 +100,31 @@ class LivesplitConnection:
         """
         if not self.sock:
             self.connect()
-        try:
-            data_received = self.sock.recv(BUFFER_SIZE)
-        except socket.timeout:
-            raise TimeoutError(
-                "No response received from the server within "
-                f"the timeout period ({self.timeout}s)"
-            )
-        except OSError:
-            self.sock.close()
-            self.sock = None
-            raise ConnectionError("The connection has been closed by the host")
+        
+        if self.sock:
+            try:
+                data_received = self.sock.recv(BUFFER_SIZE)
+            except socket.timeout:
+                raise TimeoutError(
+                    "No response received from the server within "
+                    f"the timeout period ({self.timeout}s)"
+                )
+            except OSError:
+                self.sock.close()
+                self.sock = None
+                raise ConnectionError("The connection has been closed by the host")
 
-        if data_received == b"":
-            self.sock.close()
-            self.sock = None
-            raise ConnectionError("The connection has been closed by the host")
+            if data_received == b"":
+                self.sock.close()
+                self.sock = None
+                raise ConnectionError("The connection has been closed by the host")
 
-        return data_received
+            return data_received
+        
+        return b""
 
 
-_receive_types = typing.Literal["text", "time", "int"]
-
-
-@prefab
-class LivesplitMessaging:
-    __slots__ = SlotFields(connection=attribute())
+class LivesplitMessaging(Prefab):
     connection: LivesplitConnection
 
     def connect(self) -> bool:

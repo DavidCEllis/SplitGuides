@@ -1,5 +1,4 @@
 import sys
-import os
 
 from pathlib import Path
 
@@ -10,7 +9,6 @@ from PySide6.QtGui import (
     QIntValidator,
     QDoubleValidator,
     QRegularExpressionValidator,
-    QColor,
 )
 
 from ..settings import ServerSettings
@@ -22,10 +20,6 @@ from .layouts import Ui_ServerSettings
 if getattr(sys, "frozen", False):  # pragma: nocover
     base_path = Path(sys.executable).parent
     icon_file = str(base_path / "logo_alpha.png")
-elif os.environ.get("DUCKTOOLS_ENV_LAUNCH_TYPE"):
-    # Ducktools-env zipapp
-    base_path = Path(__file__).parent
-    icon_file = str(base_path.parents[1] / "resources" / "logo_alpha.png")
 else:
     base_path = Path(__file__).parent
     icon_file = str(base_path.parents[2] / "resources" / "logo_alpha.png")
@@ -45,7 +39,7 @@ class ServerSettingsDialog(QDialog):
         self.settings = settings
 
         # noinspection PyUnresolvedReferences
-        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
 
         # self.hotkey_manager = hotkey_manager
         self.nextsplitkey = None
