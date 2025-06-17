@@ -1,5 +1,4 @@
 import sys
-import os
 
 from pathlib import Path
 
@@ -10,7 +9,6 @@ from PySide6.QtGui import (
     QIntValidator,
     QDoubleValidator,
     QRegularExpressionValidator,
-    QColor,
 )
 
 from ..settings import ServerSettings
@@ -41,7 +39,7 @@ class ServerSettingsDialog(QDialog):
         self.settings = settings
 
         # noinspection PyUnresolvedReferences
-        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
 
         # self.hotkey_manager = hotkey_manager
         self.nextsplitkey = None
