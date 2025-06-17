@@ -46,8 +46,8 @@ def read_hotkey(suppress: bool = True) -> Hotkey:
         keychange = queue.get()
         if keychange.event_type == KEY_UP:
             keyboard.unhook(hooked)
-            with keyboard._pressed_events_lock:
-                key_events = list(keyboard._pressed_events.values())
+            with keyboard._pressed_events_lock:  # type: ignore
+                key_events = list(keyboard._pressed_events.values())  # type: ignore
                 key_events.append(keychange)
                 key_codes = [e.scan_code for e in key_events]
                 key_string = keyboard.get_hotkey_name([e.name for e in key_events])
