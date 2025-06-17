@@ -10,10 +10,22 @@ Includes a server version for rendering notes in browsers on another device
 
 ## Install/Setup ##
 
+### Standalone Bundle for Windows ###
+
 1. Download `SplitGuides_v<VERSION>.zip` from the
    [**releases page**](https://github.com/DavidCEllis/SplitGuides/releases)
    Where `<VERSION>` is the version number of the release.
 2. Extract anywhere and run *splitguides.exe*
+
+### Using Python Packaging tools ###
+
+#### UV ####
+
+If you have [uv](https://docs.astral.sh/uv/) installed you can install and run splitguides
+directly from the Python Package Index (PyPI).
+
+* Install and run the latest release with `uvx splitguides`
+
 
 ## Usage ##
 
@@ -123,11 +135,11 @@ Configuration Options:
 
 On Desktop:
 
-![Image of splitguides rendering](resources/splits_example.png)
+![Image of splitguides rendering](images/splits_example.png)
 
 Via Splitnotes Server on Tablet:
 
-![Image of splitguides server - yes this is an old iPad](resources/splitguides_server_example.jpg)
+![Image of splitguides server - yes this is an old iPad](images/splitguides_server_example.jpg)
 
 ## Development ##
 

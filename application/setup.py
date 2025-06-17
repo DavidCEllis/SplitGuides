@@ -21,8 +21,8 @@ server_app = str(base_path / "src" / "splitguides" / "server" / "__main__.py")
 
 templates = str(base_path / "src" / "splitguides" / "templates")
 static_folder = str(base_path / "src" / "splitguides" / "static")
-icon_file = str(base_path / "resources" / "logo_alpha.ico")
-icon_png = str(base_path / "resources" / "logo_alpha.png")
+icon_file = str(base_path / "src" / "splitguides" / "resources" / "logo_alpha.ico")
+icon_png = str(base_path / "src" / "splitguides" / "resources" / "logo_alpha.png")
 readme = str(base_path / "readme.md")
 license_file = str(base_path / "COPYING")
 
