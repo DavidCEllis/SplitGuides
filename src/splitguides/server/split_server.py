@@ -37,6 +37,7 @@ def notes_page():
     :return:
     """
     global notefile
+    assert notefile is not None
     return render_template(settings.html_template_file, notefile=notefile.stem)
 
 
@@ -52,6 +53,9 @@ def split():
         Handle the stream of note updates, when the note index changes - push the update
         otherwise just keep alive every 10s.
         """
+        global notes
+        assert notes is not None
+
         current_note_index = None
         last_update = 0
         client = get_client(settings.hostname, settings.port)
@@ -87,7 +91,7 @@ def split():
                             data = "".join(split_text).replace("\n", "")
                             yield f"data: {data}\n\n"
                         else:
-                            yield f"data: End of Notes.\n\n"
+                            yield "data: End of Notes.\n\n"
                     elif now - last_update > KEEP_ALIVE:
                         last_update = now
                         yield ":No update, keep connection\n\n"
