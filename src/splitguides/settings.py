@@ -7,7 +7,7 @@ from abc import ABCMeta
 from pathlib import Path
 from typing import ClassVar
 
-from ducktools.classbuilder.prefab import prefab, attribute, as_dict, is_prefab_instance
+from ducktools.classbuilder.prefab import prefab, attribute, as_dict, is_prefab_instance, get_attributes
 
 from .hotkeys import hotkey_or_none, Hotkey
 from .exceptions import UnsupportedPlatformError
@@ -86,7 +86,7 @@ class BaseSettings(metaclass=ABCMeta):
 
     html_template_folder: Path = DEFAULT_TEMPLATE_FOLDER
     css_folder: Path = DEFAULT_STATIC_FOLDER
-    
+
     # Default to desktop versions
     html_template_file: str = "desktop.html"
     css_file: str = "desktop.css"
@@ -148,11 +148,19 @@ class BaseSettings(metaclass=ABCMeta):
         if input_filename is None:
             input_filename = cls.SETTINGS_FILE
         input_path = Path(input_filename)
-        
+
         if input_path.exists():
             new_settings = json.loads(input_path.read_text())
 
-            loaded_settings = cls(output_file=input_path, **new_settings)
+            valid_attribs = {k for k, v in get_attributes(cls).items() if v.init}
+
+            # Filter settings from new_settings so there are no invalid keys
+            filtered_settings = {
+                k: v for k, v in new_settings.items()
+                if k in valid_attribs
+            }
+
+            loaded_settings = cls(output_file=input_path, **filtered_settings)
 
             # Check that the templates exist, reset otherwise
             # This will happen if the executable folder is moved
