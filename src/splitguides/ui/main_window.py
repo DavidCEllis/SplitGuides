@@ -12,6 +12,7 @@ from jinja2 import Environment, FileSystemLoader, Template
 from PySide6 import QtCore
 from PySide6.QtGui import QColorConstants, QCursor, QIcon, QMouseEvent, QAction
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMenu, QErrorMessage
+from PySide6.QtWebEngineCore import QWebEngineSettings
 
 from .color import rgba_to_qss
 from .custom_elements import ExtLinkWebEnginePage
@@ -272,6 +273,12 @@ class MainWindow(QMainWindow):
         self.ui.notes.customContextMenuRequested.connect(self.show_menu)
         # Allow links to open in an external browser
         page = ExtLinkWebEnginePage(self, backgroundColor=QColorConstants.Transparent)
+
+        # Make webengine allow access to remote and local images from local files
+        _websettings = page.settings()
+        _websettings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
+        _websettings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessFileUrls, True)
+
         self.ui.notes.setPage(page)
 
     def build_menu(self):
