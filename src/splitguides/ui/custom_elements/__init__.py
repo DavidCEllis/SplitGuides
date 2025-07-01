@@ -12,7 +12,7 @@ class ExtLinkWebEnginePage(QWebEnginePage):
 
     def acceptNavigationRequest(self, url, _type, is_mainframe):
         # Launch external browser for clicking links, otherwise do default behaviour
-        if _type == QWebEnginePage.NavigationTypeLinkClicked:
+        if _type == QWebEnginePage.NavigationType.NavigationTypeLinkClicked:
             QDesktopServices.openUrl(url)
             return False
         return super().acceptNavigationRequest(url, _type, is_mainframe)
