@@ -223,7 +223,10 @@ def test_update_notes(qtbot, fake_link, idx):
         css=main_window.css,
         notes="Fake Splits",
     )
-    fake_note_ui.setHtml.assert_called_once_with("Fake HTML", baseUrl="Notes_URL")
+
+    note_path = Path("Notes_URL").absolute().as_uri()
+
+    fake_note_ui.setHtml.assert_called_once_with("Fake HTML", baseUrl=note_path)
 
     assert main_window.split_index == used_idx
 
