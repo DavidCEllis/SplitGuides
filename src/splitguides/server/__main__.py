@@ -1,7 +1,11 @@
+from pathlib import Path
+
 from PySide6.QtWidgets import QApplication, QMainWindow
 import waitress
 
 from splitguides.server import app, get_notes, settings
+from splitguides.server import split_server
+
 from splitguides.ui.server_settings_ui import ServerSettingsDialog
 
 
@@ -30,9 +34,14 @@ def launch():
     print(
         "This server version of SplitGuides allows you view notes via a browser window "
         "and should work across a local network.\n"
-        "This uses a development server and is not intended "
-        "to be used over the internet."
+        "This is not intended to be used over the internet or on public networks."
     )
+
+    # Access via split_server as this value gets replaced only after get_notes
+    assert isinstance(split_server.notefile, Path)  # True due to success of get_notes
+    notefolder = Path(split_server.notefile).parent
+
+    print(f"Serving data from '{notefolder}' for local files")
 
     print(
         f"Connect a browser to "
