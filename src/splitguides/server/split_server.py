@@ -4,7 +4,7 @@ import string
 import time
 from pathlib import Path
 
-from flask import Flask, render_template, Response
+from flask import Flask, Response, render_template, send_from_directory
 from PySide6.QtWidgets import QFileDialog
 
 from ..settings import ServerSettings
@@ -105,6 +105,16 @@ def split():
             time.sleep(0.5)
 
     return Response(event_stream(), mimetype="text/event-stream")
+
+
+@app.route("/<path:filename>")
+def serve_file(filename):
+    global notefile
+    assert isinstance(notefile, Path)
+
+    fld = notefile.parent
+
+    return send_from_directory(fld, filename)
 
 
 def get_notes(parent):
