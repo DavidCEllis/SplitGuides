@@ -3,7 +3,6 @@ Define the main windows for the desktop application
 """
 from __future__ import annotations
 
-import os.path
 import sys
 import time
 from pathlib import Path
@@ -385,8 +384,6 @@ class MainWindow(QMainWindow):
                 css=self.css,
                 notes=self.notes.render_splits(start, end),
             )
-
-            # noteuri = QtCore.QUrl.fromLocalFile(str(Path(self.notefile).parent) + os.path.sep)
 
             self.ui.notes.setHtml(html, baseUrl=self.notefile)
             self.split_index = idx
