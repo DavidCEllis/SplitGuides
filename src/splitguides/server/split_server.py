@@ -113,7 +113,7 @@ def serve_file(filename):
     assert isinstance(notefile, Path)
 
     fld = notefile.parent
-                  
+
     return send_from_directory(fld, filename)
 
 
