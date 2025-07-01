@@ -385,7 +385,9 @@ class MainWindow(QMainWindow):
                 notes=self.notes.render_splits(start, end),
             )
 
-            self.ui.notes.setHtml(html, baseUrl=self.notefile)
+            note_uri = Path(self.notefile).absolute().as_uri()
+
+            self.ui.notes.setHtml(html, baseUrl=note_uri)
             self.split_index = idx
 
     def open_settings(self):
