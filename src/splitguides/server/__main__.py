@@ -41,7 +41,7 @@ def launch():
     assert isinstance(split_server.notefile, Path)  # True due to success of get_notes
     notefolder = Path(split_server.notefile).parent
 
-    print(f"Serving data from '{notefolder}' for local files")
+    print(f"Serving contents of '{notefolder}' for relative links")
 
     print(
         f"Connect a browser to "
