@@ -1,70 +1,28 @@
-import re
-import socket
+import json
+from websockets.sync.client import connect, ClientConnection
 from datetime import timedelta
 import typing
 
 from ducktools.classbuilder.prefab import Prefab, attribute
 
-BUFFER_SIZE = 4096
+from livesplit_client import BUFFER_SIZE, parse_time
 
-
-pattern = re.compile(
-    r"^(?:(?P<hours>\d*):)?(?P<minutes>\d{1,2}):(?P<seconds>\d{2}).(?P<centiseconds>\d*)"
-)
-
-
-def parse_time(time_str: str) -> timedelta:
+class LivesplitoneConnection(Prefab):
     """
-    Takes the time string from livesplit and converts to a timedelta
-
-    :param time_str:
-    :return:
-    """
-    match = pattern.match(time_str)
-    if match is None:
-        raise RuntimeError("String time from livesplit did not match expected pattern")
-
-    hours = int(match["hours"]) if match["hours"] else 0
-    minutes = int(match["minutes"])
-    seconds = int(match["seconds"])
-    milliseconds = int(match["centiseconds"]) * 10
-
-    result = timedelta(
-        hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds
-    )
-
-    return result
-
-
-class LivesplitConnection(Prefab):
-    """
-    Socket based livesplit connection model
+    Socket based livesplit one connection model
     """
     server: str = "localhost"
     port: int = 16834
     timeout: int = 1
-    sock: socket.socket | None = attribute(default=None, init=False, repr=False)
+    sock: ClientConnection | None = attribute(default=None, init=False, repr=False)
 
     def connect(self) -> bool:
         """
-        Attempt to connect to the livesplit server
+        Attempt to connect to the livesplit one server
         :return: True if connected, otherwise False
         """
-        self.sock = socket.socket()
-        try:
-            self.sock.connect((self.server, self.port))
-        except ConnectionRefusedError:
-            self.sock.close()
-            self.sock = None
-            return False
-        except socket.gaierror:
-            # Could not resolve hostname
-            self.sock.close()
-            self.sock = None
-            return False
-        else:
-            self.sock.settimeout(self.timeout)
-            return True
+        self.sock = connect(f"ws://{self.server}:{self.port}")
+        return True
 
     def close(self) -> None:
         if self.sock:
@@ -73,8 +31,8 @@ class LivesplitConnection(Prefab):
 
     def send(self, msg: bytes) -> None:
         """
-        Send a message to the livesplit server - connect if not already connected.
-        If the connection is aborted (ie: if livesplit server has been closed)
+        Send a message to the livesplit one server - connect if not already connected.
+        If the connection is aborted (ie: if livesplit one server has been closed)
         raise a ConnectionAbortedError
 
         :param msg: bytes message to send (should end with "\r\n")
@@ -93,7 +51,7 @@ class LivesplitConnection(Prefab):
 
     def receive(self) -> bytes:
         """
-        Attempt to receive a message from the livesplit server
+        Attempt to receive a message from the livesplit one server
         raise ConnectionError if the connection has been terminated.
 
         :return: bytes received from the server
@@ -103,12 +61,7 @@ class LivesplitConnection(Prefab):
         
         if self.sock:
             try:
-                data_received = self.sock.recv(BUFFER_SIZE)
-            except socket.timeout:
-                raise TimeoutError(
-                    "No response received from the server within "
-                    f"the timeout period ({self.timeout}s)"
-                )
+                data_received = self.sock.recv(BUFFER_SIZE, False)
             except OSError:
                 self.sock.close()
                 self.sock = None
@@ -124,8 +77,8 @@ class LivesplitConnection(Prefab):
         return b""
 
 
-class LivesplitMessaging(Prefab):
-    connection: LivesplitConnection
+class LivesplitoneMessaging(Prefab):
+    connection: LivesplitoneConnection
 
     def connect(self) -> bool:
         return self.connection.connect()
@@ -134,7 +87,7 @@ class LivesplitMessaging(Prefab):
         self.connection.close()
 
     def send(self, message) -> None:
-        m = message.encode("UTF8")
+        m = json.dumps(message).encode("UTF8")
         self.connection.send(m + b"\r\n")
 
     @typing.overload
@@ -142,15 +95,20 @@ class LivesplitMessaging(Prefab):
     @typing.overload
     def receive(self, datatype: typing.Literal["int"]) -> int: ...
     @typing.overload
+    def receive(self, datatype: typing.Literal["state"]) -> dict: ...
+    @typing.overload
     def receive(self, datatype: typing.Literal["text"] = "text") -> str: ...
 
     def receive(self, datatype="text"):
         result = self.connection.receive()
         result = result.strip().decode("UTF8")
+        result = json.loads(result)["success"]
         if datatype == "time":
-            result = parse_time(result)
+            result = parse_time(result["string"])
         elif datatype == "int":
-            return int(result)
+            return int(result["string"])
+        elif datatype == "state":
+            return result
 
         return result
 
@@ -158,55 +116,55 @@ class LivesplitMessaging(Prefab):
         """
         Start the timer
         """
-        self.send("starttimer")
+        self.send({ "command": "start" })
 
     def start_or_split(self) -> None:
         """
         Start the timer or split a running timer
         """
-        self.send("startorsplit")
+        self.send({ "command": "splitOrStart" })
 
     def split(self) -> None:
         """
         Split
         """
-        self.send("split")
+        self.send({ "command": "split" })
 
     def unsplit(self) -> None:
         """
         Undo the previous split
         """
-        self.send("unsplit")
+        self.send({ "command": "undoSplit" })
 
     def skip_split(self) -> None:
         """
         Skip the current split
         """
-        self.send("skipsplit")
+        self.send({ "command": "skipSplit" })
 
     def pause(self) -> None:
         """
         Pause the timer
         """
-        self.send("pause")
+        self.send({ "command": "pause" })
 
     def resume(self) -> None:
         """
         Resume a paused timer
         """
-        self.send("resume")
+        self.send({ "command": "resume" })
 
     def reset(self) -> None:
         """
         Reset the timer
         """
-        self.send("reset")
+        self.send({ "command": "reset" })
 
     def init_game_time(self) -> None:
         """
         Activate the game timer
         """
-        self.send("initgametime")
+        self.send({ "command": "initializeGameTime" })
 
     def set_game_time(self, t: str) -> None:
         """
@@ -214,26 +172,26 @@ class LivesplitMessaging(Prefab):
         :param t:
         :return:
         """
-        self.send(f"setgametime {t}")
+        self.send({ "command": "setGameTime", "time": t })
 
     def set_loading_times(self, t: str) -> None:
         """
 
         :param t:
         """
-        self.send(f"setloadingtimes {t}")
+        self.send({ "command": "setLoadingTimes", "time": t })
 
     def pause_game_time(self) -> None:
         """
         Pause the game timer
         """
-        self.send("pausegametime")
+        self.send({ "command": "pauseGameTime" })
 
     def unpause_game_time(self) -> None:
         """
         Unpause the game timer
         """
-        self.send("unpausegametime")
+        self.send({ "command": "resumeGameTime" })
 
     def set_comparison(self, comparison) -> None:
         """
@@ -241,63 +199,45 @@ class LivesplitMessaging(Prefab):
 
         :param comparison: Time to compare against eg 'Personal Best' or 'Best Segments'
         """
-        self.send(f"setcomparison {comparison}")
-
-    def get_delta(self, comparison=None) -> str:
-        if comparison:
-            self.send(f"getdelta {comparison}")
-        else:
-            self.send(f"getdelta")
-
-        return self.receive()
+        self.send({ "command": "setCurrentComparison", "comparison": comparison })
 
     def get_last_split_time(self) -> timedelta:
-        self.send("getlastsplittime")
+        self.send({ "command": "getCurrentRunSplitTime" })
         return self.receive("time")
 
     def get_comparison_split_time(self) -> timedelta:
-        self.send("getcomparisonsplittime")
+        self.send({ "command": "getComparisonTime" })
         return self.receive("time")
 
     def get_current_time(self) -> timedelta:
-        self.send("getcurrenttime")
-        return self.receive("time")
-
-    def get_final_time(self, comparison=None) -> timedelta:
-        if comparison:
-            self.send(f"getfinaltime {comparison}")
-        else:
-            self.send("getfinaltime")
-        return self.receive("time")
-
-    def get_predicted_time(self, comparison) -> timedelta:
-        self.send(f"getpredictedtime {comparison}")
-        return self.receive("time")
-
-    def get_best_possible_time(self) -> timedelta:
-        self.send("getbestpossibletime")
+        self.send({ "command": "getCurrentTime" })
         return self.receive("time")
 
     def get_split_index(self) -> int:
-        self.send("getsplitindex")
-        return self.receive("int")
+        self.send({ "command": "getCurrentState" })
+        s = self.receive("state")
+        match s["state"]:
+            case "Running" | "Paused":
+                return s["index"]
+            case _:
+                return -1
 
     def get_current_split_name(self) -> str:
-        self.send("getcurrentsplitname")
+        self.send({ "command": "getSegmentName" })
         return self.receive()
 
     def get_previous_split_name(self) -> str:
-        self.send("getprevioussplitname")
+        self.send({ "command": "getSegmentName",  "index": -1, "relative": True })
         return self.receive()
 
     def get_current_timer_phase(self) -> str:
-        self.send("getcurrenttimerphase")
-        return self.receive()
+        self.send({ "command": "getCurrentState" })
+        return self.receive("state")["state"]
 
 
-def get_client(
+def get_livesplitone_client(
         server: str = "localhost",
         port: int = 16834,
         timeout: int = 1
-) -> LivesplitMessaging:
-    return LivesplitMessaging(connection=LivesplitConnection(server, port, timeout))
+) -> LivesplitoneMessaging:
+    return LivesplitoneMessaging(connection=LivesplitoneConnection(server, port, timeout))
