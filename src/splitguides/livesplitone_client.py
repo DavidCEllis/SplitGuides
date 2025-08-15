@@ -11,11 +11,11 @@ class LivesplitoneConnection(Prefab):
     """
     Socket based livesplit one connection model
     """
-    timer: str = "LiveSplitOne"
     server: str = "localhost"
     port: int = 16834
     timeout: int = 1
     sock: ClientConnection | None = attribute(default=None, init=False, repr=False)
+    timer: str = "LiveSplitOne"
 
     def connect(self) -> bool:
         """

@@ -40,11 +40,11 @@ class LivesplitConnection(Prefab):
     """
     Socket based livesplit connection model
     """
-    timer: str = "LiveSplit"
     server: str = "localhost"
     port: int = 16834
     timeout: int = 1
     sock: socket.socket | None = attribute(default=None, init=False, repr=False)
+    timer: str = "LiveSplit"
 
     def connect(self) -> bool:
         """
