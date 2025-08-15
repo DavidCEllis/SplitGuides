@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QFileDialog
 
 from ..settings import ServerSettings
 from ..livesplit_client import get_client
+from ..livesplitone_client import get_livesplitone_client
 from ..note_parser import Notes
 
 KEEP_ALIVE = 10
@@ -58,7 +59,11 @@ def split():
 
         current_note_index = None
         last_update = 0
-        client = get_client(settings.hostname, settings.port)
+        match settings.timer:
+            case "LiveSplitOne":
+                client = get_livesplitone_client(settings.hostname, settings.port)
+            case _: # "LiveSplit"
+                client = get_client(settings.hostname, settings.port)
         connected = client.connect()
         # Note if the previous state was not connected
         disconnected = True

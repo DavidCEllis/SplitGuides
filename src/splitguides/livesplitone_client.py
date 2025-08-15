@@ -5,12 +5,13 @@ import typing
 
 from ducktools.classbuilder.prefab import Prefab, attribute
 
-from livesplit_client import BUFFER_SIZE, parse_time
+from .livesplit_client import BUFFER_SIZE, parse_time
 
 class LivesplitoneConnection(Prefab):
     """
     Socket based livesplit one connection model
     """
+    timer: str = "LiveSplitOne"
     server: str = "localhost"
     port: int = 16834
     timeout: int = 1

@@ -40,6 +40,7 @@ class LivesplitConnection(Prefab):
     """
     Socket based livesplit connection model
     """
+    timer: str = "LiveSplit"
     server: str = "localhost"
     port: int = 16834
     timeout: int = 1
