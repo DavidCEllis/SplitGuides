@@ -26,6 +26,8 @@ match sys.platform:
         SETTINGS_FOLDER = Path(_local_app_folder) / PROJECT_NAME
     case "linux":
         SETTINGS_FOLDER = Path(os.path.expanduser(os.path.join("~", f".{PROJECT_NAME}")))
+    case "darwin":
+        SETTINGS_FOLDER = Path(os.path.expanduser(os.path.join("~", f".{PROJECT_NAME}")))
     case other:
         raise UnsupportedPlatformError(
             f"Platform {other!r} is not currently supported."
@@ -70,6 +72,7 @@ class BaseSettings(metaclass=ABCMeta):
     output_file: Path = attribute(serialize=False)
 
     # Networking Settings
+    timer: str = "LiveSplit"
     hostname: str = "localhost"
     port: int = 16834
 
