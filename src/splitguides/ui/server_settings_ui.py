@@ -87,6 +87,7 @@ class ServerSettingsDialog(QDialog):
         self.ui.bgcolor_edit.setValidator(color_validator)
 
     def fill_settings(self):
+        self.ui.timer_comboBox.setCurrentText(self.settings.timer)
         self.ui.hostname_edit.setText(self.settings.hostname)
         self.ui.port_edit.setText(str(self.settings.port))
         self.ui.previous_edit.setText(str(self.settings.previous_splits))
@@ -111,6 +112,7 @@ class ServerSettingsDialog(QDialog):
         self.ui.noteserverport_edit.setText(str(self.settings.server_port))
 
     def store_settings(self):
+        self.settings.timer = self.ui.timer_comboBox.currentText()
         self.settings.hostname = self.ui.hostname_edit.text()
         self.settings.port = int(self.ui.port_edit.text())
         self.settings.previous_splits = int(self.ui.previous_edit.text())
