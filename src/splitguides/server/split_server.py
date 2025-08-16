@@ -78,8 +78,8 @@ def split():
                 except (ConnectionError, TimeoutError):
                     connected = client.connect()
                     yield (
-                        f"data: <h2>Trying to connect to livesplit.</h2>"
-                        f"<h3>Make sure Livesplit server is running.</h3>{data}\n\n"
+                        f"data: <h2>Trying to connect to {settings.timer}.</h2>"
+                        f"<h3>Make sure {settings.timer} server is running.</h3>{data}\n\n"
                     )
                 else:
                     if current_note_index != new_index or disconnected:
@@ -104,8 +104,8 @@ def split():
                 disconnected = True
                 connected = client.connect()
                 yield (
-                    f"data: <h2>Trying to connect to livesplit.</h2>"
-                    f"<h3>Make sure Livesplit server is running.</h3>{data}\n\n"
+                    f"data: <h2>Trying to connect to {settings.timer}.</h2>"
+                    f"<h3>Make sure {settings.timer} server is running.</h3>{data}\n\n"
                 )
             time.sleep(0.5)
 

@@ -226,11 +226,11 @@ class MainWindow(QMainWindow):
         if not self.ls.connected:
             self.update_notes(0)
             self.ui.statusbar.showMessage(
-                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
+                f"Trying to connect to {self.settings.timer}. | Split Offset: {self.split_offset}"
             )
         else:
             self.ui.statusbar.showMessage(
-                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
+                f"Connected to {self.settings.timer}. | Split Offset: {self.split_offset}"
             )
 
     def decrease_offset(self):
@@ -239,11 +239,11 @@ class MainWindow(QMainWindow):
         if not self.ls.connected:
             self.update_notes(0)
             self.ui.statusbar.showMessage(
-                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
+                f"Trying to connect to {self.settings.timer}. | Split Offset: {self.split_offset}"
             )
         else:
             self.ui.statusbar.showMessage(
-                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
+                f"Connected to {self.settings.timer}. | Split Offset: {self.split_offset}"
             )
 
     def start_loops(self):
@@ -483,13 +483,13 @@ class LivesplitLink(QtCore.QObject):
 
     def ls_connect(self):
         self.update_status(
-            f"Trying to connect to Livesplit. | "
+            f"Trying to connect to {self.main_window.settings.timer}. | "
             f"Split Offset: {self.main_window.split_offset}"
         )
         self.connected = self.client.connect()
         if self.connected:
             self.update_status(
-                f"Connected to Livesplit. | "
+                f"Connected to {self.main_window.settings.timer}. | "
                 f"Split Offset: {self.main_window.split_offset}"
             )
 
