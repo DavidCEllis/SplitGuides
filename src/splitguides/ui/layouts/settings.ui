@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>478</height>
+    <height>586</height>
    </rect>
   </property>
   <property name="font">
@@ -37,7 +37,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="0" column="0">
     <layout class="QFormLayout" name="formLayout">
      <property name="leftMargin">
       <number>5</number>
@@ -51,7 +51,7 @@
      <property name="bottomMargin">
       <number>5</number>
      </property>
-     <item row="0" column="0">
+     <item row="1" column="0">
       <widget class="QLabel" name="hostname_label">
        <property name="font">
         <font>
@@ -63,7 +63,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
+     <item row="1" column="1">
       <widget class="QLineEdit" name="hostname_edit">
        <property name="font">
         <font>
@@ -75,7 +75,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="port_label">
        <property name="font">
         <font>
@@ -87,7 +87,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <widget class="QLineEdit" name="port_edit">
        <property name="font">
         <font>
@@ -99,28 +99,28 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="2">
+     <item row="3" column="0" colspan="2">
       <widget class="Line" name="divider_1">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="previous_label">
        <property name="text">
         <string>Show Previous Splits:</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <widget class="QLineEdit" name="previous_edit">
        <property name="text">
         <string>0</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="5" column="0">
       <widget class="QLabel" name="advance_label">
        <property name="font">
         <font>
@@ -132,7 +132,7 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="5" column="1">
       <widget class="QLineEdit" name="advance_edit">
        <property name="font">
         <font>
@@ -144,7 +144,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="6" column="0">
       <widget class="QLabel" name="separator_label">
        <property name="font">
         <font>
@@ -156,7 +156,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="6" column="1">
       <widget class="QLineEdit" name="separator_edit">
        <property name="font">
         <font>
@@ -171,31 +171,31 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="0" colspan="2">
+     <item row="7" column="0" colspan="2">
       <widget class="Line" name="divider_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item row="8" column="0">
       <widget class="QLabel" name="fontsize_label">
        <property name="text">
         <string>Font Size:</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="1">
+     <item row="8" column="1">
       <widget class="QLineEdit" name="fontsize_edit"/>
      </item>
-     <item row="8" column="0">
+     <item row="9" column="0">
       <widget class="QLabel" name="textcolor_label">
        <property name="text">
         <string>Text Colour:</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
+     <item row="9" column="1">
       <layout class="QHBoxLayout" name="textcolor_layout">
        <item>
         <widget class="QLineEdit" name="textcolor_edit"/>
@@ -209,14 +209,14 @@
        </item>
       </layout>
      </item>
-     <item row="9" column="0">
+     <item row="10" column="0">
       <widget class="QLabel" name="bgcolor_label">
        <property name="text">
         <string>Background Colour:</string>
        </property>
       </widget>
      </item>
-     <item row="9" column="1">
+     <item row="10" column="1">
       <layout class="QHBoxLayout" name="bgcolor_layout">
        <item>
         <widget class="QLineEdit" name="bgcolor_edit"/>
@@ -230,14 +230,14 @@
        </item>
       </layout>
      </item>
-     <item row="11" column="0">
+     <item row="12" column="0">
       <widget class="QLabel" name="htmltemplate_label">
        <property name="text">
         <string>HTML Template:</string>
        </property>
       </widget>
      </item>
-     <item row="11" column="1">
+     <item row="12" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QLineEdit" name="htmltemplate_edit">
@@ -255,14 +255,14 @@
        </item>
       </layout>
      </item>
-     <item row="12" column="0">
+     <item row="13" column="0">
       <widget class="QLabel" name="css_label">
        <property name="text">
         <string>CSS:</string>
        </property>
       </widget>
      </item>
-     <item row="12" column="1">
+     <item row="13" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QLineEdit" name="css_edit">
@@ -280,35 +280,35 @@
        </item>
       </layout>
      </item>
-     <item row="10" column="0" colspan="2">
+     <item row="11" column="0" colspan="2">
       <widget class="Line" name="divider_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="13" column="0" colspan="2">
+     <item row="14" column="0" colspan="2">
       <widget class="Line" name="divider_4">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="14" column="0">
+     <item row="15" column="0">
       <widget class="QLabel" name="nextsplitkey_label">
        <property name="text">
         <string>Next Split Hotkey:</string>
        </property>
       </widget>
      </item>
-     <item row="15" column="0">
+     <item row="16" column="0">
       <widget class="QLabel" name="previoussplitkey_label">
        <property name="text">
         <string>Previous Split Hotkey:</string>
        </property>
       </widget>
      </item>
-     <item row="14" column="1">
+     <item row="15" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
         <widget class="QLineEdit" name="nextsplitkey_edit">
@@ -326,7 +326,7 @@
        </item>
       </layout>
      </item>
-     <item row="15" column="1">
+     <item row="16" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
         <widget class="QLineEdit" name="previoussplitkey_edit">
@@ -343,6 +343,27 @@
         </widget>
        </item>
       </layout>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="timer_comboBox">
+       <item>
+        <property name="text">
+         <string>LiveSplit</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>LiveSplitOne</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="timer_label">
+       <property name="text">
+        <string>Livesplit Timer Type:</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -371,12 +392,32 @@
    <signal>accepted()</signal>
    <receiver>Settings</receiver>
    <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
    <receiver>Settings</receiver>
    <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
  </connections>
 </ui>
