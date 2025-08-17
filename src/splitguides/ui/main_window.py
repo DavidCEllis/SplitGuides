@@ -21,6 +21,7 @@ from .layouts import Ui_MainWindow
 from .settings_ui import SettingsDialog
 
 from ..livesplit_client import get_client, LivesplitMessaging
+from ..livesplitone_client import get_livesplitone_client, LivesplitoneMessaging
 from ..note_parser import Notes
 from ..settings import DesktopSettings
 
@@ -129,7 +130,11 @@ class MainWindow(QMainWindow):
 
         self.render_blank()
 
-        self.client = get_client(self.settings.hostname, self.settings.port)
+        match self.settings.timer:
+            case "LiveSplitOne":
+                self.client = get_livesplitone_client(self.settings.hostname, self.settings.port)
+            case _: # "LiveSplit"
+                self.client = get_client(self.settings.hostname, self.settings.port)
 
         self.ls = LivesplitLink(self.client, self)
         self.split_index = 0
@@ -221,11 +226,11 @@ class MainWindow(QMainWindow):
         if not self.ls.connected:
             self.update_notes(0)
             self.ui.statusbar.showMessage(
-                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
+                f"Trying to connect to {self.settings.timer}. | Split Offset: {self.split_offset}"
             )
         else:
             self.ui.statusbar.showMessage(
-                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
+                f"Connected to {self.settings.timer}. | Split Offset: {self.split_offset}"
             )
 
     def decrease_offset(self):
@@ -234,11 +239,11 @@ class MainWindow(QMainWindow):
         if not self.ls.connected:
             self.update_notes(0)
             self.ui.statusbar.showMessage(
-                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
+                f"Trying to connect to {self.settings.timer}. | Split Offset: {self.split_offset}"
             )
         else:
             self.ui.statusbar.showMessage(
-                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
+                f"Connected to {self.settings.timer}. | Split Offset: {self.split_offset}"
             )
 
     def start_loops(self):
@@ -404,11 +409,16 @@ class MainWindow(QMainWindow):
         if result == 1:
             # Kill and restart connection if server ip or port change
             if (
-                self.client.connection.server != self.settings.hostname
+                self.client.connection.timer != self.settings.timer
+                or self.client.connection.server != self.settings.hostname
                 or self.client.connection.port != self.settings.port
             ):
                 self.ls.close()
-                self.client = get_client(self.settings.hostname, self.settings.port)
+                match self.settings.timer:
+                    case "LiveSplitOne":
+                        self.client = get_livesplitone_client(self.settings.hostname, self.settings.port)
+                    case _: # "LiveSplit"
+                        self.client = get_client(self.settings.hostname, self.settings.port)
                 self.ls = LivesplitLink(self.client, self)
                 self.ls.start_loops()
 
@@ -473,13 +483,13 @@ class LivesplitLink(QtCore.QObject):
 
     def ls_connect(self):
         self.update_status(
-            f"Trying to connect to Livesplit. | "
+            f"Trying to connect to {self.main_window.settings.timer}. | "
             f"Split Offset: {self.main_window.split_offset}"
         )
         self.connected = self.client.connect()
         if self.connected:
             self.update_status(
-                f"Connected to Livesplit. | "
+                f"Connected to {self.main_window.settings.timer}. | "
                 f"Split Offset: {self.main_window.split_offset}"
             )
 
