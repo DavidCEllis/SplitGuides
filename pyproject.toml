@@ -2,32 +2,33 @@
 requires = [
     "setuptools>=77.0",
     "setuptools-scm>=8",
-    "pyside6-essentials~=6.9",  # Needed to build uic files
+    "pyside6-essentials~=6.9", # Needed to build uic files
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="splitguides"
-description="A tool for speedrunners to display notes that advance automatically with their splits in Livesplit."
+name = "splitguides"
+description = "A tool for speedrunners to display notes that advance automatically with their splits in Livesplit."
 authors = [
-  { name = "David C Ellis" },
+    { name = "David C Ellis" },
 ]
-readme="README.md"
-requires-python = ">=3.12"  # 3.12 should function and build now
+readme = "README.md"
+requires-python = ">=3.12"
 dependencies = [
     "pyside6~=6.9",
     "jinja2~=3.1",
-    "bleach[css]==6.0",  # Each upgrade to bleach has broken something so pin it.
+    "bleach[css]==6.0",              # Each upgrade to bleach has broken something so pin it.
     "flask~=3.0",
     "markdown~=3.6",
     "keyboard~=0.13.5",
     "ducktools-classbuilder>=0.7.4",
     "waitress~=3.0",
+    "platformdirs~=4.3",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Operating System :: Microsoft :: Windows",
-    "Operating System :: POSIX :: Linux",  # Should also work on Linux, even if livesplit doesn't
+    "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Games/Entertainment",
@@ -59,14 +60,7 @@ __version_tuple__ = {version_tuple}
 """
 
 [tool.pytest.ini_options]
-addopts= "--cov=src/ --cov-report=term-missing"
+addopts = "--cov=src/ --cov-report=term-missing"
 testpaths = [
     "tests",
-]
-
-[tool.uv]
-# Only x86_64 / AMD64 is supported
-environments = [
-    "platform_system == 'Windows' and platform_machine == 'AMD64' and implementation_name == 'cpython'",
-    "platform_system == 'Linux' and platform_machine == 'x86_64' and implementation_name == 'cpython'",
 ]
