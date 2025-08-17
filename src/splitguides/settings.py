@@ -15,6 +15,8 @@ from .exceptions import UnsupportedPlatformError
 PROJECT_NAME = "splitguides"
 
 match sys.platform:
+    # Don't change existing win32/linux config locations
+    # but let platformdirs handle this for previously unsupported platforms
     case "win32":
         if _local_app_folder := os.environ.get("LOCALAPPDATA"):
             if not os.path.isdir(_local_app_folder):
@@ -27,9 +29,8 @@ match sys.platform:
     case "linux":
         SETTINGS_FOLDER = Path(os.path.expanduser(os.path.join("~", f".{PROJECT_NAME}")))
     case other:
-        raise UnsupportedPlatformError(
-            f"Platform {other!r} is not currently supported."
-        )
+        import platformdirs
+        SETTINGS_FOLDER = Path(platformdirs.user_config_dir(PROJECT_NAME))
 
 SETTINGS_FOLDER.mkdir(exist_ok=True)
 
