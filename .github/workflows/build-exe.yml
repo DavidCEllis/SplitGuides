@@ -11,10 +11,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: "3.12"
+        python-version: "3.13"
     - name: Install the module
       run: |
         python -m pip install --upgrade pip
@@ -23,7 +25,7 @@ jobs:
       run: |
         python application/setup.py build
     - name: Store the built application
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: splitguides-app
         path: build/SplitGuides_v*.zip
@@ -40,12 +42,12 @@ jobs:
       id-token: write  # IMPORTANT: mandatory for sigstore
     steps:
     - name: Download the zipapp
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: splitguides-app
         path: dist/
     - name: Sign the zipapp with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v3.0.1
+      uses: sigstore/gh-action-sigstore-python@v3.1.0
       with:
         release-signing-artifacts: false
         inputs: >-
