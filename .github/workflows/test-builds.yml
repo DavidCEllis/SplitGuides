@@ -28,7 +28,7 @@ jobs:
       run: >-
         python application/setup.py build
     - name: Store the built app
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: splitguides-app-dev
         path: build/SplitGuides_v*.zip
@@ -55,7 +55,7 @@ jobs:
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
     - name: Store the distribution packages
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: python-package-distributions
         path: dist/
