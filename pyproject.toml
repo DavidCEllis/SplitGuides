@@ -15,7 +15,7 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pyside6~=6.9",
+    "pyside6~=6.9.0",
     "jinja2~=3.1",
     "bleach[css]==6.0",              # Each upgrade to bleach has broken something so pin it.
     "flask~=3.0",
