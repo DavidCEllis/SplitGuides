@@ -499,6 +499,10 @@ class LivesplitLink(QtCore.QObject):
                 except (ConnectionError, TimeoutError):
                     self.connected = False
                     self.client.close()
+                except Exception as e:
+                    print(f"Unexpected error while getting livesplit index: {str(e)}. Retrying")
+                    self.connected = False
+                    self.client.close()
                 else:
                     # Send the signal to the main window to update.
                     # noinspection PyUnresolvedReferences
