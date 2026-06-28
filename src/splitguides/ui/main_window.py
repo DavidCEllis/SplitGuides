@@ -85,6 +85,7 @@ class MainWindow(QMainWindow):
 
         # Window size
         self.resize(self.settings.width, self.settings.height)
+        self.move(self.settings.pos_x, self.settings.pos_y)
 
         # noinspection PyUnresolvedReferences
         self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.settings.on_top)
@@ -264,6 +265,12 @@ class MainWindow(QMainWindow):
         self.settings.width = self.width()
         self.settings.height = self.height()
         event.accept()
+    
+    def moveEvent(self, event):
+        """Store the new window position to keep it between launches."""
+        self.settings.pos_x = self.pos().x()
+        self.settings.pos_y = self.pos().y()
+        return super().moveEvent(event)
 
     def setup_actions(self):
         """Setup the browser element with custom options"""
