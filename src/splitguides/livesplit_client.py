@@ -1,5 +1,8 @@
 import re
 import socket
+import time
+import websocket
+import win32pipe, win32file, pywintypes
 from datetime import timedelta
 import typing
 
@@ -40,36 +43,97 @@ class LivesplitConnection(Prefab):
     """
     Socket based livesplit connection model
     """
-    server: str = "localhost"
-    port: int = 16834
-    timeout: int = 1
-    sock: socket.socket | None = attribute(default=None, init=False, repr=False)
+    server: str = attribute(default="localhost", init=True)
+    port: int = attribute(default=16834, init=True)
+    connectionType: int = attribute(default=1, init=True) # 0: named pipe, 1: TCP, 2: websocket
+    timeout: int = attribute(default=1, init=True)
+    sockTCP: socket.socket | None = attribute(default=None, init=False, repr=False)
+    sockWS: websocket.WebSocketApp | None = attribute(default=None, init=False, repr=False)
+    handlePipe = attribute(default=None, init=False, repr=False)
 
     def connect(self) -> bool:
         """
         Attempt to connect to the livesplit server
         :return: True if connected, otherwise False
         """
-        self.sock = socket.socket()
-        try:
-            self.sock.connect((self.server, self.port))
-        except ConnectionRefusedError:
-            self.sock.close()
-            self.sock = None
-            return False
-        except socket.gaierror:
-            # Could not resolve hostname
-            self.sock.close()
-            self.sock = None
-            return False
+        self.close()
+        
+        if self.connectionType == 1:
+            self.sockTCP = socket.socket()
+            try:
+                self.sockTCP.connect((self.server, self.port))
+                self.sockTCP.settimeout(self.timeout)
+                self.sockTCP.send(b"ping\r\n")
+                ping_resp = self.sockTCP.recv(BUFFER_SIZE).decode("UTF-8").strip("\r\n")
+                return (ping_resp == "pong")
+            except ConnectionRefusedError:
+                self.sockTCP.close()
+                self.sockTCP = None
+                return False
+            except socket.gaierror:
+                # Could not resolve hostname
+                self.sockTCP.close()
+                self.sockTCP = None
+                return False
+        elif self.connectionType == 2:
+            self.sockWS = websocket.WebSocket()
+            try:
+                self.sockWS.connect(f"ws://{self.server}:{self.port}/livesplit", origin="SplitGuides", timeout=10)
+            except Exception as e:
+                self.sockWS.close()
+                self.sockWS = None
+                return False
+            else:
+                return True
         else:
-            self.sock.settimeout(self.timeout)
-            return True
+            try:
+                self.handlePipe = win32file.CreateFile(
+                    r'\\.\pipe\livesplit',
+                    win32file.GENERIC_READ | win32file.GENERIC_WRITE,
+                    0,
+                    None,
+                    win32file.OPEN_EXISTING,
+                    0,
+                    None
+                )
+                res = win32pipe.SetNamedPipeHandleState(self.handlePipe, win32pipe.PIPE_READMODE_BYTE | win32pipe.PIPE_NOWAIT, None, None)
+                if res == 0: # errored
+                    self.handlePipe = None
+                    return False
+            except pywintypes.error as e:
+                self.handlePipe = None
+                print('Pipe error: ' + e.args[2])
+                return False
+            else:
+                return True
+
+    def ensureConnected(self) -> bool:
+        if self.connectionType == 1:
+            if not self.sockTCP:
+                return self.connect()
+            else:
+                return True
+        elif self.connectionType == 2:
+            if not self.sockWS:
+                return self.connect()
+            else:
+                return True
+        else:
+            if not self.handlePipe:
+                return self.connect()
+            else:
+                return True
 
     def close(self) -> None:
-        if self.sock:
-            self.sock.close()
-            self.sock = None
+        if self.sockTCP:
+            self.sockTCP.close()
+            self.sockTCP = None
+        if self.sockWS:
+            self.sockWS.close()
+            self.sockWS = None
+        if self.handlePipe:
+            win32file.CloseHandle(self.handlePipe)
+            self.handlePipe = None
 
     def send(self, msg: bytes) -> None:
         """
@@ -77,52 +141,86 @@ class LivesplitConnection(Prefab):
         If the connection is aborted (ie: if livesplit server has been closed)
         raise a ConnectionAbortedError
 
-        :param msg: bytes message to send (should end with "\r\n")
+        :param msg: bytes message to send
         :return:
         """
-        if not self.sock:
-            self.connect()
+        if not self.ensureConnected():
+            return
         
-        if self.sock:  # Check again in case connection failed
+        if self.connectionType == 1:
             try:
-                self.sock.send(msg)
-            except ConnectionAbortedError:
-                self.sock.close()
-                self.sock = None
+                self.sockTCP.send(msg + b"\r\n")
+            except:
+                self.sockTCP.close()
+                self.sockTCP = None
                 raise ConnectionAbortedError("The connection has been closed by the host")
+        elif self.connectionType == 2:
+            try:
+                self.sockWS.send(msg) #no CRLF on WS
+            except Exception as e:
+                self.sockWS.close()
+                self.sockWS = None
+                raise ConnectionAbortedError("The connection has been closed by the host")
+        else:
+            try:
+                win32file.WriteFile(self.handlePipe, msg + b"\r\n")
+            except Exception as e:
+                print("pipe sending error: " + str(e))
+                win32file.CloseHandle(self.handlePipe)
+                self.handlePipe = None
+                raise ConnectionAbortedError("Pipe broken")
 
-    def receive(self) -> bytes:
+    def receive(self) -> typing.Union[bytes, str]:
         """
         Attempt to receive a message from the livesplit server
         raise ConnectionError if the connection has been terminated.
 
-        :return: bytes received from the server
+        :return: bytes or string received from the server
         """
-        if not self.sock:
-            self.connect()
+        if not self.ensureConnected():
+            return b""
         
-        if self.sock:
+        data_received = b""
+        if self.connectionType == 1:
             try:
-                data_received = self.sock.recv(BUFFER_SIZE)
+                data_received = self.sockTCP.recv(BUFFER_SIZE)
             except socket.timeout:
                 raise TimeoutError(
                     "No response received from the server within "
                     f"the timeout period ({self.timeout}s)"
                 )
             except OSError:
-                self.sock.close()
-                self.sock = None
+                self.sockTCP.close()
+                self.sockTCP = None
                 raise ConnectionError("The connection has been closed by the host")
 
             if data_received == b"":
-                self.sock.close()
-                self.sock = None
+                self.sockTCP.close()
+                self.sockTCP = None
                 raise ConnectionError("The connection has been closed by the host")
 
             return data_received
+        elif self.connectionType == 2:
+            try:
+                data_received : bytes = self.sockWS.recv()
+            except Exception as e:
+                self.sockWS.close()
+                self.sockWS = None
+                raise ConnectionAbortedError("The connection has been closed by the host")
+            return data_received
+        else:
+            time.sleep(0.05)
+            try:
+                data_received = win32file.ReadFile(self.handlePipe, BUFFER_SIZE)
+                # this is returned as tuple, only pass the data onwards
+                data_received = data_received[1]
+            except Exception as e:
+                win32file.CloseHandle(self.handlePipe)
+                self.handlePipe = None
+                raise ConnectionAbortedError("Pipe broken")
+            return data_received
         
         return b""
-
 
 class LivesplitMessaging(Prefab):
     connection: LivesplitConnection
@@ -135,7 +233,7 @@ class LivesplitMessaging(Prefab):
 
     def send(self, message) -> None:
         m = message.encode("UTF8")
-        self.connection.send(m + b"\r\n")
+        self.connection.send(m)
 
     @typing.overload
     def receive(self, datatype: typing.Literal["time"]) -> timedelta: ...
@@ -146,7 +244,11 @@ class LivesplitMessaging(Prefab):
 
     def receive(self, datatype="text"):
         result = self.connection.receive()
-        result = result.strip().decode("UTF8")
+        if isinstance(result, bytes):
+            result = result.decode("UTF8").strip()
+        else: #str
+            result = result.strip()
+
         if datatype == "time":
             result = parse_time(result)
         elif datatype == "int":
@@ -298,6 +400,7 @@ class LivesplitMessaging(Prefab):
 def get_client(
         server: str = "localhost",
         port: int = 16834,
+        connectionType: int = 1,
         timeout: int = 1
 ) -> LivesplitMessaging:
-    return LivesplitMessaging(connection=LivesplitConnection(server, port, timeout))
+    return LivesplitMessaging(connection=LivesplitConnection(server, port, connectionType, timeout))

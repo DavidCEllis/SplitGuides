@@ -58,7 +58,7 @@ def split():
 
         current_note_index = None
         last_update = 0
-        client = get_client(settings.hostname, settings.port)
+        client = get_client(settings.hostname, settings.port, settings.connectionType)
         connected = client.connect()
         # Note if the previous state was not connected
         disconnected = True

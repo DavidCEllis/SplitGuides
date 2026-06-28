@@ -129,7 +129,7 @@ class MainWindow(QMainWindow):
 
         self.render_blank()
 
-        self.client = get_client(self.settings.hostname, self.settings.port)
+        self.client = get_client(self.settings.hostname, self.settings.port, self.settings.connectionType)
 
         self.ls = LivesplitLink(self.client, self)
         self.split_index = 0
@@ -406,9 +406,10 @@ class MainWindow(QMainWindow):
             if (
                 self.client.connection.server != self.settings.hostname
                 or self.client.connection.port != self.settings.port
+                or self.client.connection.connectionType != self.settings.connectionType
             ):
                 self.ls.close()
-                self.client = get_client(self.settings.hostname, self.settings.port)
+                self.client = get_client(self.settings.hostname, self.settings.port, self.settings.connectionType)
                 self.ls = LivesplitLink(self.client, self)
                 self.ls.start_loops()
 
