@@ -218,29 +218,21 @@ class MainWindow(QMainWindow):
 
     def increase_offset(self):
         self.split_offset += 1
-        # Rerender if not connected (if connected this will happen automatically)
         if not self.ls.connected:
             self.update_notes(0)
-            self.ui.statusbar.showMessage(
-                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
-            )
+            self.update_StatusMessage()
         else:
-            self.ui.statusbar.showMessage(
-                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
-            )
+            self.update_notes(self.split_index)
+            self.update_StatusMessage()
 
     def decrease_offset(self):
         self.split_offset -= 1
         # Rerender if not connected (if connected this will happen automatically)
         if not self.ls.connected:
             self.update_notes(0)
-            self.ui.statusbar.showMessage(
-                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
-            )
+            self.update_StatusMessage()
         else:
-            self.ui.statusbar.showMessage(
-                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
-            )
+            self.update_StatusMessage()
 
     def start_loops(self):
         """Start the livesplit server connection thread."""
@@ -396,6 +388,19 @@ class MainWindow(QMainWindow):
 
             self.ui.notes.setHtml(html, baseUrl=note_uri)
             self.split_index = idx
+    
+    def update_StatusMessage(self):
+        if self.ls.connected:
+            msgLS = "Connected to Livesplit via "
+        else:
+            msgLS = "Trying to connect to Livesplit via "
+        if self.ls.client.connection.connectionType == 1:
+            msgLS += "TCP"
+        elif self.ls.client.connection.connectionType == 2:
+            msgLS += "Websocket"
+        else:
+            msgLS += "Pipe"
+        self.ui.statusbar.showMessage(msgLS + f" | Split Index rendered: {self.split_index} | Split Offset to LS: {self.split_offset}")
 
     def open_settings(self):
         """Open the settings dialog, refresh everything if the settings have changed."""
@@ -476,20 +481,14 @@ class LivesplitLink(QtCore.QObject):
         self.stop_loops()
         self.client.close()
 
-    def update_status(self, message):
-        self.main_window.ui.statusbar.showMessage(message)
+    def update_status(self):
+        self.main_window.update_StatusMessage()
 
     def ls_connect(self):
-        self.update_status(
-            f"Trying to connect to Livesplit. | "
-            f"Split Offset: {self.main_window.split_offset}"
-        )
+        self.main_window.update_StatusMessage()
         self.connected = self.client.connect()
         if self.connected:
-            self.update_status(
-                f"Connected to Livesplit. | "
-                f"Split Offset: {self.main_window.split_offset}"
-            )
+            self.main_window.update_StatusMessage()
 
     def loop_update_split(self):
         while not self.break_loop:
@@ -506,4 +505,5 @@ class LivesplitLink(QtCore.QObject):
                     self.note_signal.emit(split_index)
             else:
                 self.ls_connect()
-            time.sleep(0.1)
+            self.main_window.update_StatusMessage()
+            time.sleep(0.5)
