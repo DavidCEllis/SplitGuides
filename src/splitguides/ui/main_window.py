@@ -286,6 +286,9 @@ class MainWindow(QMainWindow):
         open_notes = self.rc_menu.addAction("Open Notes")
         open_notes.triggered.connect(self.open_notes)
 
+        reload_notes = self.rc_menu.addAction("Reload Notes File")
+        reload_notes.triggered.connect(self.reload_notes)
+
         open_settings = self.rc_menu.addAction("Settings")
         open_settings.triggered.connect(self.open_settings)
 
@@ -337,12 +340,17 @@ class MainWindow(QMainWindow):
 
         if notefile:
             self.notefile = notefile
+            self.reload_notes()
+    
+    def reload_notes(self):
+        """Recreate a Notes instanceby re-reading the file"""
+        if self.notefile:
             # Reset split index and load notes
             self.notes = Notes.from_file(
-                notefile, separator=self.settings.split_separator
+                self.notefile, separator=self.settings.split_separator
             )
             # Remember this notes folder next time notes are loaded.
-            self.settings.notes_folder = str(Path(notefile).parent)
+            self.settings.notes_folder = str(Path(self.notefile).parent)
             # Reset the split offset
             self.split_offset = 0
 
