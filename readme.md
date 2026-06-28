@@ -37,6 +37,15 @@ platforms.
    containing the notes you wish to use.
 3. Some configuration is available from the settings dialog.
 
+If you are already using the Livesplit Server for something else,
+this appliction shouldn't interfere with that, but only a TCP or a Websocket server can be running at a time.
+You can change the connection to Livesplit that will be used in the settings.
+There are 3 options:
+* Named Pipe
+* TCP Server (default)
+* Websocket Server
+The Named Pipe does not use the hostname and port, it should "just work", as long as livesplit is running on the same PC.
+
 Plain text formatting works the same way as SplitNotes.
 Notes made for that should function fine in SplitGuides.
 
@@ -50,10 +59,11 @@ inserted in between lines.
   * If a split separator is given, newlines are left as in the input to the
     markdown/html processors.
 
+If you edited your notes while the program was running, you can reload the notes in the context menu "Reload Notes File".
+
 ### If the notes are not advancing ###
 
-If the text at the bottom says "Trying to connect to Livesplit." make sure that the TCP server
-is running.
+If the text at the bottom says "Trying to connect to Livesplit." make sure that the selected server in the settings is running.
 
 If that doesn't work, check in the Splitguides settings (from the right click menu)
 * "Livesplit Server Hostname" should be `localhost`
@@ -81,7 +91,7 @@ and port given in a web browser.
 
 Configuration Options:
 
-* Livesplit server hostname and port
+* Livesplit server hostname, port and wanted connection type
 * Display previous/next splits
 * Split separator (leave blank for empty line separator)
 * Font Size
