@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
 
         self.render_blank()
 
-        self.client = get_client(self.settings.hostname, self.settings.port, self.settings.connectionType)
+        self.client = get_client(self.settings.hostname, self.settings.port)
 
         self.ls = LivesplitLink(self.client, self)
         self.split_index = 0
@@ -398,17 +398,12 @@ class MainWindow(QMainWindow):
             self.split_index = idx
     
     def update_StatusMessage(self):
-        if self.ls.connected:
-            msgLS = "Connected to Livesplit via "
+        conn_status = self.ls.client.connection.get_connection_friendly_name()
+        if conn_status == "":
+            msgLS = "Trying to connect to Livesplit"
         else:
-            msgLS = "Trying to connect to Livesplit via "
-        if self.ls.client.connection.connectionType == 1:
-            msgLS += "TCP"
-        elif self.ls.client.connection.connectionType == 2:
-            msgLS += "Websocket"
-        else:
-            msgLS += "Pipe"
-        self.ui.statusbar.showMessage(msgLS + f" | Split Index rendered: {self.split_index} | Split Offset to LS: {self.split_offset}")
+            msgLS = "Connected to Livesplit via " + conn_status
+        self.ui.statusbar.showMessage(f"{msgLS} | Split Index rendered: {self.split_index} | Split Offset to LS: {self.split_offset}")
 
     def open_settings(self):
         """Open the settings dialog, refresh everything if the settings have changed."""
@@ -429,7 +424,7 @@ class MainWindow(QMainWindow):
                 or self.client.connection.connectionType != self.settings.connectionType
             ):
                 self.ls.close()
-                self.client = get_client(self.settings.hostname, self.settings.port, self.settings.connectionType)
+                self.client = get_client(self.settings.hostname, self.settings.port)
                 self.ls = LivesplitLink(self.client, self)
                 self.ls.start_loops()
 
@@ -469,7 +464,6 @@ class LivesplitLink(QtCore.QObject):
         super().__init__()
         self.client = client
         self.main_window = main_window  # type: MainWindow
-        self.connected = False
         self.break_loop = False
         self.pool = None
         # noinspection PyUnresolvedReferences
@@ -489,33 +483,22 @@ class LivesplitLink(QtCore.QObject):
         self.stop_loops()
         self.client.close()
 
-    def update_status(self):
-        self.main_window.update_StatusMessage()
-
-    def ls_connect(self):
-        self.main_window.update_StatusMessage()
-        self.connected = self.client.connect()
-        if self.connected:
-            self.main_window.update_StatusMessage()
-
     def loop_update_split(self):
         while not self.break_loop:
             # If not connected attempt to connect
-            if self.connected:
+            if self.client.connection.is_connected():
                 try:
                     split_index = self.client.get_split_index()
                 except (ConnectionError, TimeoutError):
-                    self.connected = False
                     self.client.close()
                 except Exception as e:
                     print(f"Unexpected error while getting livesplit index: {str(e)}. Retrying")
-                    self.connected = False
                     self.client.close()
                 else:
                     # Send the signal to the main window to update.
                     # noinspection PyUnresolvedReferences
                     self.note_signal.emit(split_index)
             else:
-                self.ls_connect()
+                self.client.connect()
             self.main_window.update_StatusMessage()
             time.sleep(0.5)

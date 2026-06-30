@@ -3366,7 +3366,7 @@ dependencies = [
     { name = "markdown" },
     { name = "platformdirs" },
     { name = "pyside6" },
-    { name = "pywin32" },
+    { name = "pywin32", marker = "sys_platform == 'win32'" },
     { name = "waitress" },
     { name = "websocket-client" },
 ]
