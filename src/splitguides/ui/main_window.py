@@ -421,7 +421,6 @@ class MainWindow(QMainWindow):
             if (
                 self.client.connection.server != self.settings.hostname
                 or self.client.connection.port != self.settings.port
-                or self.client.connection.connectionType != self.settings.connectionType
             ):
                 self.ls.close()
                 self.client = get_client(self.settings.hostname, self.settings.port)

@@ -73,7 +73,6 @@ class BaseSettings(metaclass=ABCMeta):
     # Networking Settings
     hostname: str = "localhost"
     port: int = 16834
-    connectionType: int = 1
 
     # Parser Settings
     split_separator: str = ""
