@@ -29,6 +29,7 @@ class ConnectionPipe(ConnectionTypeBase):
     def connect(self) -> bool:
         self.close()
 
+        # If the hostname isn't local, don't try to connect and fail fast
         if self.server not in LOOPBACK_HOSTS:
             return False
 
