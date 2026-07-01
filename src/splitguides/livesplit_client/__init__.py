@@ -4,7 +4,7 @@ import sys
 from datetime import timedelta
 import typing
 
-from ducktools.classbuilder.prefab import Prefab
+from ducktools.classbuilder.prefab import Prefab, attribute
 
 from .connection_shared import (
     ConnectionTypeBase,
@@ -12,13 +12,13 @@ from .connection_shared import (
     ConnectionWS
 )
 
-CONNECTION_TYPES: list[type[ConnectionTypeBase]]
+CONNECTION_TYPES: tuple[type[ConnectionTypeBase], ...]
 
 if sys.platform == "win32":
     from .connection_windows import ConnectionPipe
-    CONNECTION_TYPES = [ConnectionPipe, ConnectionTCP, ConnectionWS]
+    CONNECTION_TYPES = (ConnectionPipe, ConnectionTCP, ConnectionWS)
 else:
-    CONNECTION_TYPES = [ConnectionTCP, ConnectionWS]
+    CONNECTION_TYPES = (ConnectionTCP, ConnectionWS)
 
 pattern = re.compile(
     r"^(?:(?P<hours>\d*):)?(?P<minutes>\d{1,2}):(?P<seconds>\d{2}).(?P<centiseconds>\d*)"
@@ -55,7 +55,9 @@ class LivesplitConnection(Prefab):
     server: str = "localhost"
     port: int = 16834
 
-    connection_obj: ConnectionTypeBase | None = None
+    # Make it possible to replace the possible connection types for testing, but see the actual type for debugging
+    connection_obj: ConnectionTypeBase | None = attribute(default=None, init=False)
+    connection_types: tuple[type[ConnectionTypeBase], ...] = attribute(default=CONNECTION_TYPES, repr=False)
 
     def is_connected(self) -> bool:
         return bool(self.connection_obj)
@@ -74,7 +76,7 @@ class LivesplitConnection(Prefab):
         """
         self.close()
 
-        for connection_type in CONNECTION_TYPES:
+        for connection_type in self.connection_types:
             # Try each connection type in succession, accept the first successful connection type
             connection = connection_type(self.server, self.port)
             connection_success = connection.connect()
