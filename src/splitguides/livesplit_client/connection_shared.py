@@ -9,8 +9,11 @@ from ducktools.classbuilder.prefab import prefab, attribute
 BUFFER_SIZE = 4096
 
 
+@prefab
 class ConnectionTypeBase(abc.ABC):
     NAME: typing.ClassVar[str] = ""
+    server: str = "localhost"
+    port: int = 16834
 
     @abc.abstractmethod
     def connect(self) -> bool:
@@ -36,9 +39,6 @@ class ConnectionTypeBase(abc.ABC):
 @prefab
 class ConnectionTCP(ConnectionTypeBase):
     NAME: typing.ClassVar[str] = "TCP"
-
-    server: str = "localhost"
-    port: int = 16834
     timeout: int = 1
     sock: socket.socket | None = attribute(default=None, init=False, repr=False)
 
@@ -107,8 +107,6 @@ class ConnectionTCP(ConnectionTypeBase):
 class ConnectionWS(ConnectionTypeBase):
     NAME: typing.ClassVar[str] = "WebSocket"
 
-    server: str = "localhost"
-    port: int = 16834
     timeout: int = 4  # 1 second not enough to establish a connection
     ws: websocket.WebSocket | None = attribute(default=None, init=False, repr=False)
 
@@ -118,8 +116,7 @@ class ConnectionWS(ConnectionTypeBase):
         try:
             self.ws.connect(f"ws://{self.server}:{self.port}/livesplit", origin="SplitGuides", timeout=self.timeout)
             return True
-        except Exception:
-            # TODO: More precise exception here - like for ConnectionTCP
+        except ConnectionRefusedError:
             self.close()
             return False
 

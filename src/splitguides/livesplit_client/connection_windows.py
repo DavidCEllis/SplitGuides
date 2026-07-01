@@ -17,12 +17,11 @@ from .connection_shared import BUFFER_SIZE, ConnectionTypeBase
 
 # These all refer to the local machine and are used to decide if named pipes should be checked
 LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
+LIVESPLIT_PIPE = r'\\.\pipe\livesplit'
 
 @prefab
 class ConnectionPipe(ConnectionTypeBase):
     NAME: typing.ClassVar[str] = "Named Pipe"
-
-    hostname: str = "localhost"  # Used to check if this should be ignored.
 
     # Not sure if there's a good type for `handle`
     handle: typing.Any | None = attribute(default=None, init=False, repr=False)
@@ -35,7 +34,7 @@ class ConnectionPipe(ConnectionTypeBase):
 
         try:
             self.handle = win32file.CreateFile(
-                r'\\.\pipe\livesplit',
+                LIVESPLIT_PIPE,
                 win32file.GENERIC_READ | win32file.GENERIC_WRITE,
                 0,
                 None,

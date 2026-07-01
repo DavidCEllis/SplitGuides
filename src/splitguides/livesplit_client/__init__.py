@@ -4,9 +4,15 @@ import sys
 from datetime import timedelta
 import typing
 
-from ducktools.classbuilder.prefab import Prefab, attribute
+from ducktools.classbuilder.prefab import Prefab
 
-from .connection_shared import ConnectionTypeBase, ConnectionTCP, ConnectionWS
+from .connection_shared import (
+    ConnectionTypeBase,
+    ConnectionTCP,
+    ConnectionWS
+)
+
+CONNECTION_TYPES: list[type[ConnectionTypeBase]]
 
 if sys.platform == "win32":
     from .connection_windows import ConnectionPipe
@@ -42,12 +48,6 @@ def parse_time(time_str: str) -> timedelta:
     return result
 
 
-CONNECTIONTYPE_PIPE=0
-CONNECTIONTYPE_TCP=1
-CONNECTIONTYPE_WS=2
-
-STABLE_RETRY=10
-
 class LivesplitConnection(Prefab):
     """
     Livesplit connection model supporting Named Pipe (Windows-only), TCP and Websocket connections
@@ -57,35 +57,12 @@ class LivesplitConnection(Prefab):
 
     connection_obj: ConnectionTypeBase | None = None
 
-    stable_type: int = attribute(default=-1, init=False, repr=False)
-    stable_retry: int = attribute(default=0, init=False, repr=False)
-    next_attempt_idx: int = attribute(default=0, init=False, repr=False)
-    list_connection_types: list = attribute(default=[], init=False, repr=False)
-
-    def _get_valid_list(self):
-        if sys.platform != "win32":
-            self.list_connection_types = [CONNECTIONTYPE_TCP, CONNECTIONTYPE_WS]
-            return
-        # these hostnames will try the Named Pipe on Windows along with the other types
-        loopback_hosts = ["localhost", "127.0.0.1", "::1"]
-        if self.server.lower() in loopback_hosts:
-            self.list_connection_types = [CONNECTIONTYPE_PIPE, CONNECTIONTYPE_TCP, CONNECTIONTYPE_WS]
-        else:
-            self.list_connection_types = [CONNECTIONTYPE_TCP, CONNECTIONTYPE_WS]
-
     def is_connected(self) -> bool:
         return (bool)(self.connection_obj)
 
     def get_connection_friendly_name(self) -> str:
         if self.connection_obj:
-            if self.stable_type == CONNECTIONTYPE_PIPE:
-                status = "Named Pipe"
-            elif self.stable_type == CONNECTIONTYPE_TCP:
-                status = "TCP"
-            elif self.stable_type == CONNECTIONTYPE_WS:
-                status = "Websocket"
-            else:
-                status = ""
+            status = self.connection_obj.NAME
         else:
             status = ""
         return status
@@ -95,49 +72,19 @@ class LivesplitConnection(Prefab):
         Attempt to connect to the livesplit server
         :return: True if connected, otherwise False
         """
-        if len(self.list_connection_types) == 0:
-            # post init to fill the valid connections once
-            self._get_valid_list()
-
         self.close()
 
-        if self.stable_type >= 0:
-            cur_type : int = self.stable_type
+        for connection_type in CONNECTION_TYPES:
+            # Try each connection type in succession, accept the first successful connection type
+            connection = connection_type(self.server, self.port)
+            connection_success = connection.connect()
+            if connection_success:
+                self.connection_obj = connection
+                break
         else:
-            cur_type : int = self.list_connection_types[self.next_attempt_idx]
+            connection_success = False
 
-        if cur_type == CONNECTIONTYPE_PIPE:
-            self.connection_obj = ConnectionPipe()
-        elif cur_type == CONNECTIONTYPE_TCP:
-            self.connection_obj = ConnectionTCP(self.server, self.port)
-        elif cur_type == CONNECTIONTYPE_WS:
-            self.connection_obj = ConnectionWS(self.server, self.port)
-        else: # out of range, logic error
-            raise Exception('logic error')
-
-        connection_successful = self.connection_obj.connect()
-
-        if connection_successful:
-            if self.stable_type >= 0:
-                # restablished after connection drop
-                self.stable_retry = 0
-            else:
-                # connected after searching
-                self.stable_type = cur_type
-                self.stable_retry = 0
-        else:
-            self.connection_obj = None
-            if self.stable_type >= 0:
-                # try to reconnect on that method
-                self.stable_retry += 1
-                if self.stable_retry >= STABLE_RETRY:
-                    # give up on the stable index
-                    self.stable_type = -1
-                    self.next_attempt_idx = 0
-            else:
-                # try next method
-                self.next_attempt_idx = (self.next_attempt_idx + 1) % len(self.list_connection_types)
-        return connection_successful
+        return connection_success
 
     def close(self) -> None:
         if self.connection_obj:
@@ -153,10 +100,8 @@ class LivesplitConnection(Prefab):
         :param msg: bytes message to send
         :return:
         """
-        if not self.is_connected():
-            return
-
-        self.connection_obj.send(msg)
+        if self.connection_obj:
+            self.connection_obj.send(msg)
 
     def receive(self) -> bytes:
         """
@@ -165,10 +110,11 @@ class LivesplitConnection(Prefab):
 
         :return: bytes or string received from the server
         """
-        if not self.is_connected():
+        if self.connection_obj:
+            return self.connection_obj.receive()
+        else:
             return b""
 
-        return self.connection_obj.receive()
 
 class LivesplitMessaging(Prefab):
     connection: LivesplitConnection
@@ -294,7 +240,7 @@ class LivesplitMessaging(Prefab):
         if comparison:
             self.send(f"getdelta {comparison}")
         else:
-            self.send(f"getdelta")
+            self.send("getdelta")
 
         return self.receive()
 
