@@ -29,7 +29,7 @@ class ConnectionPipe(ConnectionTypeBase):
     def connect(self) -> bool:
         self.close()
 
-        if self.hostname not in LOOPBACK_HOSTS:
+        if self.server not in LOOPBACK_HOSTS:
             return False
 
         try:
