@@ -84,4 +84,7 @@ class ConnectionPipe(ConnectionTypeBase):
             self.handle = None
             raise ConnectionError("Pipe broken: " + str(e))
 
-        return data_received.encode("UTF8")
+        # Type checkers report it as str, but it does appear to be bytes
+        assert isinstance(data_received, bytes)
+
+        return data_received
