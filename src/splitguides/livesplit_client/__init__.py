@@ -55,11 +55,12 @@ class LivesplitConnection(Prefab):
     server: str = "localhost"
     port: int = 16834
 
-    stable_type : int = attribute(default=-1, init=False, repr=False)
-    stable_retry : int = attribute(default=0, init=False, repr=False)
-    next_attempt_idx : int = attribute(default=0, init=False, repr=False)
-    connection_obj : ConnectionTypeBase | None = attribute(default=None, init=False, repr=False)
-    list_connection_types : list = attribute(default=[], init=False, repr=False)
+    connection_obj: ConnectionTypeBase | None = None
+
+    stable_type: int = attribute(default=-1, init=False, repr=False)
+    stable_retry: int = attribute(default=0, init=False, repr=False)
+    next_attempt_idx: int = attribute(default=0, init=False, repr=False)
+    list_connection_types: list = attribute(default=[], init=False, repr=False)
 
     def _get_valid_list(self):
         if sys.platform != "win32":
