@@ -1,3 +1,4 @@
+import abc
 import socket
 import websocket
 
@@ -7,18 +8,23 @@ from ducktools.classbuilder.prefab import prefab, attribute
 BUFFER_SIZE = 4096
 
 
-class ConnectionTypeBase:
+class ConnectionTypeBase(abc.ABC):
+    @abc.abstractmethod
     def connect(self) -> bool:
-        return False
+        ...
 
+    @abc.abstractmethod
     def close(self) -> None:
-        return
+        ...
 
+    @abc.abstractmethod
     def send(self, msg: bytes) -> None:
-        return
+        ...
 
+    @abc.abstractmethod
     def receive(self) -> bytes:
-        return b""
+        ...
+
 
 @prefab
 class ConnectionTCP(ConnectionTypeBase):
@@ -32,25 +38,29 @@ class ConnectionTCP(ConnectionTypeBase):
         self.sock = socket.socket()
         try:
             self.sock.connect((self.server, self.port))
+        except (ConnectionRefusedError, socket.gaierror):
+            # gaierror is raised if it could not resolve hostname
+            self.sock.close()
+            self.sock = None
+            return False
+        else:
             self.sock.settimeout(self.timeout)
-            # We need to ping the connection to make sure we are connected to a TCP server,
-            # the Websocket server also allows this socket connection
-            self.sock.send(b"ping\r\n")
-            ping_resp = self.sock.recv(BUFFER_SIZE).decode("UTF-8").strip("\r\n")
-            return (ping_resp == "pong")
-        except TimeoutError:
-            self.sock.close()
-            self.sock = None
+            if self._ping(self.sock):
+                return True
+            else:
+                self.sock.close()
+                self.sock = None
+                return False
+
+    @staticmethod
+    def _ping(sock) -> bool:
+        try:
+            sock.send(b"ping\r\n")
+            ping_resp = sock.recv(BUFFER_SIZE).decode("UTF-8").strip("\r\n")
+        except (TimeoutError, ConnectionError):
             return False
-        except ConnectionRefusedError:
-            self.sock.close()
-            self.sock = None
-            return False
-        except socket.gaierror:
-            # Could not resolve hostname
-            self.sock.close()
-            self.sock = None
-            return False
+        else:
+            return ping_resp == "pong"
 
     def close(self) -> None:
         if self.sock:
@@ -58,14 +68,21 @@ class ConnectionTCP(ConnectionTypeBase):
             self.sock = None
 
     def send(self, msg: bytes) -> None:
+        if not self.sock:
+            raise ConnectionError("The connection has not yet been established")
+
         try:
             self.sock.send(msg + b"\r\n")
-        except:
+        except ConnectionAbortedError:
             self.sock.close()
             self.sock = None
             raise ConnectionError("The connection has been closed by the host")
 
+
     def receive(self) -> bytes:
+        if not self.sock:
+            raise ConnectionError("The connection has not yet been established")
+
         data_received = b""
         try:
             data_received = self.sock.recv(BUFFER_SIZE)
