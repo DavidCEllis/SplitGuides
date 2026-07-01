@@ -58,7 +58,7 @@ class LivesplitConnection(Prefab):
     connection_obj: ConnectionTypeBase | None = None
 
     def is_connected(self) -> bool:
-        return (bool)(self.connection_obj)
+        return bool(self.connection_obj)
 
     def get_connection_friendly_name(self) -> str:
         if self.connection_obj:
