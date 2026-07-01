@@ -18,8 +18,6 @@ class ConnectionPipe(ConnectionTypeBase):
     handle = None
 
     def connect(self) -> bool:
-        if sys.platform != "win32":
-            raise NotImplementedError('ConnectionPipe class only on Windows')
         self.close()
         try:
             self.handle = win32file.CreateFile(
@@ -43,15 +41,11 @@ class ConnectionPipe(ConnectionTypeBase):
         return True
 
     def close(self) -> None:
-        if sys.platform != "win32":
-            raise NotImplementedError('ConnectionPipe class only on Windows')
         if self.handle:
             win32file.CloseHandle(self.handle)
             self.handle = None
 
     def send(self, msg: bytes) -> None:
-        if sys.platform != "win32":
-            raise NotImplementedError('ConnectionPipe class only on Windows')
         try:
             win32file.WriteFile(self.handle, msg + b"\r\n")
         except Exception as e:
@@ -60,8 +54,6 @@ class ConnectionPipe(ConnectionTypeBase):
             raise ConnectionError("Pipe sending error: " + str(e))
 
     def receive(self) -> bytes:
-        if sys.platform != "win32":
-            raise NotImplementedError('ConnectionPipe class only on Windows')
         try:
             # wait a bit for data to arrive, the ReadFile would stall otherwise
             time.sleep(0.05)
