@@ -3,11 +3,12 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from splitguides.livesplit_client import LivesplitConnection, BUFFER_SIZE
+from splitguides.livesplit_client import ConnectionTCP
+from splitguides.livesplit_client.connection_shared import BUFFER_SIZE
 
 
 def test_init():
-    connection = LivesplitConnection(server="hostname", port=12, timeout=2)
+    connection = ConnectionTCP(server="hostname", port=12, timeout=2)
     assert connection.server == "hostname"
     assert connection.port == 12
     assert connection.timeout == 2
@@ -19,7 +20,7 @@ def test_connect():
         mock_sock = MagicMock()
         mock_socket.return_value = mock_sock
 
-        connection = LivesplitConnection(server="host", port=12, timeout=2)
+        connection = ConnectionTCP(server="host", port=12, timeout=2)
         response = connection.connect()
 
         mock_socket.assert_called_once()
@@ -35,7 +36,7 @@ def test_failed_connect():
         mock_socket.return_value = mock_sock
 
         mock_sock.connect.side_effect = ConnectionRefusedError("Should be handled")
-        connection = LivesplitConnection()
+        connection = ConnectionTCP()
 
         response = connection.connect()
 
@@ -47,7 +48,7 @@ def test_close():
         mock_sock = MagicMock()
         mock_socket.return_value = mock_sock
 
-        connection = LivesplitConnection()
+        connection = ConnectionTCP()
         connection.connect()
 
         connection.close()
@@ -66,7 +67,7 @@ def test_send(connect_first):
         mock_sock = MagicMock()
         mock_socket.return_value = mock_sock
 
-        connection = LivesplitConnection()
+        connection = ConnectionTCP()
 
         if connect_first:
             connection.connect()
@@ -84,7 +85,7 @@ def test_send_fail():
         mock_socket.return_value = mock_sock
         mock_sock.send.side_effect = ConnectionAbortedError("Should be caught")
 
-        connection = LivesplitConnection()
+        connection = ConnectionTCP()
 
         with pytest.raises(ConnectionAbortedError):
             connection.send(b"test message")
@@ -103,7 +104,7 @@ def test_receive(connect_first):
 
         mock_sock.recv.return_value = b"returned data"
 
-        connection = LivesplitConnection()
+        connection = ConnectionTCP()
 
         if connect_first:
             connection.connect()
@@ -122,7 +123,7 @@ def test_receive_empty():
 
         mock_sock.recv.return_value = b""
 
-        connection = LivesplitConnection()
+        connection = ConnectionTCP()
 
         with pytest.raises(ConnectionError):
             connection.receive()
@@ -138,7 +139,7 @@ def test_receive_timeout():
 
         mock_sock.recv.side_effect = socket.timeout()
 
-        connection = LivesplitConnection()
+        connection = ConnectionTCP()
 
         with pytest.raises(TimeoutError):
             connection.receive()
@@ -154,7 +155,7 @@ def test_receive_oserror():
 
         mock_sock.recv.side_effect = OSError("Confusing windows message.")
 
-        connection = LivesplitConnection()
+        connection = ConnectionTCP()
 
         with pytest.raises(ConnectionError):
             connection.receive()
