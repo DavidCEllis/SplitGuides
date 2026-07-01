@@ -85,6 +85,6 @@ class ConnectionPipe(ConnectionTypeBase):
             raise ConnectionError("Pipe broken: " + str(e))
 
         # Type checkers report it as str, but it does appear to be bytes
-        assert isinstance(data_received, bytes)
+        data_received = typing.cast(bytes, data_received)
 
         return data_received
