@@ -1,5 +1,6 @@
 import abc
 import socket
+import typing
 import websocket
 
 from ducktools.classbuilder.prefab import prefab, attribute
@@ -16,6 +17,10 @@ class ConnectionTypeBase(abc.ABC):
     @abc.abstractmethod
     def close(self) -> None:
         ...
+
+    def closed_by_host(self) -> typing.NoReturn:
+        self.close()
+        raise ConnectionError("The connection has been closed by the host")
 
     @abc.abstractmethod
     def send(self, msg: bytes) -> None:
@@ -40,17 +45,15 @@ class ConnectionTCP(ConnectionTypeBase):
             self.sock.connect((self.server, self.port))
         except (ConnectionRefusedError, socket.gaierror):
             # gaierror is raised if it could not resolve hostname
-            self.sock.close()
-            self.sock = None
+            self.close()
             return False
+
+        self.sock.settimeout(self.timeout)
+        if self._ping(self.sock):
+            return True
         else:
-            self.sock.settimeout(self.timeout)
-            if self._ping(self.sock):
-                return True
-            else:
-                self.sock.close()
-                self.sock = None
-                return False
+            self.close()
+            return False
 
     @staticmethod
     def _ping(sock) -> bool:
@@ -74,10 +77,7 @@ class ConnectionTCP(ConnectionTypeBase):
         try:
             self.sock.send(msg + b"\r\n")
         except ConnectionAbortedError:
-            self.sock.close()
-            self.sock = None
-            raise ConnectionError("The connection has been closed by the host")
-
+            self.closed_by_host()
 
     def receive(self) -> bytes:
         if not self.sock:
@@ -92,13 +92,11 @@ class ConnectionTCP(ConnectionTypeBase):
                 f"the timeout period ({self.timeout}s)"
             )
         except OSError:
-            self.sock.close()
-            self.sock = None
-            raise ConnectionError("The connection has been closed by the host")
+            self.closed_by_host()
+
         if data_received == b"":
-            self.sock.close()
-            self.sock = None
-            raise ConnectionError("The connection has been closed by the host")
+            self.closed_by_host()
+
         return data_received
 
 @prefab
@@ -114,9 +112,9 @@ class ConnectionWS(ConnectionTypeBase):
         try:
             self.ws.connect(f"ws://{self.server}:{self.port}/livesplit", origin="SplitGuides", timeout=self.timeout)
             return True
-        except Exception as e:
-            self.ws.close()
-            self.ws = None
+        except Exception:
+            # TODO: More precise exception here - like for ConnectionTCP
+            self.close()
             return False
 
     def close(self) -> None:
@@ -125,25 +123,29 @@ class ConnectionWS(ConnectionTypeBase):
             self.ws = None
 
     def send(self, msg: bytes) -> None:
+        if not self.ws:
+            raise ConnectionError("The connection has not yet been established")
         try:
             self.ws.send(msg) # no CRLF on Websocket
-        except Exception as e:
-            self.ws.close()
-            self.ws = None
-            raise ConnectionError("The connection has been closed by the host")
+        except Exception:
+            # TODO: More precise exception here
+            self.closed_by_host()
 
     def receive(self) -> bytes:
+        if not self.ws:
+            raise ConnectionError("The connection has not yet been established")
+
         try:
-            data_received : bytes = self.ws.recv()
-        except Exception as e:
-            self.ws.close()
-            self.ws = None
-            raise ConnectionError("The connection has been closed by the host")
+            data_received = self.ws.recv()
+        except Exception:
+            # TODO: More precise exception here
+            self.closed_by_host()
+
         if isinstance(data_received, str):
             # should always be string, encode to bytes for unified handling
             data_received = data_received.encode("UTF8")
+
         if data_received == b"":
-            self.ws.close()
-            self.ws = None
-            raise ConnectionError("The connection has been closed by the host")
+            self.closed_by_host()
+
         return data_received
