@@ -10,7 +10,9 @@ from .connection_shared import ConnectionTypeBase, ConnectionTCP, ConnectionWS
 
 if sys.platform == "win32":
     from .connection_windows import ConnectionPipe
-
+    CONNECTION_TYPES = [ConnectionPipe, ConnectionTCP, ConnectionWS]
+else:
+    CONNECTION_TYPES = [ConnectionTCP, ConnectionWS]
 
 pattern = re.compile(
     r"^(?:(?P<hours>\d*):)?(?P<minutes>\d{1,2}):(?P<seconds>\d{2}).(?P<centiseconds>\d*)"
