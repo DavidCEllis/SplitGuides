@@ -1,16 +1,15 @@
 import re
-import socket
-import time
-import websocket
 import sys
-if sys.platform == "win32":
-    import win32pipe, win32file, pywintypes
+
 from datetime import timedelta
 import typing
 
 from ducktools.classbuilder.prefab import Prefab, attribute
 
-BUFFER_SIZE = 4096
+from .connection_shared import ConnectionTypeBase, ConnectionTCP, ConnectionWS
+
+if sys.platform == "win32":
+    from .connection_windows import ConnectionPipe
 
 
 pattern = re.compile(
@@ -40,188 +39,6 @@ def parse_time(time_str: str) -> timedelta:
 
     return result
 
-class ConnectionTypeBase:
-    def connect(self) -> bool:
-        return False
-
-    def close(self) -> None:
-        return
-
-    def send(self, msg: bytes) -> None:
-        return
-
-    def receive(self) -> bytes:
-        return b""
-
-class ConnectionTCP(ConnectionTypeBase, Prefab):
-    server: str = "localhost"
-    port: int = 16834
-    timeout: int = 1
-    sock: socket.socket | None = attribute(default=None, init=False, repr=False)
-
-    def connect(self) -> bool:
-        self.close()
-        self.sock = socket.socket()
-        try:
-            self.sock.connect((self.server, self.port))
-            self.sock.settimeout(self.timeout)
-            # We need to ping the connection to make sure we are connected to a TCP server,
-            # the Websocket server also allows this socket connection
-            self.sock.send(b"ping\r\n")
-            ping_resp = self.sock.recv(BUFFER_SIZE).decode("UTF-8").strip("\r\n")
-            return (ping_resp == "pong")
-        except TimeoutError:
-            self.sock.close()
-            self.sock = None
-            return False
-        except ConnectionRefusedError:
-            self.sock.close()
-            self.sock = None
-            return False
-        except socket.gaierror:
-            # Could not resolve hostname
-            self.sock.close()
-            self.sock = None
-            return False
-    
-    def close(self) -> None:
-        if self.sock:
-            self.sock.close()
-            self.sock = None
-    
-    def send(self, msg: bytes) -> None:
-        try:
-            self.sock.send(msg + b"\r\n")
-        except:
-            self.sock.close()
-            self.sock = None
-            raise ConnectionError("The connection has been closed by the host")
-
-    def receive(self) -> bytes:
-        data_received = b""
-        try:
-            data_received = self.sock.recv(BUFFER_SIZE)
-        except socket.timeout:
-            raise TimeoutError(
-                "No response received from the server within "
-                f"the timeout period ({self.timeout}s)"
-            )
-        except OSError:
-            self.sock.close()
-            self.sock = None
-            raise ConnectionError("The connection has been closed by the host")
-        if data_received == b"":
-            self.sock.close()
-            self.sock = None
-            raise ConnectionError("The connection has been closed by the host")
-        return data_received
-
-class ConnectionWS(ConnectionTypeBase, Prefab):
-    server: str = "localhost"
-    port: int = 16834
-    timeout: int = 4  # 1 second not enough to establish a connection
-    ws: websocket.WebSocket | None = attribute(default=None, init=False, repr=False)
-
-    def connect(self) -> bool:
-        self.close()
-        self.ws = websocket.WebSocket()
-        try:
-            self.ws.connect(f"ws://{self.server}:{self.port}/livesplit", origin="SplitGuides", timeout=self.timeout)
-            return True
-        except Exception as e:
-            self.ws.close()
-            self.ws = None
-            return False
-    
-    def close(self) -> None:
-        if self.ws:
-            self.ws.close()
-            self.ws = None
-    
-    def send(self, msg: bytes) -> None:
-        try:
-            self.ws.send(msg) # no CRLF on Websocket
-        except Exception as e:
-            self.ws.close()
-            self.ws = None
-            raise ConnectionError("The connection has been closed by the host")
-
-    def receive(self) -> bytes:
-        try:
-            data_received : bytes = self.ws.recv()
-        except Exception as e:
-            self.ws.close()
-            self.ws = None
-            raise ConnectionError("The connection has been closed by the host")
-        if isinstance(data_received, str):
-            # should always be string, encode to bytes for unified handling
-            data_received = data_received.encode("UTF8")
-        if data_received == b"":
-            self.ws.close()
-            self.ws = None
-            raise ConnectionError("The connection has been closed by the host")
-        return data_received
-
-class ConnectionPipe(ConnectionTypeBase):
-    # pipe is Windows and localhost only, localhost setting is not checked
-    handle = None
-
-    def connect(self) -> bool:
-        if sys.platform != "win32":
-            raise NotImplementedError('ConnectionPipe class only on Windows') 
-        self.close()
-        try:
-            self.handle = win32file.CreateFile(
-                r'\\.\pipe\livesplit',
-                win32file.GENERIC_READ | win32file.GENERIC_WRITE,
-                0,
-                None,
-                win32file.OPEN_EXISTING,
-                0,
-                None
-            )
-            res = win32pipe.SetNamedPipeHandleState(self.handle, win32pipe.PIPE_READMODE_BYTE | win32pipe.PIPE_NOWAIT, None, None)
-            if res == 0: # errored
-                self.handle = None
-                return False
-        except pywintypes.error as e:
-            self.handle = None
-            if e.args[0] != 2: # 2 is unable to find the file -> don't spam the console with that
-                print('Pipe error: ' + str(e))
-            return False
-        return True
-    
-    def close(self) -> None:
-        if sys.platform != "win32":
-            raise NotImplementedError('ConnectionPipe class only on Windows') 
-        if self.handle:
-            win32file.CloseHandle(self.handle)
-            self.handle = None
-    
-    def send(self, msg: bytes) -> None:
-        if sys.platform != "win32":
-            raise NotImplementedError('ConnectionPipe class only on Windows') 
-        try:
-            win32file.WriteFile(self.handle, msg + b"\r\n")
-        except Exception as e:
-            win32file.CloseHandle(self.handle)
-            self.handle = None
-            raise ConnectionError("Pipe sending error: " + str(e))
-
-    def receive(self) -> bytes:
-        if sys.platform != "win32":
-            raise NotImplementedError('ConnectionPipe class only on Windows') 
-        try:
-            # wait a bit for data to arrive, the ReadFile would stall otherwise
-            time.sleep(0.05)
-            data_received = win32file.ReadFile(self.handle, BUFFER_SIZE)
-            # this is returned as tuple, only pass the data onwards
-            data_received = data_received[1]
-        except Exception as e:
-            win32file.CloseHandle(self.handle)
-            self.handle = None
-            raise ConnectionError("Pipe broken: " + str(e))
-        return data_received
 
 CONNECTIONTYPE_PIPE=0
 CONNECTIONTYPE_TCP=1
@@ -252,10 +69,10 @@ class LivesplitConnection(Prefab):
             self.list_connection_types = [CONNECTIONTYPE_PIPE, CONNECTIONTYPE_TCP, CONNECTIONTYPE_WS]
         else:
             self.list_connection_types = [CONNECTIONTYPE_TCP, CONNECTIONTYPE_WS]
-    
+
     def is_connected(self) -> bool:
         return (bool)(self.connection_obj)
-    
+
     def get_connection_friendly_name(self) -> str:
         if self.connection_obj:
             if self.stable_type == CONNECTIONTYPE_PIPE:
@@ -285,7 +102,7 @@ class LivesplitConnection(Prefab):
             cur_type : int = self.stable_type
         else:
             cur_type : int = self.list_connection_types[self.next_attempt_idx]
-        
+
         if cur_type == CONNECTIONTYPE_PIPE:
             self.connection_obj = ConnectionPipe()
         elif cur_type == CONNECTIONTYPE_TCP:
@@ -294,7 +111,7 @@ class LivesplitConnection(Prefab):
             self.connection_obj = ConnectionWS(self.server, self.port)
         else: # out of range, logic error
             raise Exception('logic error')
-        
+
         connection_successful = self.connection_obj.connect()
 
         if connection_successful:
@@ -335,7 +152,7 @@ class LivesplitConnection(Prefab):
         """
         if not self.is_connected():
             return
-        
+
         self.connection_obj.send(msg)
 
     def receive(self) -> bytes:
@@ -347,7 +164,7 @@ class LivesplitConnection(Prefab):
         """
         if not self.is_connected():
             return b""
-        
+
         return self.connection_obj.receive()
 
 class LivesplitMessaging(Prefab):
