@@ -10,6 +10,8 @@ BUFFER_SIZE = 4096
 
 
 class ConnectionTypeBase(abc.ABC):
+    NAME: typing.ClassVar[str] = ""
+
     @abc.abstractmethod
     def connect(self) -> bool:
         ...
@@ -33,6 +35,8 @@ class ConnectionTypeBase(abc.ABC):
 
 @prefab
 class ConnectionTCP(ConnectionTypeBase):
+    NAME: typing.ClassVar[str] = "TCP"
+
     server: str = "localhost"
     port: int = 16834
     timeout: int = 1
@@ -101,6 +105,8 @@ class ConnectionTCP(ConnectionTypeBase):
 
 @prefab
 class ConnectionWS(ConnectionTypeBase):
+    NAME: typing.ClassVar[str] = "WebSocket"
+
     server: str = "localhost"
     port: int = 16834
     timeout: int = 4  # 1 second not enough to establish a connection

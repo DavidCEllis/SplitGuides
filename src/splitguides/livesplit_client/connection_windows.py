@@ -13,16 +13,26 @@ import win32pipe
 
 from ducktools.classbuilder.prefab import prefab, attribute
 
-from .connection_shared import ConnectionTypeBase
+from .connection_shared import BUFFER_SIZE, ConnectionTypeBase
 
+# These all refer to the local machine and are used to decide if named pipes should be checked
+LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
 
 @prefab
 class ConnectionPipe(ConnectionTypeBase):
+    NAME: typing.ClassVar[str] = "Named Pipe"
+
+    hostname: str = "localhost"  # Used to check if this should be ignored.
+
     # Not sure if there's a good type for `handle`
     handle: typing.Any | None = attribute(default=None, init=False, repr=False)
 
     def connect(self) -> bool:
         self.close()
+
+        if self.hostname not in LOOPBACK_HOSTS:
+            return False
+
         try:
             self.handle = win32file.CreateFile(
                 r'\\.\pipe\livesplit',
@@ -50,6 +60,9 @@ class ConnectionPipe(ConnectionTypeBase):
             self.handle = None
 
     def send(self, msg: bytes) -> None:
+        if not self.handle:
+            raise ConnectionError("The connection has not yet been established")
+
         try:
             win32file.WriteFile(self.handle, msg + b"\r\n")
         except Exception as e:
@@ -58,6 +71,9 @@ class ConnectionPipe(ConnectionTypeBase):
             raise ConnectionError("Pipe sending error: " + str(e))
 
     def receive(self) -> bytes:
+        if not self.handle:
+            raise ConnectionError("The connection has not yet been established")
+
         try:
             # wait a bit for data to arrive, the ReadFile would stall otherwise
             time.sleep(0.05)
@@ -68,4 +84,5 @@ class ConnectionPipe(ConnectionTypeBase):
             win32file.CloseHandle(self.handle)
             self.handle = None
             raise ConnectionError("Pipe broken: " + str(e))
-        return data_received
+
+        return data_received.encode("UTF8")
