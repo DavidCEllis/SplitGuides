@@ -4,18 +4,22 @@ if sys.platform != "win32":
     raise ImportError("'connection_windows.py' is not supported on platforms other than Windows")
 
 import time
+import typing
 
 import pywintypes
 import win32file
 import win32pipe
 
 
+from ducktools.classbuilder.prefab import prefab, attribute
+
 from .connection_shared import ConnectionTypeBase
 
 
+@prefab
 class ConnectionPipe(ConnectionTypeBase):
-    # pipe is Windows and localhost only, localhost setting is not checked
-    handle = None
+    # Not sure if there's a good type for `handle`
+    handle: typing.Any | None = attribute(default=None, init=False, repr=False)
 
     def connect(self) -> bool:
         self.close()
