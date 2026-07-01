@@ -1,7 +1,7 @@
 import socket
 import websocket
 
-from ducktools.classbuilder.prefab import Prefab, attribute
+from ducktools.classbuilder.prefab import prefab, attribute
 
 
 BUFFER_SIZE = 4096
@@ -20,7 +20,8 @@ class ConnectionTypeBase:
     def receive(self) -> bytes:
         return b""
 
-class ConnectionTCP(ConnectionTypeBase, Prefab):
+@prefab
+class ConnectionTCP(ConnectionTypeBase):
     server: str = "localhost"
     port: int = 16834
     timeout: int = 1
@@ -83,7 +84,8 @@ class ConnectionTCP(ConnectionTypeBase, Prefab):
             raise ConnectionError("The connection has been closed by the host")
         return data_received
 
-class ConnectionWS(ConnectionTypeBase, Prefab):
+@prefab
+class ConnectionWS(ConnectionTypeBase):
     server: str = "localhost"
     port: int = 16834
     timeout: int = 4  # 1 second not enough to establish a connection
