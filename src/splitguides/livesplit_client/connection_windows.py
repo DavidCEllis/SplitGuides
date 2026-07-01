@@ -19,12 +19,15 @@ from .connection_shared import BUFFER_SIZE, ConnectionTypeBase
 LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
 LIVESPLIT_PIPE = r'\\.\pipe\livesplit'
 
+# The real type doesn't work as an annotation - use `Any` but indicate that it's actually a handle
+type PyHANDLE = typing.Any
+
+
 @prefab
 class ConnectionPipe(ConnectionTypeBase):
     NAME: typing.ClassVar[str] = "Named Pipe"
 
-    # Not sure if there's a good type for `handle`
-    handle: typing.Any | None = attribute(default=None, init=False, repr=False)
+    handle: PyHANDLE | None = attribute(default=None, init=False, repr=False)
 
     def connect(self) -> bool:
         self.close()
