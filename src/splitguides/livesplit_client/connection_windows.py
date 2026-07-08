@@ -64,7 +64,7 @@ class ConnectionPipe(ConnectionTypeBase):
 
         try:
             win32file.WriteFile(self.handle, msg + b"\r\n")
-        except Exception as e:
+        except pywintypes.error as e:
             win32file.CloseHandle(self.handle)
             self.handle = None
             raise ConnectionError("Pipe sending error: " + str(e))
@@ -79,7 +79,10 @@ class ConnectionPipe(ConnectionTypeBase):
             data_received = win32file.ReadFile(self.handle, BUFFER_SIZE)
             # this is returned as tuple, only pass the data onwards
             data_received = data_received[1]
-        except Exception as e:
+        except pywintypes.error as e:
+            if e.args[0]==232 and e.args[2]=='The pipe is being closed.':
+                # no data to gather
+                return b""
             win32file.CloseHandle(self.handle)
             self.handle = None
             raise ConnectionError("Pipe broken: " + str(e))
