@@ -213,12 +213,12 @@ class MainWindow(QMainWindow):
             self.hotkey_manager.disable_hotkeys()
 
             self.split_offset = 0  # Reset the offset as you can no longer change it
-            if not self.ls.connected:
+            if not self.ls.is_connected():
                 self.update_notes(0)
 
     def increase_offset(self):
         self.split_offset += 1
-        if not self.ls.connected:
+        if not self.ls.is_connected():
             self.update_notes(0)
             self.update_StatusMessage()
         else:
@@ -228,7 +228,7 @@ class MainWindow(QMainWindow):
     def decrease_offset(self):
         self.split_offset -= 1
         # Rerender if not connected (if connected this will happen automatically)
-        if not self.ls.connected:
+        if not self.ls.is_connected():
             self.update_notes(0)
             self.update_StatusMessage()
         else:
@@ -467,6 +467,9 @@ class LivesplitLink(QtCore.QObject):
         self.pool = None
         # noinspection PyUnresolvedReferences
         self.note_signal.connect(self.main_window.update_notes)
+    
+    def is_connected(self):
+        return self.client.connection.is_connected()
 
     def start_loops(self):
         self.break_loop = False
@@ -485,7 +488,7 @@ class LivesplitLink(QtCore.QObject):
     def loop_update_split(self):
         while not self.break_loop:
             # If not connected attempt to connect
-            if self.client.connection.is_connected():
+            if self.is_connected():
                 try:
                     split_index = self.client.get_split_index()
                 except (ConnectionError, TimeoutError):
