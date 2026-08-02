@@ -85,6 +85,7 @@ class MainWindow(QMainWindow):
 
         # Window size
         self.resize(self.settings.width, self.settings.height)
+        self.move(self.settings.pos_x, self.settings.pos_y)
 
         # noinspection PyUnresolvedReferences
         self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.settings.on_top)
@@ -212,34 +213,26 @@ class MainWindow(QMainWindow):
             self.hotkey_manager.disable_hotkeys()
 
             self.split_offset = 0  # Reset the offset as you can no longer change it
-            if not self.ls.connected:
+            if not self.ls.is_connected():
                 self.update_notes(0)
 
     def increase_offset(self):
         self.split_offset += 1
-        # Rerender if not connected (if connected this will happen automatically)
-        if not self.ls.connected:
+        if not self.ls.is_connected():
             self.update_notes(0)
-            self.ui.statusbar.showMessage(
-                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
-            )
+            self.update_StatusMessage()
         else:
-            self.ui.statusbar.showMessage(
-                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
-            )
+            self.update_notes(self.split_index)
+            self.update_StatusMessage()
 
     def decrease_offset(self):
         self.split_offset -= 1
         # Rerender if not connected (if connected this will happen automatically)
-        if not self.ls.connected:
+        if not self.ls.is_connected():
             self.update_notes(0)
-            self.ui.statusbar.showMessage(
-                f"Trying to connect to Livesplit. | Split Offset: {self.split_offset}"
-            )
+            self.update_StatusMessage()
         else:
-            self.ui.statusbar.showMessage(
-                f"Connected to Livesplit. | Split Offset: {self.split_offset}"
-            )
+            self.update_StatusMessage()
 
     def start_loops(self):
         """Start the livesplit server connection thread."""
@@ -264,6 +257,12 @@ class MainWindow(QMainWindow):
         self.settings.width = self.width()
         self.settings.height = self.height()
         event.accept()
+    
+    def moveEvent(self, event):
+        """Store the new window position to keep it between launches."""
+        self.settings.pos_x = self.pos().x()
+        self.settings.pos_y = self.pos().y()
+        return super().moveEvent(event)
 
     def setup_actions(self):
         """Setup the browser element with custom options"""
@@ -286,6 +285,9 @@ class MainWindow(QMainWindow):
         self.rc_menu = QMenu()
         open_notes = self.rc_menu.addAction("Open Notes")
         open_notes.triggered.connect(self.open_notes)
+
+        reload_notes = self.rc_menu.addAction("Reload Notes File")
+        reload_notes.triggered.connect(self.reload_notes)
 
         open_settings = self.rc_menu.addAction("Settings")
         open_settings.triggered.connect(self.open_settings)
@@ -338,12 +340,17 @@ class MainWindow(QMainWindow):
 
         if notefile:
             self.notefile = notefile
+            self.reload_notes()
+    
+    def reload_notes(self):
+        """Recreate a Notes instanceby re-reading the file"""
+        if self.notefile:
             # Reset split index and load notes
             self.notes = Notes.from_file(
-                notefile, separator=self.settings.split_separator
+                self.notefile, separator=self.settings.split_separator
             )
             # Remember this notes folder next time notes are loaded.
-            self.settings.notes_folder = str(Path(notefile).parent)
+            self.settings.notes_folder = str(Path(self.notefile).parent)
             # Reset the split offset
             self.split_offset = 0
 
@@ -389,6 +396,14 @@ class MainWindow(QMainWindow):
 
             self.ui.notes.setHtml(html, baseUrl=note_uri)
             self.split_index = idx
+    
+    def update_StatusMessage(self):
+        conn_status = self.ls.client.connection.get_connection_friendly_name()
+        if conn_status == "":
+            msgLS = "Trying to connect to Livesplit"
+        else:
+            msgLS = "Connected to Livesplit via " + conn_status
+        self.ui.statusbar.showMessage(f"{msgLS} | Split Index rendered: {self.split_index} | Split Offset to LS: {self.split_offset}")
 
     def open_settings(self):
         """Open the settings dialog, refresh everything if the settings have changed."""
@@ -448,11 +463,13 @@ class LivesplitLink(QtCore.QObject):
         super().__init__()
         self.client = client
         self.main_window = main_window  # type: MainWindow
-        self.connected = False
         self.break_loop = False
         self.pool = None
         # noinspection PyUnresolvedReferences
         self.note_signal.connect(self.main_window.update_notes)
+    
+    def is_connected(self):
+        return self.client.connection.is_connected()
 
     def start_loops(self):
         self.break_loop = False
@@ -468,34 +485,22 @@ class LivesplitLink(QtCore.QObject):
         self.stop_loops()
         self.client.close()
 
-    def update_status(self, message):
-        self.main_window.ui.statusbar.showMessage(message)
-
-    def ls_connect(self):
-        self.update_status(
-            f"Trying to connect to Livesplit. | "
-            f"Split Offset: {self.main_window.split_offset}"
-        )
-        self.connected = self.client.connect()
-        if self.connected:
-            self.update_status(
-                f"Connected to Livesplit. | "
-                f"Split Offset: {self.main_window.split_offset}"
-            )
-
     def loop_update_split(self):
         while not self.break_loop:
             # If not connected attempt to connect
-            if self.connected:
+            if self.is_connected():
                 try:
                     split_index = self.client.get_split_index()
                 except (ConnectionError, TimeoutError):
-                    self.connected = False
+                    self.client.close()
+                except Exception as e:
+                    print(f"Unexpected error while getting livesplit index: {str(e)}. Retrying")
                     self.client.close()
                 else:
                     # Send the signal to the main window to update.
                     # noinspection PyUnresolvedReferences
                     self.note_signal.emit(split_index)
             else:
-                self.ls_connect()
-            time.sleep(0.1)
+                self.client.connect()
+            self.main_window.update_StatusMessage()
+            time.sleep(0.5)
