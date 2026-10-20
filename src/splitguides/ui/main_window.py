@@ -69,6 +69,8 @@ class MainWindow(QMainWindow):
     livesplit_index: int
     split_offset: int
 
+    status_message: str | None
+
     def __init__(self):
         super().__init__()
         # Setup the UI and get an icon
@@ -136,6 +138,7 @@ class MainWindow(QMainWindow):
 
         self.livesplit_index = 0
         self.split_offset = 0  # Offset for advancing/reversing split
+        self.status_message = None
 
         self.start_loops()  # Start livesplit checking loops
 
@@ -415,7 +418,11 @@ class MainWindow(QMainWindow):
             msgLS = "Trying to connect to Livesplit"
         else:
             msgLS = "Connected to Livesplit via " + conn_status
-        self.ui.statusbar.showMessage(f"{msgLS} | Split Index rendered: {self.split_index} | Split Offset to LS: {self.split_offset}")
+
+        new_msg = f"{msgLS} | Split Index rendered: {self.split_index} | Split Offset to LS: {self.split_offset}"
+        if new_msg != self.status_message:
+            self.ui.statusbar.showMessage(new_msg)
+            self.status_message = new_msg
 
     def open_settings(self):
         """Open the settings dialog, refresh everything if the settings have changed."""
@@ -517,4 +524,4 @@ class LivesplitLink(QtCore.QObject):
             else:
                 self.client.connect()
             self.status_signal.emit()
-            time.sleep(0.5)
+            time.sleep(0.1)
