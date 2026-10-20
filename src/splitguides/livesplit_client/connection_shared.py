@@ -107,7 +107,7 @@ class ConnectionTCP(ConnectionTypeBase):
 class ConnectionWS(ConnectionTypeBase):
     NAME: typing.ClassVar[str] = "WebSocket"
 
-    timeout: int = 4  # 1 second not enough to establish a connection
+    timeout: int = 3  # 1 second not enough to establish a connection
     ws: websocket.WebSocket | None = attribute(default=None, init=False, repr=False)
 
     def connect(self) -> bool:
@@ -116,7 +116,9 @@ class ConnectionWS(ConnectionTypeBase):
         try:
             self.ws.connect(f"ws://{self.server}:{self.port}/livesplit", origin="SplitGuides", timeout=self.timeout)
             return True
-        except ConnectionRefusedError:
+        except ConnectionRefusedError, websocket._exceptions.WebSocketTimeoutException:
+            # ConnectionRefusedError -> target port not in use
+            # WebSocketTimeoutException -> TCP server running
             self.close()
             return False
 
@@ -130,8 +132,8 @@ class ConnectionWS(ConnectionTypeBase):
             raise ConnectionError("The connection has not yet been established")
         try:
             self.ws.send(msg) # no CRLF on Websocket
-        except Exception:
-            # TODO: More precise exception here
+        except ConnectionAbortedError:
+            # server-side closed, only on second (send) invocation
             self.closed_by_host()
 
     def receive(self) -> bytes:
@@ -140,15 +142,18 @@ class ConnectionWS(ConnectionTypeBase):
 
         try:
             data_received = self.ws.recv()
-        except Exception:
-            # TODO: More precise exception here
+        except websocket._exceptions.WebSocketTimeoutException:
+            # no data available
+            data_received = b""
+        except ConnectionAbortedError:
             self.closed_by_host()
+        else:
+            if data_received == "":
+                # server-side closed
+                self.closed_by_host()
 
         if isinstance(data_received, str):
             # should always be string, encode to bytes for unified handling
             data_received = data_received.encode("UTF8")
-
-        if data_received == b"":
-            self.closed_by_host()
 
         return data_received
