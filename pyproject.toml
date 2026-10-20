@@ -13,11 +13,11 @@ authors = [
     { name = "David C Ellis" },
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
-    "pyside6~=6.11.0",
+    "pyside6~=6.11",
     "jinja2~=3.1",
-    "bleach[css]==6.0",              # Each upgrade to bleach has broken something so pin it.
+    "bleach[css]==6.4",  # Bleach is EOL, Plan to replace with NH3
     "flask~=3.0",
     "markdown~=3.6",
     "keyboard~=0.13.5",
