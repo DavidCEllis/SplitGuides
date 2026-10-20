@@ -218,17 +218,18 @@ class MainWindow(QMainWindow):
 
     def increase_offset(self):
         self.split_offset += 1
-        if not self.ls.is_connected():
-            self.update_notes(0)
-        else:
+        if self.ls.is_connected():
             self.update_notes(self.split_index)
+        else:
+            self.update_notes(0)
 
         self.update_status_message()
 
     def decrease_offset(self):
         self.split_offset -= 1
-        # Rerender if not connected (if connected this will happen automatically)
-        if not self.ls.is_connected():
+        if self.ls.is_connected():
+            self.update_notes(self.split_index)
+        else:
             self.update_notes(0)
 
         self.update_status_message()
