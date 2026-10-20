@@ -220,19 +220,18 @@ class MainWindow(QMainWindow):
         self.split_offset += 1
         if not self.ls.is_connected():
             self.update_notes(0)
-            self.update_StatusMessage()
         else:
             self.update_notes(self.split_index)
-            self.update_StatusMessage()
+
+        self.update_status_message()
 
     def decrease_offset(self):
         self.split_offset -= 1
         # Rerender if not connected (if connected this will happen automatically)
         if not self.ls.is_connected():
             self.update_notes(0)
-            self.update_StatusMessage()
-        else:
-            self.update_StatusMessage()
+
+        self.update_status_message()
 
     def start_loops(self):
         """Start the livesplit server connection thread."""
@@ -257,7 +256,7 @@ class MainWindow(QMainWindow):
         self.settings.width = self.width()
         self.settings.height = self.height()
         event.accept()
-    
+
     def moveEvent(self, event):
         """Store the new window position to keep it between launches."""
         self.settings.pos_x = self.pos().x()
@@ -341,7 +340,7 @@ class MainWindow(QMainWindow):
         if notefile:
             self.notefile = notefile
             self.reload_notes()
-    
+
     def reload_notes(self):
         """Recreate a Notes instanceby re-reading the file"""
         if self.notefile:
@@ -396,8 +395,8 @@ class MainWindow(QMainWindow):
 
             self.ui.notes.setHtml(html, baseUrl=note_uri)
             self.split_index = idx
-    
-    def update_StatusMessage(self):
+
+    def update_status_message(self):
         conn_status = self.ls.client.connection.get_connection_friendly_name()
         if conn_status == "":
             msgLS = "Trying to connect to Livesplit"
@@ -467,7 +466,7 @@ class LivesplitLink(QtCore.QObject):
         self.pool = None
         # noinspection PyUnresolvedReferences
         self.note_signal.connect(self.main_window.update_notes)
-    
+
     def is_connected(self):
         return self.client.connection.is_connected()
 
@@ -502,5 +501,5 @@ class LivesplitLink(QtCore.QObject):
                     self.note_signal.emit(split_index)
             else:
                 self.client.connect()
-            self.main_window.update_StatusMessage()
+            self.main_window.update_status_message()
             time.sleep(0.5)
