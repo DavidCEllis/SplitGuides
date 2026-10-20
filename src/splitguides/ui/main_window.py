@@ -470,6 +470,7 @@ class LivesplitLink(QtCore.QObject):
 
     # Have to message via signals or the program crashes
     note_signal = QtCore.Signal(int)
+    status_signal = QtCore.Signal()
 
     def __init__(self, client, main_window):
         super().__init__()
@@ -479,6 +480,7 @@ class LivesplitLink(QtCore.QObject):
         self.pool = None
         # noinspection PyUnresolvedReferences
         self.note_signal.connect(self.main_window.update_notes)
+        self.status_signal.connect(self.main_window.update_status_message)
 
     def is_connected(self):
         return self.client.connection.is_connected()
@@ -514,5 +516,5 @@ class LivesplitLink(QtCore.QObject):
                     self.note_signal.emit(split_index)
             else:
                 self.client.connect()
-            self.main_window.update_status_message()
+            self.status_signal.emit()
             time.sleep(0.5)
