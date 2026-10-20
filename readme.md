@@ -31,26 +31,16 @@ platforms.
 
 ## Usage ##
 
-1. Connect with livesplit by starting the livesplit server component selecting
-   'Control' and 'Start TCP Server' in livesplit.
-2. Right click in the splitguides window and select 'Open Notes' and find the text file
-   containing the notes you wish to use.
-3. Some configuration is available from the settings dialog.
+Once launched, right click in the splitguides window and select 'Open Notes' and find the text file 
+containing the notes you wish to use.
 
-If you are already using the Livesplit Server for something else,
-this appliction shouldn't interfere with that, but only a TCP or a Websocket server can be running at a time.
-You can change the connection to Livesplit that will be used in the settings.
-There are 3 options:
-* Named Pipe
-* TCP Server (default)
-* Websocket Server
-The Named Pipe does not use the hostname and port, it should "just work", as long as livesplit is running on the same PC.
+### Note Formatting ###
 
 Plain text formatting works the same way as SplitNotes.
 Notes made for that should function fine in SplitGuides.
 
 Additionally Markdown and HTML formatted notes are supported.
-These will be interpreted based on file extension (.md, .txt or .html).
+**These will be interpreted based on file extension (.md, .txt or .html).**
 Markdown and plain text formatted notes will automatically have line breaks
 inserted in between lines.
 
@@ -61,14 +51,19 @@ inserted in between lines.
 
 If you edited your notes while the program was running, you can reload the notes in the context menu "Reload Notes File".
 
-### If the notes are not advancing ###
+### Connection Issues ###
 
-If the text at the bottom says "Trying to connect to Livesplit." make sure that the selected server in the settings is running.
+If you are running SplitGuides and Livesplit on the same PC on Windows it should automatically connect
+using named pipes without any configuration required.
 
-If that doesn't work, check in the Splitguides settings (from the right click menu)
-* "Livesplit Server Hostname" should be `localhost`
+If Livesplit is running on a separate machine or you are running SplitGuides on Linux or MacOS
+you will need to use either the TCP server or the Websocket server (either should work).
+
+If it is still not connecting, check the hostname and port in the settings
 * "Livesplit Server Port" should match the value for "Server Port" in Livesplit's own settings
   * This is `16834` by default
+* If Livesplit is running on the same machine as Splitguides "Livesplit Server Hostname" should 
+  be `localhost`. Otherwise it should be the hostname for the machine running Livesplit.
 
 ## SplitGuides Server ##
 
@@ -91,7 +86,7 @@ and port given in a web browser.
 
 Configuration Options:
 
-* Livesplit server hostname, port and wanted connection type
+* Livesplit server hostname and port
 * Display previous/next splits
 * Split separator (leave blank for empty line separator)
 * Font Size
