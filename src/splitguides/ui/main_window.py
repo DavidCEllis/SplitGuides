@@ -217,22 +217,16 @@ class MainWindow(QMainWindow):
                 self.update_notes(0)
 
     def increase_offset(self):
+        # Only update the notes and status if there is no connection
+        # We do not store the last split value from livesplit only the split with offset
         self.split_offset += 1
-        if self.ls.is_connected():
-            self.update_notes(self.split_index)
-        else:
+        if not self.ls.is_connected():
             self.update_notes(0)
-
-        self.update_status_message()
 
     def decrease_offset(self):
         self.split_offset -= 1
-        if self.ls.is_connected():
-            self.update_notes(self.split_index)
-        else:
+        if not self.ls.is_connected():
             self.update_notes(0)
-
-        self.update_status_message()
 
     def start_loops(self):
         """Start the livesplit server connection thread."""
