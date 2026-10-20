@@ -142,7 +142,8 @@ class MainWindow(QMainWindow):
     @property
     def split_index(self) -> int:
         # Get the adjusted split index including offset
-        return max(self.livesplit_index, 0) + self.split_offset
+        # The max use is to prevent the index from being less than 0
+        return max(max(self.livesplit_index, 0) + self.split_offset, 0)
 
     @split_index.setter
     def split_index(self, value: int) -> None:
@@ -228,19 +229,19 @@ class MainWindow(QMainWindow):
 
     def increase_offset(self):
         self.split_offset += 1
-        if not self.ls.is_connected():
-            self.update_notes(self.livesplit_index)
+        if self.ls.is_connected():
+            self.update_notes(self.livesplit_index, refresh=True)
         else:
-            self.update_notes(0)
+            self.update_notes(0, refresh=True)
 
         self.update_status_message()
 
     def decrease_offset(self):
         self.split_offset -= 1
-        if self.ls.is_connected:
-            self.update_notes(self.livesplit_index)
+        if self.ls.is_connected():
+            self.update_notes(self.livesplit_index, refresh=True)
         else:
-            self.update_notes(0)
+            self.update_notes(0, refresh=True)
 
         self.update_status_message()
 
@@ -389,15 +390,12 @@ class MainWindow(QMainWindow):
         # Add the offset and then make sure we're still above 0
 
         # Copy the current index for comparison and store the new value
-        current_index = self.split_index
+        previous_index = self.split_index
         self.livesplit_index = idx
 
-        idx = max(idx, 0) + self.split_offset
-        idx = max(idx, 0)
-
-        if self.notefile and self.notes and (idx != current_index or refresh):
-            start = idx - self.settings.previous_splits
-            end = idx + self.settings.next_splits + 1
+        if self.notefile and self.notes and (self.split_index != previous_index or refresh):
+            start = self.split_index - self.settings.previous_splits
+            end = self.split_index + self.settings.next_splits + 1
 
             html = self.template.render(
                 font_size=self.settings.font_size,
