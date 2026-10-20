@@ -11,11 +11,16 @@ def clear_settings():
     # Should move to not using the actual user settings file location but that will take
     # some digging.
 
-    data = DESKTOP_SETTINGS_FILE.read_text()
+    try:
+        data = DESKTOP_SETTINGS_FILE.read_text()
+    except FileNotFoundError:
+        data = None
     DESKTOP_SETTINGS_FILE.unlink(missing_ok=True)
 
     try:
         yield
     finally:
         DESKTOP_SETTINGS_FILE.unlink(missing_ok=True)
-        DESKTOP_SETTINGS_FILE.write_text(data)
+
+        if data:
+            DESKTOP_SETTINGS_FILE.write_text(data)
