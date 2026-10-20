@@ -1,7 +1,9 @@
 import pytest
+import os
 
 from splitguides.settings import DESKTOP_SETTINGS_FILE
 
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 @pytest.fixture(scope="function")
 def clear_settings():
