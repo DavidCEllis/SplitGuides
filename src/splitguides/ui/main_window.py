@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
     client: LivesplitMessaging
     ls: LivesplitLink
 
-    split_index: int
+    livesplit_index: int
     split_offset: int
 
     def __init__(self):
@@ -133,11 +133,21 @@ class MainWindow(QMainWindow):
         self.client = get_client(self.settings.hostname, self.settings.port)
 
         self.ls = LivesplitLink(self.client, self)
-        self.split_index = 0
 
+        self.livesplit_index = 0
         self.split_offset = 0  # Offset for advancing/reversing split
 
         self.start_loops()  # Start livesplit checking loops
+
+    @property
+    def split_index(self) -> int:
+        # Get the adjusted split index including offset
+        return max(self.livesplit_index, 0) + self.split_offset
+
+    @split_index.setter
+    def split_index(self, value: int) -> None:
+        # In case anything relies on setting split_index *with* the offset.
+        self.livesplit_index = value - self.split_offset
 
     def toggle_on_top(self):
         """Toggle window always on top, update settings and window flag to match."""
@@ -217,16 +227,22 @@ class MainWindow(QMainWindow):
                 self.update_notes(0)
 
     def increase_offset(self):
-        # Only update the notes and status if there is no connection
-        # We do not store the last split value from livesplit only the split with offset
         self.split_offset += 1
         if not self.ls.is_connected():
+            self.update_notes(self.livesplit_index)
+        else:
             self.update_notes(0)
+
+        self.update_status_message()
 
     def decrease_offset(self):
         self.split_offset -= 1
-        if not self.ls.is_connected():
+        if self.ls.is_connected:
+            self.update_notes(self.livesplit_index)
+        else:
             self.update_notes(0)
+
+        self.update_status_message()
 
     def start_loops(self):
         """Start the livesplit server connection thread."""
@@ -365,16 +381,21 @@ class MainWindow(QMainWindow):
         """
         Update the notes to the index given.
 
-        :param idx: The new index
+        :param idx: The new index without offset
         :param refresh: force a refresh even if the index is the same
         """
 
         # Initial index can be -1 when livesplit is stopped
         # Add the offset and then make sure we're still above 0
+
+        # Copy the current index for comparison and store the new value
+        current_index = self.split_index
+        self.livesplit_index = idx
+
         idx = max(idx, 0) + self.split_offset
         idx = max(idx, 0)
 
-        if self.notefile and self.notes and (idx != self.split_index or refresh):
+        if self.notefile and self.notes and (idx != current_index or refresh):
             start = idx - self.settings.previous_splits
             end = idx + self.settings.next_splits + 1
 
@@ -389,7 +410,6 @@ class MainWindow(QMainWindow):
             note_uri = Path(self.notefile).absolute().as_uri()
 
             self.ui.notes.setHtml(html, baseUrl=note_uri)
-            self.split_index = idx
 
     def update_status_message(self):
         conn_status = self.ls.client.connection.get_connection_friendly_name()
@@ -431,7 +451,7 @@ class MainWindow(QMainWindow):
                 )
                 # Reset the offset
                 self.split_offset = 0
-                self.update_notes(self.split_index, refresh=True)
+                self.update_notes(self.livesplit_index, refresh=True)
             else:
                 self.render_blank()
 

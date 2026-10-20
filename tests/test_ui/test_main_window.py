@@ -255,7 +255,7 @@ def test_open_settings(qtbot, fake_link):
         # Change separator to /split
         main_window.settings.split_separator = "/split"
         main_window.notefile = "fake_file"
-        main_window.split_index = 2
+        main_window.livesplit_index = 2
 
         assert main_window.client.connection.server != main_window.settings.hostname
 
