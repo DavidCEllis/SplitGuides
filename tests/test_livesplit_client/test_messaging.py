@@ -41,7 +41,7 @@ def test_send():
     messager = LivesplitMessaging(fake_connection)
 
     messager.send("Test message")
-    fake_connection.send.assert_called_with(b"Test message\r\n")
+    fake_connection.send.assert_called_with(b"Test message")
 
 
 def test_send_only_messages():
@@ -52,20 +52,20 @@ def test_send_only_messages():
     messager = LivesplitMessaging(fake_connection)
 
     expected = [
-        call(b"starttimer\r\n"),
-        call(b"startorsplit\r\n"),
-        call(b"split\r\n"),
-        call(b"unsplit\r\n"),
-        call(b"skipsplit\r\n"),
-        call(b"pause\r\n"),
-        call(b"resume\r\n"),
-        call(b"reset\r\n"),
-        call(b"initgametime\r\n"),
-        call(b"setgametime 2\r\n"),
-        call(b"setloadingtimes 12\r\n"),
-        call(b"pausegametime\r\n"),
-        call(b"unpausegametime\r\n"),
-        call(b"setcomparison Personal Best\r\n"),
+        call(b"starttimer"),
+        call(b"startorsplit"),
+        call(b"split"),
+        call(b"unsplit"),
+        call(b"skipsplit"),
+        call(b"pause"),
+        call(b"resume"),
+        call(b"reset"),
+        call(b"initgametime"),
+        call(b"setgametime 2"),
+        call(b"setloadingtimes 12"),
+        call(b"pausegametime"),
+        call(b"unpausegametime"),
+        call(b"setcomparison Personal Best"),
     ]
 
     messager.start_timer()
@@ -124,7 +124,7 @@ def test_get_delta():
     fake_connection.receive.return_value = b"+2\r\n"
     delta = messager.get_delta()
 
-    fake_connection.send.assert_called_with(b"getdelta\r\n")
+    fake_connection.send.assert_called_with(b"getdelta")
     fake_connection.receive.assert_called_once()
     assert delta == "+2"
 
@@ -133,7 +133,7 @@ def test_get_delta():
     fake_connection.receive.return_value = b"-12\r\n"
     delta = messager.get_delta("Personal Best")
 
-    fake_connection.send.assert_called_with(b"getdelta Personal Best\r\n")
+    fake_connection.send.assert_called_with(b"getdelta Personal Best")
     fake_connection.receive.assert_called_once()
     assert delta == "-12"
 
@@ -141,11 +141,11 @@ def test_get_delta():
 @pytest.mark.parametrize(
     "funcname, message",
     [
-        ("get_last_split_time", b"getlastsplittime\r\n"),
-        ("get_comparison_split_time", b"getcomparisonsplittime\r\n"),
-        ("get_current_time", b"getcurrenttime\r\n"),
-        ("get_best_possible_time", b"getbestpossibletime\r\n"),
-        ("get_final_time", b"getfinaltime\r\n"),
+        ("get_last_split_time", b"getlastsplittime"),
+        ("get_comparison_split_time", b"getcomparisonsplittime"),
+        ("get_current_time", b"getcurrenttime"),
+        ("get_best_possible_time", b"getbestpossibletime"),
+        ("get_final_time", b"getfinaltime"),
     ],
 )
 def test_get_times(funcname, message):
@@ -165,8 +165,8 @@ def test_get_times(funcname, message):
 @pytest.mark.parametrize(
     "funcname, message",
     [
-        ("get_final_time", b"getfinaltime Personal Best\r\n"),
-        ("get_predicted_time", b"getpredictedtime Personal Best\r\n"),
+        ("get_final_time", b"getfinaltime Personal Best"),
+        ("get_predicted_time", b"getpredictedtime Personal Best"),
     ],
 )
 def test_get_times_pb(funcname, message):
@@ -191,16 +191,16 @@ def test_get_split_index():
     result = messager.get_split_index()
 
     assert result == 2
-    fake_connection.send.assert_called_with(b"getsplitindex\r\n")
+    fake_connection.send.assert_called_with(b"getsplitindex")
     fake_connection.receive.assert_called_once()
 
 
 @pytest.mark.parametrize(
     "funcname, message",
     [
-        ("get_current_split_name", b"getcurrentsplitname\r\n"),
-        ("get_previous_split_name", b"getprevioussplitname\r\n"),
-        ("get_current_timer_phase", b"getcurrenttimerphase\r\n"),
+        ("get_current_split_name", b"getcurrentsplitname"),
+        ("get_previous_split_name", b"getprevioussplitname"),
+        ("get_current_timer_phase", b"getcurrenttimerphase"),
     ],
 )
 def test_get_names(funcname, message):
