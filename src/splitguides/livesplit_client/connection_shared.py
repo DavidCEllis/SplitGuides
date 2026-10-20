@@ -116,7 +116,7 @@ class ConnectionWS(ConnectionTypeBase):
         try:
             self.ws.connect(f"ws://{self.server}:{self.port}/livesplit", origin="SplitGuides", timeout=self.timeout)
             return True
-        except ConnectionRefusedError, websocket._exceptions.WebSocketTimeoutException:
+        except (ConnectionRefusedError, websocket._exceptions.WebSocketTimeoutException):
             # ConnectionRefusedError -> target port not in use
             # WebSocketTimeoutException -> TCP server running
             self.close()
