@@ -31,17 +31,16 @@ platforms.
 
 ## Usage ##
 
-1. Connect with livesplit by starting the livesplit server component selecting
-   'Control' and 'Start TCP Server' in livesplit.
-2. Right click in the splitguides window and select 'Open Notes' and find the text file
-   containing the notes you wish to use.
-3. Some configuration is available from the settings dialog.
+Once launched, right click in the splitguides window and select 'Open Notes' and find the text file 
+containing the notes you wish to use.
+
+### Note Formatting ###
 
 Plain text formatting works the same way as SplitNotes.
 Notes made for that should function fine in SplitGuides.
 
 Additionally Markdown and HTML formatted notes are supported.
-These will be interpreted based on file extension (.md, .txt or .html).
+**These will be interpreted based on file extension (.md, .txt or .html).**
 Markdown and plain text formatted notes will automatically have line breaks
 inserted in between lines.
 
@@ -50,15 +49,21 @@ inserted in between lines.
   * If a split separator is given, newlines are left as in the input to the
     markdown/html processors.
 
-### If the notes are not advancing ###
+If you edited your notes while the program was running, you can reload the notes in the context menu "Reload Notes File".
 
-If the text at the bottom says "Trying to connect to Livesplit." make sure that the TCP server
-is running.
+### Connection Issues ###
 
-If that doesn't work, check in the Splitguides settings (from the right click menu)
-* "Livesplit Server Hostname" should be `localhost`
+If you are running SplitGuides and Livesplit on the same PC on Windows it should automatically connect
+using named pipes without any configuration required.
+
+If Livesplit is running on a separate machine or you are running SplitGuides on Linux or MacOS
+you will need to use either the TCP server or the Websocket server (either should work).
+
+If it is still not connecting, check the hostname and port in the settings
 * "Livesplit Server Port" should match the value for "Server Port" in Livesplit's own settings
   * This is `16834` by default
+* If Livesplit is running on the same machine as Splitguides "Livesplit Server Hostname" should 
+  be `localhost`. Otherwise it should be the hostname for the machine running Livesplit.
 
 ## SplitGuides Server ##
 

@@ -1,12 +1,24 @@
 import re
-import socket
+import sys
+
 from datetime import timedelta
 import typing
 
 from ducktools.classbuilder.prefab import Prefab, attribute
 
-BUFFER_SIZE = 4096
+from .connection_shared import (
+    ConnectionTypeBase,
+    ConnectionTCP,
+    ConnectionWS
+)
 
+CONNECTION_TYPES: tuple[type[ConnectionTypeBase], ...]
+
+if sys.platform == "win32":
+    from .connection_windows import ConnectionPipe
+    CONNECTION_TYPES = (ConnectionPipe, ConnectionTCP, ConnectionWS)
+else:
+    CONNECTION_TYPES = (ConnectionTCP, ConnectionWS)
 
 pattern = re.compile(
     r"^(?:(?P<hours>\d*):)?(?P<minutes>\d{1,2}):(?P<seconds>\d{2}).(?P<centiseconds>\d*)"
@@ -38,38 +50,48 @@ def parse_time(time_str: str) -> timedelta:
 
 class LivesplitConnection(Prefab):
     """
-    Socket based livesplit connection model
+    Livesplit connection model supporting Named Pipe (Windows-only), TCP and Websocket connections
     """
     server: str = "localhost"
     port: int = 16834
-    timeout: int = 1
-    sock: socket.socket | None = attribute(default=None, init=False, repr=False)
+
+    # Make it possible to replace the possible connection types for testing, but see the actual type for debugging
+    connection_obj: ConnectionTypeBase | None = attribute(default=None, init=False)
+    connection_types: tuple[type[ConnectionTypeBase], ...] = attribute(default=CONNECTION_TYPES, repr=False)
+
+    def is_connected(self) -> bool:
+        return bool(self.connection_obj)
+
+    def get_connection_friendly_name(self) -> str:
+        if self.connection_obj:
+            status = self.connection_obj.NAME
+        else:
+            status = ""
+        return status
 
     def connect(self) -> bool:
         """
         Attempt to connect to the livesplit server
         :return: True if connected, otherwise False
         """
-        self.sock = socket.socket()
-        try:
-            self.sock.connect((self.server, self.port))
-        except ConnectionRefusedError:
-            self.sock.close()
-            self.sock = None
-            return False
-        except socket.gaierror:
-            # Could not resolve hostname
-            self.sock.close()
-            self.sock = None
-            return False
+        self.close()
+
+        for connection_type in self.connection_types:
+            # Try each connection type in succession, accept the first successful connection type
+            connection = connection_type(self.server, self.port)
+            connection_success = connection.connect()
+            if connection_success:
+                self.connection_obj = connection
+                break
         else:
-            self.sock.settimeout(self.timeout)
-            return True
+            connection_success = False
+
+        return connection_success
 
     def close(self) -> None:
-        if self.sock:
-            self.sock.close()
-            self.sock = None
+        if self.connection_obj:
+            self.connection_obj.close()
+            self.connection_obj = None
 
     def send(self, msg: bytes) -> None:
         """
@@ -77,51 +99,23 @@ class LivesplitConnection(Prefab):
         If the connection is aborted (ie: if livesplit server has been closed)
         raise a ConnectionAbortedError
 
-        :param msg: bytes message to send (should end with "\r\n")
+        :param msg: bytes message to send
         :return:
         """
-        if not self.sock:
-            self.connect()
-        
-        if self.sock:  # Check again in case connection failed
-            try:
-                self.sock.send(msg)
-            except ConnectionAbortedError:
-                self.sock.close()
-                self.sock = None
-                raise ConnectionAbortedError("The connection has been closed by the host")
+        if self.connection_obj:
+            self.connection_obj.send(msg)
 
     def receive(self) -> bytes:
         """
         Attempt to receive a message from the livesplit server
         raise ConnectionError if the connection has been terminated.
 
-        :return: bytes received from the server
+        :return: bytes or string received from the server
         """
-        if not self.sock:
-            self.connect()
-        
-        if self.sock:
-            try:
-                data_received = self.sock.recv(BUFFER_SIZE)
-            except socket.timeout:
-                raise TimeoutError(
-                    "No response received from the server within "
-                    f"the timeout period ({self.timeout}s)"
-                )
-            except OSError:
-                self.sock.close()
-                self.sock = None
-                raise ConnectionError("The connection has been closed by the host")
-
-            if data_received == b"":
-                self.sock.close()
-                self.sock = None
-                raise ConnectionError("The connection has been closed by the host")
-
-            return data_received
-        
-        return b""
+        if self.connection_obj:
+            return self.connection_obj.receive()
+        else:
+            return b""
 
 
 class LivesplitMessaging(Prefab):
@@ -133,9 +127,9 @@ class LivesplitMessaging(Prefab):
     def close(self) -> None:
         self.connection.close()
 
-    def send(self, message) -> None:
+    def send(self, message: str) -> None:
         m = message.encode("UTF8")
-        self.connection.send(m + b"\r\n")
+        self.connection.send(m)
 
     @typing.overload
     def receive(self, datatype: typing.Literal["time"]) -> timedelta: ...
@@ -146,7 +140,8 @@ class LivesplitMessaging(Prefab):
 
     def receive(self, datatype="text"):
         result = self.connection.receive()
-        result = result.strip().decode("UTF8")
+        result = result.decode("UTF8").strip()
+
         if datatype == "time":
             result = parse_time(result)
         elif datatype == "int":
@@ -247,7 +242,7 @@ class LivesplitMessaging(Prefab):
         if comparison:
             self.send(f"getdelta {comparison}")
         else:
-            self.send(f"getdelta")
+            self.send("getdelta")
 
         return self.receive()
 
@@ -297,7 +292,6 @@ class LivesplitMessaging(Prefab):
 
 def get_client(
         server: str = "localhost",
-        port: int = 16834,
-        timeout: int = 1
+        port: int = 16834
 ) -> LivesplitMessaging:
-    return LivesplitMessaging(connection=LivesplitConnection(server, port, timeout))
+    return LivesplitMessaging(connection=LivesplitConnection(server, port))
