@@ -90,7 +90,8 @@ class ConnectionTCP(ConnectionTypeBase):
         data_received = b""
         try:
             data_received = self.sock.recv(BUFFER_SIZE)
-        except socket.timeout:
+        except TimeoutError:
+            # Change the message
             raise TimeoutError(
                 "No response received from the server within "
                 f"the timeout period ({self.timeout}s)"
