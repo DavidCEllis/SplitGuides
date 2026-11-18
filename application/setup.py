@@ -46,8 +46,6 @@ options = {
     }
 }
 
-assert Path(icon_file).exists()
-
 executables = [
     Executable(script=desktop_app, base=base, target_name="splitguides", icon=icon_file),
     Executable(script=server_app, target_name="splitguides_server", icon=icon_file),
