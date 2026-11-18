@@ -59,7 +59,7 @@ def test_render():
 @pytest.mark.parametrize(
     "safe_mode, expected",
     [
-        (True, "&lt;script&gt;Escape these tags&lt;/script&gt;"),
+        (True, ""),
         (False, "<script>Escape these tags</script>"),
     ],
 )

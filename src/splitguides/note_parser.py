@@ -4,37 +4,16 @@ Handle parsing a notes file into separate pages of notes.
 import os
 from pathlib import Path
 
-import bleach
-import bleach.sanitizer
-import bleach.css_sanitizer
+import justhtml
 import markdown
+from ducktools.classbuilder.prefab import Prefab
 
 
-PERMITTED_TAGS = {
-    "p",
-    "br",
-    "del",
-    "ins",
-    "mark",
-    "small",
-    "sub",
-    "sup",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "div",
-    "img",
-    "video",
-    "source",
-}
-
+PERMITTED_TAGS = {"source", "video"}
 PERMITTED_ATTRIBUTES = {
-    "*": ["class", "style", "href"],
-    "img": ["src", "alt", "width", "height"],
-    "video": [
+    "*": {"class", "style", "href"},
+    "source": {"src", "type"},
+    "video": {
         "autoplay",
         "controls",
         "height",
@@ -43,10 +22,15 @@ PERMITTED_ATTRIBUTES = {
         "poster",
         "src",
         "width",
-    ],
-    "source": ["src", "type"],
+    },
 }
 
+PERMITTED_URL_SCHEMES = {
+    ("a", "href"): justhtml.UrlRule(allowed_schemes={"file", "http", "https"}),
+    ("img", "src"): justhtml.UrlRule(allowed_schemes={"file", "http", "https"}),
+    ("video", "src"): justhtml.UrlRule(allowed_schemes={"file", "http", "https"}),
+    ("source", "src"): justhtml.UrlRule(allowed_schemes={"file", "http", "https"}),
+}
 
 PERMITTED_STYLES = {
     "background-color",
@@ -98,9 +82,13 @@ class Notes:
 
         self.notes = []
         self.get_notes(note_stream)
+
         self.safe_mode = True
         self.cleaner = get_cleaner(
-            PERMITTED_TAGS, PERMITTED_ATTRIBUTES, PERMITTED_STYLES
+            PERMITTED_TAGS,
+            PERMITTED_ATTRIBUTES,
+            PERMITTED_STYLES,
+            PERMITTED_URL_SCHEMES,
         )
 
     def get_notes(self, note_stream):
@@ -125,8 +113,8 @@ class Notes:
                 split = []
             else:
                 split.append(line)
-        else:
-            split_notes.append("\n".join(split))
+
+        split_notes.append("\n".join(split))
 
         self.notes = split_notes
 
@@ -182,30 +170,45 @@ class Notes:
         return result
 
 
-def get_cleaner(extra_tags, extra_attributes, extra_styles):
+class Cleaner(Prefab):
+    policy: justhtml.SanitizationPolicy
+
+    def clean(self, html: str) -> str:
+        result = justhtml.JustHTML(html, policy=self.policy, fragment=True).to_html(pretty=False)
+        return result
+
+
+def get_cleaner(extra_tags, extra_attributes, extra_styles, allowed_url_schemes) -> Cleaner:
     """
     Get a HTML cleaner to remove dangerous tags
 
     This handles the external 'bleach' library.
-    :param extra_tags:
-    :param extra_attributes:
-    :param extra_styles:
+    :param extra_tags: Tags in addition to the default NH3 tags
+    :param extra_attributes: Attributes in addition to the default NH3 attributes
+    :param extra_styles: Additional CSS styles to allow
+    :param allowed_url_schemes: Complete list of allowed schemes (NH3 allows some bizarre url schemes)
     :return:
     """
-    valid_tags = set(bleach.sanitizer.ALLOWED_TAGS)
-    valid_tags.update(extra_tags)
-    valid_attributes = bleach.sanitizer.ALLOWED_ATTRIBUTES.copy()
-    valid_attributes.update(extra_attributes)
 
-    # Bleach 5.0 changed how CSS works, to avoid changing internals we'll wrap around this
-    valid_styles = set(bleach.css_sanitizer.ALLOWED_CSS_PROPERTIES)
-    valid_styles.update(extra_styles)
-    css_sanitizer = bleach.css_sanitizer.CSSSanitizer(allowed_css_properties=valid_tags)
+    tags = justhtml.DEFAULT_POLICY.allowed_tags | extra_tags
+    attributes = justhtml.DEFAULT_POLICY.allowed_attributes | extra_attributes
+    styles = justhtml.CSS_PRESET_TEXT | extra_styles
 
-    cleaner = bleach.sanitizer.Cleaner(
-        tags=valid_tags, attributes=valid_attributes, css_sanitizer=css_sanitizer
+    url_policy = justhtml.UrlPolicy(
+        default_handling="allow",
+        default_allow_relative=True,
+        allow_rules=allowed_url_schemes,
     )
-    return cleaner
+
+    policy = justhtml.SanitizationPolicy(
+        allowed_tags=tags,
+        allowed_attributes=attributes,
+        allowed_css_properties=styles,
+        url_policy=url_policy,
+        disallowed_tag_handling="escape",
+    )
+
+    return Cleaner(policy)
 
 
 class TextProcessor:
