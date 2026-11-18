@@ -10,7 +10,6 @@ from typing import ClassVar
 from ducktools.classbuilder.prefab import prefab, attribute, as_dict, is_prefab_instance, get_attributes
 
 from .hotkeys import hotkey_or_none, Hotkey
-from .exceptions import UnsupportedPlatformError
 
 PROJECT_NAME = "splitguides"
 

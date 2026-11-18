@@ -3,11 +3,15 @@ The keyboard library does not handle numpad hotkeys correctly.
 
 This is a rewrite of the relevant functions to handle this.
 """
-
+import sys
 import queue as _queue
 
 from ducktools.classbuilder.prefab import prefab, attribute, SlotFields
-import keyboard
+
+IS_WINDOWS = sys.platform == "win32"
+
+if IS_WINDOWS:
+    import keyboard
 
 
 KEY_DOWN = "down"
@@ -33,6 +37,8 @@ def read_hotkey(suppress: bool = True) -> Hotkey:
     The scancodes can then be stored while the name can be displayed.
     """
     # This function is only ever called in windows
+
+    assert IS_WINDOWS, "This should never be called on non-windows platforms"
 
     queue = _queue.Queue()
 
