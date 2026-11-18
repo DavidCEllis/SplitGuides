@@ -117,16 +117,19 @@ a {
     .main-content blockquote > :last-child {
       margin-bottom: 0; }
   .main-content table {
+    margin-top: 0.7em;
+    margin-bottom: 0.7em;
     display: block;
     width: 100%;
     overflow: auto;
     word-break: keep-all;
-    -webkit-overflow-scrolling: touch; }
+    -webkit-overflow-scrolling: touch;
+    border-collapse: collapse; }
     .main-content table th {
       font-weight: bold; }
     .main-content table th,
     .main-content table td {
-      padding: 0.5rem 1rem;
+      padding: 0.2rem 1rem;
       border: 1px solid #a1a3a4; }
   .main-content dl {
     padding: 0; }
