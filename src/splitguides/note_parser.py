@@ -4,14 +4,15 @@ Handle parsing a notes file into separate pages of notes.
 import os
 from pathlib import Path
 
+import justhtml
 import markdown
-import nh3
+from ducktools.classbuilder.prefab import Prefab
 
 
-PERMITTED_TAGS = {"video", "source",}
-
+PERMITTED_TAGS = {"source", "video"}
 PERMITTED_ATTRIBUTES = {
     "*": {"class", "style", "href"},
+    "source": {"src", "type"},
     "video": {
         "autoplay",
         "controls",
@@ -22,10 +23,23 @@ PERMITTED_ATTRIBUTES = {
         "src",
         "width",
     },
-    "source": {"src", "type"},
 }
 
-PERMITTED_URL_SCHEMES = {"file", "ftp", "http", "https"}
+PERMITTED_URL_SCHEMES = {
+    ("a", "href"): justhtml.UrlRule(allowed_schemes={"file", "http", "https"}),
+    ("img", "src"): justhtml.UrlRule(allowed_schemes={"file", "http", "https"}),
+    ("video", "src"): justhtml.UrlRule(allowed_schemes={"file", "http", "https"}),
+    ("source", "src"): justhtml.UrlRule(allowed_schemes={"file", "http", "https"}),
+}
+
+PERMITTED_STYLES = {
+    "background-color",
+    "color",
+    "font-family",
+    "font-size",
+    "font-weight",
+    "text-align",
+}
 
 
 class Notes:
@@ -68,9 +82,13 @@ class Notes:
 
         self.notes = []
         self.get_notes(note_stream)
+
         self.safe_mode = True
         self.cleaner = get_cleaner(
-            PERMITTED_TAGS, PERMITTED_ATTRIBUTES, PERMITTED_URL_SCHEMES
+            PERMITTED_TAGS,
+            PERMITTED_ATTRIBUTES,
+            PERMITTED_STYLES,
+            PERMITTED_URL_SCHEMES,
         )
 
     def get_notes(self, note_stream):
@@ -152,28 +170,45 @@ class Notes:
         return result
 
 
-def get_cleaner(extra_tags, extra_attributes, allowed_url_schemes):
+class Cleaner(Prefab):
+    policy: justhtml.SanitizationPolicy
+
+    def clean(self, html: str) -> str:
+        result = justhtml.JustHTML(html, policy=self.policy, fragment=True).to_html(pretty=False)
+        return result
+
+
+def get_cleaner(extra_tags, extra_attributes, extra_styles, allowed_url_schemes) -> Cleaner:
     """
     Get a HTML cleaner to remove dangerous tags
 
     This handles the external 'bleach' library.
     :param extra_tags: Tags in addition to the default NH3 tags
     :param extra_attributes: Attributes in addition to the default NH3 attributes
+    :param extra_styles: Additional CSS styles to allow
     :param allowed_url_schemes: Complete list of allowed schemes (NH3 allows some bizarre url schemes)
     :return:
     """
 
-    tags = nh3.ALLOWED_TAGS | extra_tags
-    attributes = nh3.ALLOWED_ATTRIBUTES | extra_attributes
-    url_schemes = allowed_url_schemes
+    tags = justhtml.DEFAULT_POLICY.allowed_tags | extra_tags
+    attributes = justhtml.DEFAULT_POLICY.allowed_attributes | extra_attributes
+    styles = justhtml.CSS_PRESET_TEXT | extra_styles
 
-    cleaner = nh3.Cleaner(
-        tags=tags,
-        attributes=attributes,
-        url_schemes=url_schemes,
+    url_policy = justhtml.UrlPolicy(
+        default_handling="allow",
+        default_allow_relative=True,
+        allow_rules=allowed_url_schemes,
     )
 
-    return cleaner
+    policy = justhtml.SanitizationPolicy(
+        allowed_tags=tags,
+        allowed_attributes=attributes,
+        allowed_css_properties=styles,
+        url_policy=url_policy,
+        disallowed_tag_handling="escape",
+    )
+
+    return Cleaner(policy)
 
 
 class TextProcessor:
