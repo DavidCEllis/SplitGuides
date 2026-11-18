@@ -32,6 +32,10 @@ def parse_time(time_str: str) -> timedelta:
     :param time_str:
     :return:
     """
+    if time_str == "":
+        # If there is no str, return a timedelta of 0
+        return timedelta()
+
     match = pattern.match(time_str)
     if match is None:
         raise RuntimeError("String time from livesplit did not match expected pattern")
@@ -145,7 +149,10 @@ class LivesplitMessaging(Prefab):
         if datatype == "time":
             result = parse_time(result)
         elif datatype == "int":
-            return int(result)
+            try:
+                return int(result)
+            except ValueError:
+                return 0
 
         return result
 
