@@ -213,6 +213,8 @@ class DesktopSettings(BaseSettings):
     transparency: bool = False
     width: int = 800
     height: int = 800
+    pos_x: int = 10
+    pos_y: int = 10
 
 
 @prefab

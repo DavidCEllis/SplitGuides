@@ -1,16 +1,26 @@
-import sys
-from pathlib import Path
-
 import pytest
+import os
 
 from splitguides.settings import DESKTOP_SETTINGS_FILE
 
-src_folder = Path("./src").resolve()
-sys.path.insert(0, str(src_folder))
-
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 @pytest.fixture(scope="function")
 def clear_settings():
+    # Make a memory copy of the settings file and restore it on completion
+    # Should move to not using the actual user settings file location but that will take
+    # some digging.
+
+    try:
+        data = DESKTOP_SETTINGS_FILE.read_text()
+    except FileNotFoundError:
+        data = None
     DESKTOP_SETTINGS_FILE.unlink(missing_ok=True)
-    yield
-    DESKTOP_SETTINGS_FILE.unlink(missing_ok=True)
+
+    try:
+        yield
+    finally:
+        DESKTOP_SETTINGS_FILE.unlink(missing_ok=True)
+
+        if data:
+            DESKTOP_SETTINGS_FILE.write_text(data)
