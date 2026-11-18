@@ -13,7 +13,6 @@ import time
 import json
 from collections.abc import Callable
 
-import keyboard
 from PySide6 import QtCore
 
 from ducktools.classbuilder.prefab import as_dict
@@ -23,6 +22,8 @@ from ..hotkeys import read_hotkey
 
 IS_WINDOWS = sys.platform == "win32"
 
+if IS_WINDOWS:
+    import keyboard
 
 class HotkeyManager(QtCore.QObject):
     hotkey_signal = QtCore.Signal(str)
