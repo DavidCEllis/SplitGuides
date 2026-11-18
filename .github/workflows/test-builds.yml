@@ -13,22 +13,31 @@ jobs:
     name: Test exe Build
     runs-on: windows-latest
 
+    env:
+      UV_PYTHON: "3.15"
+      UV_PYTHON_DOWNLOADS: "never"
+
     steps:
     - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       with:
         fetch-depth: 0
         persist-credentials: false
-    - name: Set up Python
+    - name: Set up Python ${{ env.UV_PYTHON }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
-        python-version: "3.15"  # build with oldest supported python
+        python-version: ${{ env.UV_PYTHON }}
+
+    - name: Install UV
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+
     - name: Install the module
       run: |
-        python -m pip install --upgrade pip
-        python -m pip install . --group build
+        uv sync --group build
+
     - name: Build the application
       run: >-
-        python application/setup.py build
+        uv run python application/setup.py build
+
     - name: Store the built app
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:

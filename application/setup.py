@@ -37,11 +37,10 @@ options = {
             "atexit",
             "jinja2.ext",
             "html.parser",
+        ],
+        "packages": [
+            "justhtml",
             "markdown",
-            "markdown.extensions",
-            "markdown.extensions.nl2br",
-            "markdown.extensions.sane_lists",
-            "markdown.extensions.tables",
         ],
         "include_files": [templates, static_folder, icon_png, readme, license_file],
     }
